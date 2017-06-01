@@ -1,0 +1,6 @@
+<legend>Updates</legend>
+<ul>
+   <li *ngFor="let update of updates">
+     <a href="{{ update.href }}" title="{{ update.title }}">{{ update.date }}</a>
+   </li>
+</ul>

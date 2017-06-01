@@ -1,0 +1,19 @@
+#toast-container {
+    pointer-events: initial;
+    position: initial;
+    z-index: initial;
+}
+
+.toast-message, .toast-title {
+    display: inline;
+}
+
+
+.toast {
+    width: 100% !important;
+}
+
+.alert {
+    margin-bottom: 10px;
+    cursor: pointer;
+}

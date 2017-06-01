@@ -1,0 +1,12 @@
+{
+    "require": {
+        "illuminate/database": "^5.2",
+        "symfony/http-foundation": "^3.0",
+        "bjeavons/zxcvbn-php": "^0.1.4"
+    },
+    "autoload": {
+    	"classmap": [
+    		"app/models"
+    	]
+    }
+}

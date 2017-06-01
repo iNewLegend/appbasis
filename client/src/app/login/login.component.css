@@ -1,0 +1,12 @@
+/*
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" class="form-control" placeholder="" required
+                ngcontrol="password" />
+        </div>
+
+        <!--<div class="form-group" ng-show="captchaStatus">
+            <div class="captcha" key="'6Lfx0xMTAAAAAIebVmpyUHP2ynuCuPYAeYid2SKk'" vc-recaptcha
+                 ng-model="formData.captcha" on-create="onCaptchaCreate(widgetId);"></div>
+        </div>-->
+*/

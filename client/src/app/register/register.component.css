@@ -1,0 +1,7 @@
+.register input {
+    max-width: 600px;
+}
+
+.register label {
+    text-align: left;
+}
