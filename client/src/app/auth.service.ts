@@ -3,53 +3,76 @@ import { Http, Response } from '@angular/http';
 import { environment } from '../environments/environment';
 
 import 'rxjs/add/operator/map'
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+
+enum eAuthStates {
+  NONE,
+  UNAUTHORIZED,
+  AUTHORIZED
+}
 
 @Injectable()
 
 export class AuthService {
-  public authState:BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
- 
+  public authState: BehaviorSubject<eAuthStates> = new BehaviorSubject<eAuthStates>(eAuthStates.NONE);
+
+
   constructor(private http: Http) {
     this.try();
   }
 
-  getState() : boolean {
+  getState(): eAuthStates {
     return this.authState.getValue();
   }
 
-  getHash() : string {
+  getHash(): string {
     let hash = localStorage.getItem('hash');
-    
-    if(hash == null) return '';
-    
+
+    if (hash == null) return '';
+
     return hash;
   }
-  
-  protected setState(state: boolean) {
+
+  getStatus(): boolean {
+    if (this.getState() == eAuthStates.AUTHORIZED)
+      return true;
+
+    return false;
+  }
+
+  protected setState(state: eAuthStates) {
     this.authState.next(state);
   }
 
-  protected setHash(hash : string) {
+  protected setHash(hash: string) {
     localStorage.setItem('hash', hash);
   }
 
-  
+  protected setStatus(status: boolean) {
+    if (true === status) {
+      this.setState(eAuthStates.AUTHORIZED);
+    } else {
+      this.setState(eAuthStates.UNAUTHORIZED);
+    }
+  }
+
+
   try() {
     let hash = this.getHash();
-    
-    if(typeof hash == 'undefined') return;
 
-    if(this.getHash().length == 40) {
-      this.setState(true);
+    console.log("[auth.service.ts::try] -> " + hash);
 
-      this.http.get(environment.server_base + 'authorization/index/' + hash)
-        .map((response: Response) => {
-          let data = response.json();
+    this.http.get(environment.server_base + 'authorization/index/' + hash)
+      .map((response: Response) => {
+        let data = response.json();
 
-          this.setState(data.status);
-        }).subscribe();
-    }
+        this.setStatus(data.status);
+        console.log("[auth.service.ts::try] result -> " + data.status);
+      }).subscribe(success => {
+      }, error => {
+        console.log("[auth.service.ts::try] -> http -> error");
+        console.log(error);
+      });
   }
 
   login(email: string, password: string, captcha: string, callback: (response: Response) => any) {
@@ -71,14 +94,14 @@ export class AuthService {
         let data;
         try {
           data = response.json();
-        } catch(e) {
+        } catch (e) {
           data = false;
         }
 
-        if(data && typeof data.hash !== 'undefined') {
+        if (data && typeof data.hash !== 'undefined') {
           // user successfuly authorized
           this.setHash(data.hash);
-          this.setState(true);
+          this.setStatus(true);
         }
 
         callback(response);
@@ -86,14 +109,14 @@ export class AuthService {
   }
 
   logout() {
-    this.http.get(environment.server_base + 'authorization/logout/' + this.getHash())
+    return this.http.get(environment.server_base + 'authorization/logout/' + this.getHash())
       .map((response: Response) => {
         let data = response.json();
 
         if (data.code !== undefined && data.code == 'success') {
           this.setHash('');
-          this.setState(false);
+          this.setState(eAuthStates.UNAUTHORIZED);
         }
-      }).subscribe();
+      })
   }
 }

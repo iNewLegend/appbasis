@@ -20,12 +20,12 @@ class Welcome extends \Controller
 
     public function updates()
     {
-        $commits = simplexml_load_file('http://github.com/iNewLegend/php-simple-mvc/commits/master.atom');
+        $commits = simplexml_load_file('https://github.com/iNewLegend/AppBasis/commits/master.atom');
 
         $array = json_decode(json_encode($commits),TRUE);
         $array = $array['entry'];
         $needle = [];
-        $maximum = 3;
+        $maximum = 5;
         $i = 0;
 
         foreach($array as $update) {

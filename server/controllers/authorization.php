@@ -63,7 +63,7 @@ class Authorization extends \Controller
     * TODO: Write PHPDOC
     *
     */
-    public function index($hash)
+    public function index($hash = '')
     {
         $return = ['status' => 'false'];
 

@@ -136,7 +136,7 @@ class Core
      * @param  array    $params
      * @return void
      */
-    protected function callMethod($controller, $method, $params)
+    protected function callMethod($controller, $method, $params = [])
     {
         $r = call_user_func_array([$controller, $method], $params);
 

@@ -19,12 +19,12 @@ export class AppComponent implements OnInit{
 
   @ViewChild(ToastContainerDirective) toastContainer: ToastContainerDirective;
   
-  constructor(private router: Router,
+  constructor(private authService: AuthService,
    private toastrService: ToastrService,
    private toastrConfig: ToastrConfig,
-   private authService: AuthService) {
+   private router: Router) {
 
-
+    
     // route
     this.currentRoute = this.router.url;
 
@@ -71,5 +71,9 @@ export class AppComponent implements OnInit{
 
   getAuthState() {
     return this.authService.getState();
+  }
+
+  getAuthStatus() {
+    return this.authService.getStatus();
   }
 }

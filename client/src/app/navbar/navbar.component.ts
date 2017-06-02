@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
 
+import { ToastrService } from 'ngx-toastr';
+
 @Component({
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
@@ -10,7 +12,7 @@ export class NavbarComponent implements OnInit {
   navbarCollapse: boolean;
   dropDown: boolean;
 
-  constructor(private authService: AuthService) { 
+  constructor(private authService: AuthService, private toastrService: ToastrService) { 
     this.navbarCollapse = false;
     this.dropDown = false;
   }
@@ -19,10 +21,12 @@ export class NavbarComponent implements OnInit {
   }
 
   logout() {
-    this.authService.logout();
+    this.authService.logout().subscribe(success => {
+      this.toastrService.info('you have been successfully logged out.', 'Thank you');
+    })
   }
 
-  getAuthState() {
-    return this.authService.getState();
+  getAuthStatus() {
+    return this.authService.getStatus();
   }
 }
