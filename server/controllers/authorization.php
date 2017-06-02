@@ -60,17 +60,19 @@ class Authorization extends \Controller
     }
 
     /**
-     * Return the login status
-     *
-     * @return boolean|array
-     */
-    public function index()
+    * TODO: Write PHPDOC
+    *
+    */
+    public function index($hash)
     {
-        if($this->auth->isLogged()) {
-            return ['hash' => $this->auth->getHash()];
+        $return = ['status' => 'false'];
+
+        if(strlen($hash) == 40) {
+            $this->auth->login($hash);
+            $return['status'] = true;
         }
 
-        return false;
+        return $return;
     }
 
     /**

@@ -38,7 +38,7 @@ class Auth
     *
     * @var string
     */
-    protected $hash = null;
+    protected $hash = '';
 
     /**
     * the block status of the current authorization
@@ -69,7 +69,7 @@ class Auth
     protected $config;
 
     /**
-    * Create the auth & check auturaiztion
+    * TODO: Write an explanation of function logic.
     *
     */
     public function __construct()
@@ -86,7 +86,7 @@ class Auth
 
         $this->blockStatus = $this->attempt->getBlockStatus($this->ip);
 
-        if(isset($_COOKIE[$this->config->cookie_name])) {
+        /*if(isset($_COOKIE[$this->config->cookie_name])) {
             $this->hash = $_COOKIE[$this->config->cookie_name];
 
             if(strlen($this->hash) == 40) {
@@ -94,10 +94,26 @@ class Auth
                     $this->logged = true;
 
                 }
+            
+        }}*/
+
+        self::$instance = $this;
+    }
+
+    /**
+    * TODO: Write an explanation of function logic.
+    *
+    */
+    public function login($hash)
+    {
+        if(strlen($hash) == 40) {
+            if($this->session->check($hash, $this->ip)) {
+                $this->logged = true;
+                $this->hash = $hash; 
             }
         }
 
-        self::$instance = $this;
+        return $this->logged;
     }
 
     /**

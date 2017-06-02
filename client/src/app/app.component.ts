@@ -24,6 +24,7 @@ export class AppComponent implements OnInit{
    private toastrConfig: ToastrConfig,
    private authService: AuthService) {
 
+
     // route
     this.currentRoute = this.router.url;
 

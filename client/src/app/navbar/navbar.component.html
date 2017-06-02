@@ -19,7 +19,7 @@
 
       <ul class="nav navbar-nav navbar-right" [hidden]="! getAuthState()">
         <li class="dropdown" [ngClass]="userDropdownStatus ? 'open' : ''" (mouseleave)="userDropdownStatus = false">
-          <a href="" (mouseover)="userDropdownStatus = true">
+          <a (mouseover)="userDropdownStatus = true">
             My Panel <span class="caret"></span>
           </a>
           <ul class="dropdown-menu" (click)="userDropdownStatus = false">
@@ -27,7 +27,7 @@
             <li><a href="#">Another action</a></li>
             <li><a href="#">Something else here</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="#/home" ng-click="logout()">Logout</a></li>
+            <li><a (click)="logout()">Logout</a></li>
           </ul>
         </li>
       </ul>
