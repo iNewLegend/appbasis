@@ -1,6 +1,6 @@
 <?php
 /**
- * file 		: index.php
+ * file 	: index.php
  * author 	: czf.leo123@gmail.com
  * todo		:
  */

@@ -100,7 +100,7 @@ class Session extends Eloquent
     }
 
     /**
-     * Delete a session using hash as id
+     * Delete a session
      *
      * @param string $hash
      * @return boolean
@@ -108,7 +108,7 @@ class Session extends Eloquent
     public function deleteSession($hash)
     {
         $session = Session::where('hash', $hash)->get()->first();
-
+    
         return ! empty($session);
     }
 } // EOF Session.php

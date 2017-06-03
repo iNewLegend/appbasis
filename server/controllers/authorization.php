@@ -60,38 +60,19 @@ class Authorization extends \Controller
     }
 
     /**
-    * TODO: Write PHPDOC
+    * Function used to check auth state
     *
+    * @param string $hash
     */
     public function index($hash = '')
     {
         $return = ['status' => 'false'];
 
         if(strlen($hash) == 40) {
-            $this->auth->login($hash);
-            $return['status'] = true;
-        }
-
-        return $return;
-    }
-
-    /**
-     * Return the hash as javascript variable
-     *
-     * @return string
-     */
-    public function js()
-    {
-        $loginStatus = $this->auth->isLogged() ? 'true' : 'false';
-
-        $return =
-        "
-            Auth =
-            {
-                Hash: '{$this->auth->getHash()}',
-                LoginStatus: {$loginStatus}
+            if($this->auth->check($hash)) {
+                $return['status'] = true;
             }
-        ";
+        }
 
         return $return;
     }
@@ -108,12 +89,11 @@ class Authorization extends \Controller
         if(! $request->isXmlHttpRequest()) {
             exit(__FUNCTION__ . '() method is only available for ajax requests');
         }
+
         $request->request->replace(json_decode($request->getContent(), true));
 
         $ip = $this->auth->getIp();
-
         $block_status = $this->attempt->getBlockStatus($ip);
-
         $captcha = $request->request->get('captcha');
 
         if($block_status == 'verify') {
@@ -160,20 +140,14 @@ class Authorization extends \Controller
             return 'the account is inactive';
         }
 
-        $session = $this->session->add($id, $remember, $ip);
+        $session = $this->auth->login($id, $ip, $remember);
 
-        if(! $session) return "system error";
+        if(! $session) {
+            return "system error";
+        }
 
-        setcookie($this->config->cookie_name,
-            $session['hash'],
-            $session['expire'],
-            $this->config->cookie_path,
-            $this->config->cookie_domain,
-            $this->config->cookie_secure,
-            $this->config->cookie_http);
-
-        # delete all attempts for success fully login
-        $this->attempt->deleteAttempts($this->auth->getIp(), true);
+        # delete all attempts after successfully login
+        $this->attempt->deleteAttempts($ip, true);
 
         return [
             'hash' => $session['hash']
@@ -184,22 +158,16 @@ class Authorization extends \Controller
      * Logout function
      *
      * @param string $hash
-     * @return string|array
+     * @return array
      */
     public function logout($hash)
     {
         if(strlen($hash) != 40) {
-            return 'invalid hash';
+            if($this->auth->logout($hash)) {
+                return ['code' => 'success'];
+            }
         }
 
-        setcookie($this->config->cookie_name,
-            "",
-            time() - 3600,
-            $this->config->cookie_pat,
-            $this->config->cookie_domain,
-            $this->config->cookie_secure,
-            $this->config->cookie_http);
-
-        return ['code' => 'success'];
+        return ['code' => 'fail'];
     }
 } // EOF authorization.php

@@ -69,7 +69,7 @@ class Auth
     protected $config;
 
     /**
-    * TODO: Write an explanation of function logic.
+    * Initialize the Auth library 
     *
     */
     public function __construct()
@@ -86,26 +86,21 @@ class Auth
 
         $this->blockStatus = $this->attempt->getBlockStatus($this->ip);
 
-        /*if(isset($_COOKIE[$this->config->cookie_name])) {
-            $this->hash = $_COOKIE[$this->config->cookie_name];
-
-            if(strlen($this->hash) == 40) {
-                if($this->session->check($this->hash, $this->ip)) {
-                    $this->logged = true;
-
-                }
-            
-        }}*/
-
         self::$instance = $this;
     }
 
     /**
-    * TODO: Write an explanation of function logic.
+    * Check auth by hash and return the authorization status
     *
+    * @param  string    $hash
+    * @return boolean
     */
-    public function login($hash)
+    public function check($hash = false)
     {
+        if(false === $hash) {
+            $hash = $_COOKIE[$this->config->cookie_name];
+        }
+        
         if(strlen($hash) == 40) {
             if($this->session->check($hash, $this->ip)) {
                 $this->logged = true;
@@ -114,6 +109,55 @@ class Auth
         }
 
         return $this->logged;
+    }
+
+    /**
+    * Login a user and return the session
+    *
+    * @param    $id         int
+    * @param    $ip         string
+    * @param    $remember   boolean
+    * @return   array|boolean
+    */
+    public function login($id, $ip, $remember)
+    {
+        $session = $this->session->add($id, $remember, $ip);
+
+        if(! $session) return false;
+
+        setcookie($this->config->cookie_name,
+            $session['hash'],
+            $session['expire'],
+            $this->config->cookie_path,
+            $this->config->cookie_domain,
+            $this->config->cookie_secure,
+            $this->config->cookie_http);
+
+        return $session;
+    }
+
+    /**
+    * Logout a user
+    *
+    * @param    $hash   string
+    * @return   boolean
+    */
+    public function logout($hash)
+    {
+        if(false === $hash) {
+            $hash = $_COOKIE[$this->config->cookie_name];
+        }
+
+        if($this->session->delete($hash)) {
+            return setcookie($this->config->cookie_name,
+                "",
+                time() - 3600,
+                $this->config->cookie_pat,
+                $this->config->cookie_domain,
+                $this->config->cookie_secure,
+                $this->config->cookie_http);
+        }
+        return false;
     }
 
     /**

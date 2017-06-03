@@ -3,7 +3,7 @@
 * file      : # db.php
 * author    : czf.leo123@gmail.com
 * todo      : make it better
-* desc     : used to create the DB
+* desc      : used to create the DB
 */
 
 require 'init.php';
