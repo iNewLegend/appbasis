@@ -60,17 +60,26 @@ export class AuthService {
   try() {
     let hash = this.getHash();
 
-    console.log("[auth.service.ts::try] -> " + hash);
+    console.log("[auth.service.ts::try]: " + hash);
 
     this.http.get(environment.server_base + 'authorization/index/' + hash)
       .map((response: Response) => {
+        console.log("[auth.service.ts::try:recv]->");
+        console.log(response);
+                
         let data = response.json();
+        console.log("[auth.service.ts::logout:recv:json]->");
+        console.log(data);
+
+        /*
+        REVIEW: here it should return code status
+        eg:     data.code [fail, success] then everything else.
+        */
 
         this.setStatus(data.status);
-        console.log("[auth.service.ts::try] result -> " + data.status);
       }).subscribe(success => {
       }, error => {
-        console.log("[auth.service.ts::try] -> http -> error");
+        console.log("[auth.service.ts::try:httpError]->");
         console.log(error);
       });
   }
@@ -82,15 +91,14 @@ export class AuthService {
       captcha: captcha
     });
 
-    console.log("[auth.service.ts::login]-> " + sendData);
+    console.log("[auth.service.ts::login:send]->");
+    console.log(sendData);
 
     return this.http.post(environment.server_base + 'authorization/login', sendData)
       .map((response: Response) => {
+        console.log("[auth.service.ts::login:recv]->");
         console.log(response);
 
-        /*
-        REVIEW: Code repeated in backgrond (nonsense) 
-        */
         let data;
         try {
           data = response.json();
@@ -98,6 +106,10 @@ export class AuthService {
           data = false;
         }
 
+        /*
+        REVIEW: here it should return code status
+        eg:     data.code [fail, success] then everything else.
+        */
         if (data && typeof data.hash !== 'undefined') {
           // user successfuly authorized
           this.setHash(data.hash);
@@ -109,11 +121,21 @@ export class AuthService {
   }
 
   logout() {
-    return this.http.get(environment.server_base + 'authorization/logout/' + this.getHash())
+    var hash = this.getHash();
+
+    console.log("[auth.service.ts::logout:send]: " + hash);
+
+    return this.http.get(environment.server_base + 'authorization/logout/' + hash)
       .map((response: Response) => {
+        console.log("[auth.service.ts::logout:recv]->");
+        console.log(response);
+
         let data = response.json();
 
-        if (data.code !== undefined && data.code == 'success') {
+        if (typeof data.code !== 'undefined') {
+          console.log("[auth.service.ts::logout:recv:json]->");
+          console.log(data);
+
           this.setHash('');
           this.setState(eAuthStates.UNAUTHORIZED);
         }

@@ -162,6 +162,7 @@ class Authorization extends \Controller
      */
     public function logout($hash)
     {
+	// TODO: Check this function it allways return fail !
         if(strlen($hash) != 40) {
             if($this->auth->logout($hash)) {
                 return ['code' => 'success'];
