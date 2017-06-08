@@ -9,7 +9,10 @@ namespace Controllers;
 
 use Symfony\Component\HttpFoundation\Request;
 
-class Authorization extends \Controller
+use Core;
+use Models;
+
+class Authorization extends \Core\Controller
 {
     /**
      * The instance of user model
@@ -46,12 +49,18 @@ class Authorization extends \Controller
      */
     protected $auth;
 
+    //
+    protected $logger;
+
     /**
-     * Create models that will be used later
+     * Initialize the controller and prepare the dependencies
      */
-    public function __construct()
+    public function __construct(Core\Logger $logger, Models\User $user)
     {
-        $this->user = $this->Model('User');
+        $this->logger = $logger;
+        $logger->info("Controller initialization.");
+
+        $this->user = $user;
         $this->attempt = $this->Model('Attempt');
         $this->session = $this->Model('Session');
         $this->config = $this->Model('Config');

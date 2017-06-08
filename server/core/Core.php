@@ -5,6 +5,11 @@
 * todo		:
 */
 
+namespace Core;
+
+require 'Logger.php';
+require 'Controller.php';
+
 class Core
 {
     /**
@@ -42,6 +47,10 @@ class Core
      */
     protected $methodParams = [];
 
+    //
+    protected $container;
+    protected $logger;
+
     /**
      * Create a new APP instance
      *
@@ -50,6 +59,11 @@ class Core
      */
     public function __construct($cmd)
     {
+        # create logger instance
+        $this->logger = new Logger();
+        $this->logger->info("Core initialization.");
+ 
+
         $cmd = $this->parseCmd($cmd);
 
         $this->controllerName = 'Controllers\\' . $cmd->controller;
@@ -65,8 +79,11 @@ class Core
         # load the controller
         require_once($this->controllerPath);
 
+        # create container for DI
+        $container = \DI\ContainerBuilder::buildDevContainer();
+        
         # create controller instance
-        $this->controller = new $this->controllerName;
+        $this->controller = $container->get($this->controllerName);
 
         if(! method_exists($this->controller, $this->method)) {
             throw new Exception("method: '{$this->method}' not found in controller: '{$this->controllerName}, in: " . __FILE__ . '(' . __LINE__. ')');
@@ -83,7 +100,7 @@ class Core
      */
     public function parseCmd($cmd)
     {
-        $return = new stdClass();
+        $return = new \stdClass();
 
         # setting defaults
         $return->controller = $this->controllerName;

@@ -4,7 +4,10 @@
     "require": {
         "illuminate/database": "^5.2",
         "symfony/http-foundation": "^3.0",
-        "bjeavons/zxcvbn-php": "^0.1.4"
+        "bjeavons/zxcvbn-php": "^0.1.4",
+        "nackjicholson/monolog-symfony2-console": "^0.0.2",
+        "symfony/console": "^3.3",
+        "php-di/php-di": "^5.4"
     },
     "autoload": {
     	"classmap": [

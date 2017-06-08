@@ -6,6 +6,8 @@
  */
 require_once 'init.php';
 
+
+
 $cmd = '';
 
 if(isset($_GET['cmd'])) {
@@ -13,7 +15,7 @@ if(isset($_GET['cmd'])) {
 }
 
 try {
-    $core = new Core($cmd);
+    $core = new \Core\Core($cmd);
 } catch(Exception $e) {
     exit($e->getMessage());
 }

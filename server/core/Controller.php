@@ -5,6 +5,8 @@
 * todo		:
 */
 
+namespace Core;
+
 class Controller
 {
     /**

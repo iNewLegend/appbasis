@@ -68,13 +68,23 @@ export class AuthService {
         console.log(response);
                 
         let data = response.json();
-        console.log("[auth.service.ts::logout:recv:json]->");
+        console.log("[auth.service.ts::try:recv:json]->");
         console.log(data);
 
         /*
         REVIEW: here it should return code status
         eg:     data.code [fail, success] then everything else.
         */
+        //if(typeof data.code !== 'undefined') {
+          //if(data.code == 'success') {
+            //this.setStatus(true);
+          //} else {
+            if(hash.length > 0) {
+              this.setHash('');
+            }
+            //this.setStatus(false);
+          //}
+        //}
 
         this.setStatus(data.status);
       }).subscribe(success => {

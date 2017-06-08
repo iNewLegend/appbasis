@@ -11,7 +11,7 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 require 'config.php';
 require 'core/Core.php';
-require 'core/Controller.php';
+
 
 $capsule = new Capsule();
 
