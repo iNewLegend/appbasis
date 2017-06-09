@@ -21,17 +21,6 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { RegisterComponent } from './register/register.component';
 import { LoginComponent } from './login/login.component';
 
-export class MyOptions extends RequestOptions {
-  constructor() { 
-    super({ 
-      headers: new Headers({
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      })
-    });
-  }
-}
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -53,7 +42,6 @@ export class MyOptions extends RequestOptions {
     ToastContainerModule.forRoot()
   ],
   providers: [
-    {provide: RequestOptions, useClass: MyOptions},
     AuthService,
     RegisterService
 

@@ -9,9 +9,6 @@ namespace Controllers;
 
 use Symfony\Component\HttpFoundation\Request;
 
-use Core;
-use Models;
-
 class Authorization extends \Core\Controller
 {
     /**
@@ -49,37 +46,46 @@ class Authorization extends \Core\Controller
      */
     protected $auth;
 
-    //
+    /**
+
+     * The instance of logger
+     *
+     * @var \Monolog\Logger
+     */
     protected $logger;
 
     /**
      * Initialize the controller and prepare the dependencies
      */
-    public function __construct(Core\Logger $logger, Models\User $user)
+    public function __construct(\Core\Logger $logger,
+        \Models\User $user,
+        \Models\Attempt $attempt,
+        \Models\Session $session,
+        \Models\Config $config,
+        \Library\Auth $auth)
     {
         $this->logger = $logger;
-        $logger->info("Controller initialization.");
 
         $this->user = $user;
-        $this->attempt = $this->Model('Attempt');
-        $this->session = $this->Model('Session');
-        $this->config = $this->Model('Config');
+        $this->attempt = $attempt;
+        $this->session = $session;
+        $this->config = $config;
 
-        $this->auth = $this->Library('Auth');
+        $this->auth = $auth;
     }
 
     /**
-    * Function used to check auth state
+    * Function used to check authorization status
     *
     * @param string $hash
     */
-    public function index($hash = '')
+    public function check($hash = '')
     {
-        $return = ['status' => 'false'];
+        $return = ['code' => 'fail'];
 
         if(strlen($hash) == 40) {
             if($this->auth->check($hash)) {
-                $return['status'] = true;
+                $return['code'] = 'success';
             }
         }
 
@@ -94,16 +100,17 @@ class Authorization extends \Core\Controller
     public function login()
     {
         $request = Request::createFromGlobals();
-
-        if(! $request->isXmlHttpRequest()) {
-            exit(__FUNCTION__ . '() method is only available for ajax requests');
-        }
-
         $request->request->replace(json_decode($request->getContent(), true));
+
+        $email = $request->request->get('email');
+        $password = $request->request->get('password');
+        $remember = $request->request->get('remember', 0);
+        $captcha = $request->request->get('captcha');
+
+        $this->logger->debug("email: `$email`, password: `$password`, remember: `$remember`");
 
         $ip = $this->auth->getIp();
         $block_status = $this->attempt->getBlockStatus($ip);
-        $captcha = $request->request->get('captcha');
 
         if($block_status == 'verify') {
             if(! $this->auth->checkCaptcha($captcha)) {
@@ -112,10 +119,6 @@ class Authorization extends \Core\Controller
         } else if($block_status == 'block') {
             return "your ip address has been blocked";
         }
-
-        $email = $request->request->get('email');
-        $password = $request->request->get('password');
-        $remember = $request->request->get('remember', 0);
 
         $validEmail = $this->auth->validateEmail($email);
         $validPassword = $this->auth->validatePassword($password);
@@ -152,13 +155,15 @@ class Authorization extends \Core\Controller
         $session = $this->auth->login($id, $ip, $remember);
 
         if(! $session) {
-            return "system error";
+            return ['code' => 'fail',
+                'error' => 'system error'];
         }
 
         # delete all attempts after successfully login
         $this->attempt->deleteAttempts($ip, true);
 
         return [
+            'code' => 'success',
             'hash' => $session['hash']
         ];
     }
@@ -171,13 +176,11 @@ class Authorization extends \Core\Controller
      */
     public function logout($hash)
     {
-	// TODO: Check this function it allways return fail !
-        if(strlen($hash) != 40) {
+        if(strlen($hash) == 40) {
             if($this->auth->logout($hash)) {
                 return ['code' => 'success'];
             }
         }
-
         return ['code' => 'fail'];
     }
 } // EOF authorization.php

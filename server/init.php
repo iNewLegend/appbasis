@@ -10,8 +10,9 @@ require __DIR__ . '/vendor/autoload.php';
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 require 'config.php';
+require 'core/Controller.php';
+require 'core/Logger.php';
 require 'core/Core.php';
-
 
 $capsule = new Capsule();
 

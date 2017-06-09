@@ -19,6 +19,7 @@ currectly we have this:
 - Blueprint DB Builder
 - Password Score(zxcvbn)
 - Captcha (google) 
+- Dependency Injection
 
 demo:
 

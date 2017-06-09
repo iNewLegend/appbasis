@@ -1,12 +1,13 @@
 <?php
 /**
-* file 		: /app/core/controllers/welcome.php
-* author 	: czf.leo123@gmail.com
-* todo		:
-*/
+ * @file    : /app/core/controllers/welcome.php
+ * @author  : <czf.leo123@gmail.com>
+ * @todo    :
+ */
+
 namespace Controllers;
 
-class Welcome extends \Controller
+class Welcome extends \Core\Controller
 {
     /**
      * Default method of the controller
@@ -15,7 +16,7 @@ class Welcome extends \Controller
      */
     public function index()
     {
-
+        return 'Welcome to AppBasis Server API';
     }
 
     public function updates()

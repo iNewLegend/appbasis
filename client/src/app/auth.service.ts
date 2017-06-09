@@ -49,11 +49,7 @@ export class AuthService {
   }
 
   protected setStatus(status: boolean) {
-    if (true === status) {
-      this.setState(eAuthStates.AUTHORIZED);
-    } else {
-      this.setState(eAuthStates.UNAUTHORIZED);
-    }
+    status ? this.setState(eAuthStates.AUTHORIZED) : this.setState(eAuthStates.UNAUTHORIZED);
   }
 
 
@@ -62,7 +58,7 @@ export class AuthService {
 
     console.log("[auth.service.ts::try]: " + hash);
 
-    this.http.get(environment.server_base + 'authorization/index/' + hash)
+    this.http.get(environment.server_base + 'authorization/check/' + hash)
       .map((response: Response) => {
         console.log("[auth.service.ts::try:recv]->");
         console.log(response);
@@ -71,22 +67,18 @@ export class AuthService {
         console.log("[auth.service.ts::try:recv:json]->");
         console.log(data);
 
-        /*
-        REVIEW: here it should return code status
-        eg:     data.code [fail, success] then everything else.
-        */
-        //if(typeof data.code !== 'undefined') {
-          //if(data.code == 'success') {
-            //this.setStatus(true);
-          //} else {
+
+        if(typeof data.code !== 'undefined') {
+          if(data.code == 'success') {
+            this.setStatus(true);
+          } else {
             if(hash.length > 0) {
               this.setHash('');
             }
-            //this.setStatus(false);
-          //}
-        //}
+            this.setStatus(false);
+          }
+        }
 
-        this.setStatus(data.status);
       }).subscribe(success => {
       }, error => {
         console.log("[auth.service.ts::try:httpError]->");
@@ -116,14 +108,11 @@ export class AuthService {
           data = false;
         }
 
-        /*
-        REVIEW: here it should return code status
-        eg:     data.code [fail, success] then everything else.
-        */
         if (data && typeof data.hash !== 'undefined') {
-          // user successfuly authorized
-          this.setHash(data.hash);
-          this.setStatus(true);
+          if(data.code == 'success') {
+            this.setHash(data.hash);
+            this.setStatus(true);
+          }
         }
 
         callback(response);

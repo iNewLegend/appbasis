@@ -1,22 +1,19 @@
 <?php
 /**
-* file 		: /app/library/Auth.php
-* author 	: czf.leo123@gmail.com
-* todo		:
-* desc		:
+ * @file    : /app/library/Auth.php
+ * @author  : czf.leo123@gmail.com
+ * @todo    : move from cookies to sessions
+ * @desc    : do the actual login
 */
-
 namespace Library;
-
-use ZxcvbnPhp\Zxcvbn;
 
 class Auth
 {
     /**
-    * Save self $instance for static use
-    *
-    * @var object
-    */
+     * Save self $instance for static use
+     *
+     * @var Auth
+     */
     protected static $instance = null;
 
     /**
@@ -67,18 +64,24 @@ class Auth
     * @var \Models\Config
     */
     protected $config;
-
+    protected $logger;
     /**
-    * Initialize the Auth library 
+    * Initialize the Auth library
     *
     */
-    public function __construct()
-    {
-        $this->attempt  = \Controller::Model('Attempt');
-        $this->session  = \Controller::Model('Session');
-        $this->config   = \Controller::Model('Config');
+    public function __construct(
+        \Models\Attempt $attempt,
+        \Models\Session $session,
+        \Models\Config $config,
+        \Core\Logger $logger
+    ) {
+    
+        $this->attempt  = $attempt;
+        $this->session  = $session;
+        $this->config   = $config;
+        $this->logger   = $logger;
 
-        if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] != '') {
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] != '') {
             $this->ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
         } else {
             $this->ip = $_SERVER['REMOTE_ADDR'];
@@ -97,33 +100,34 @@ class Auth
     */
     public function check($hash = false)
     {
-        if(false === $hash) {
+        if (false === $hash) {
             $hash = $_COOKIE[$this->config->cookie_name];
         }
         
-        if(strlen($hash) == 40) {
-            if($this->session->check($hash, $this->ip)) {
+        if (strlen($hash) == 40) {
+            if ($this->session->check($hash, $this->ip)) {
                 $this->logged = true;
-                $this->hash = $hash; 
+                $this->hash = $hash;
             }
         }
 
         return $this->logged;
     }
-
     /**
-    * Login a user and return the session
-    *
-    * @param    $id         int
-    * @param    $ip         string
-    * @param    $remember   boolean
-    * @return   array|boolean
-    */
+     * Login a user and return the session
+     *
+     * @param int       $id
+     * @param string    $ip
+     * @param boolean   $remember
+     * @return array|boolean
+     */
     public function login($id, $ip, $remember)
     {
         $session = $this->session->add($id, $remember, $ip);
-
-        if(! $session) return false;
+        
+        if (! $session) {
+            return false;
+        }
 
         setcookie($this->config->cookie_name,
             $session['hash'],
@@ -144,11 +148,11 @@ class Auth
     */
     public function logout($hash)
     {
-        if(false === $hash) {
+        if (false === $hash) {
             $hash = $_COOKIE[$this->config->cookie_name];
         }
 
-        if($this->session->delete($hash)) {
+        if ($ret = $this->session->deleteByHash($hash)) {
             return setcookie($this->config->cookie_name,
                 "",
                 time() - 3600,
@@ -157,6 +161,7 @@ class Auth
                 $this->config->cookie_secure,
                 $this->config->cookie_http);
         }
+        
         return false;
     }
 
@@ -190,7 +195,7 @@ class Auth
             $result = file_get_contents($url, false, $context);
 
             return json_decode($result)->success;
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
     }
@@ -208,17 +213,17 @@ class Auth
 
         $emailLength = strlen($email);
 
-        if($emailLength < intval($this->config->get('verify_email_min_length'))) {
+        if ($emailLength < intval($this->config->get('verify_email_min_length'))) {
             $return->message = 'the email is too short';
             return $return;
         }
 
-        if($emailLength > intval($this->config->get('verify_email_max_length'))) {
+        if ($emailLength > intval($this->config->get('verify_email_max_length'))) {
             $return->message = 'the email is too long';
             return $return;
         }
 
-        if(! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $return->message = 'not valid email';
             return $return;
         }
@@ -239,15 +244,15 @@ class Auth
         $return = new \stdClass();
         $return->error = true;
 
-        if(strlen($password) < intval($this->config->get('verify_password_min_length'))) {
+        if (strlen($password) < intval($this->config->get('verify_password_min_length'))) {
             $return->message = 'the password is too short';
             return $return;
         }
 
-        $zxcvbn = new Zxcvbn();
+        $zxcvbn = new \ZxcvbnPhp\Zxcvbn();
         $passwordScore = $zxcvbn->passwordStrength('-' . $password)['score'];
 
-        if($passwordScore < intval($this->config->password_min_score)) {
+        if ($passwordScore < intval($this->config->password_min_score)) {
             $return->message = 'The password is too weak';
             return $return;
         }
@@ -264,7 +269,7 @@ class Auth
     */
     public function isLogged()
     {
-        if(isset($this->logged)) {
+        if (isset($this->logged)) {
             return $this->logged;
         }
 
@@ -278,7 +283,7 @@ class Auth
     */
     public function getIp()
     {
-        if(isset($this->ip)) {
+        if (isset($this->ip)) {
             return $this->ip;
         }
 
@@ -292,7 +297,7 @@ class Auth
     */
     public function getHash()
     {
-        if(isset($this->hash)) {
+        if (isset($this->hash)) {
             return $this->hash;
         }
 
@@ -306,7 +311,7 @@ class Auth
     */
     public function getBlockStatus()
     {
-        if(isset($this->blockStatus)) {
+        if (isset($this->blockStatus)) {
             return $this->blockStatus;
         }
 

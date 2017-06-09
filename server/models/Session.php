@@ -105,7 +105,7 @@ class Session extends Eloquent
      * @param string $hash
      * @return boolean
      */
-    public function deleteSession($hash)
+    public function deleteByHash($hash)
     {
         $session = Session::where('hash', $hash)->get()->first();
     

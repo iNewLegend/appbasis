@@ -4,14 +4,24 @@
 * author 	: czf.leo123@gmail.com
 * todo		:
 */
-
 namespace Core;
-
-require 'Logger.php';
-require 'Controller.php';
 
 class Core
 {
+    /**
+     * The container of DI
+     *
+     * @var \DI\ContainerBuilder
+     */
+    protected $container;
+    
+    /**
+     * The monolog instance
+     *
+     * @var \Monolog\Logger
+     */
+    protected $logger;
+
     /**
      * The controller instance
      *
@@ -27,18 +37,18 @@ class Core
     protected $controllerName = 'welcome';
 
     /**
-     * The path of controller
-     *
-     * @var string
-     */
-    protected $controllerPath;
-
-    /**
      * The method that will be called
      *
      * @var string
      */
     protected $method = 'index';
+
+    /**
+     * The path of controller
+     *
+     * @var string
+     */
+    protected $controllerPath;
 
     /**
      * The parameters of the method
@@ -47,25 +57,22 @@ class Core
      */
     protected $methodParams = [];
 
-    //
-    protected $container;
-    protected $logger;
+
 
     /**
      * Create a new APP instance
      *
      * @param  string    $cmd
+     * @example location description
      * @throws Exception
      */
     public function __construct($cmd)
     {
-        # create logger instance
-        $this->logger = new Logger();
-        $this->logger->info("Core initialization.");
- 
+        $container = \DI\ContainerBuilder::buildDevContainer();
+
 
         $cmd = $this->parseCmd($cmd);
-
+        
         $this->controllerName = 'Controllers\\' . $cmd->controller;
         $this->controllerPath = 'controllers/' . $cmd->controller . '.php';
 
@@ -86,7 +93,7 @@ class Core
         $this->controller = $container->get($this->controllerName);
 
         if(! method_exists($this->controller, $this->method)) {
-            throw new Exception("method: '{$this->method}' not found in controller: '{$this->controllerName}, in: " . __FILE__ . '(' . __LINE__. ')');
+            throw new \Exception("method: '{$this->method}' not found in controller: '{$this->controllerName}, in: " . __FILE__ . '(' . __LINE__. ')');
         }
 
         $this->callMethod($this->controller, $this->method, $this->methodParams);
@@ -148,15 +155,14 @@ class Core
     /**
      * Call a specific method
      *
-     * @param  object    $controller
-     * @param  object    $method
+     * @param  object   $controller
+     * @param  object   $method
      * @param  array    $params
      * @return void
      */
     protected function callMethod($controller, $method, $params = [])
     {
         $r = call_user_func_array([$controller, $method], $params);
-
         /*
          * If the the controller method returns array print it as json
          * Else just echo the result if its not empty

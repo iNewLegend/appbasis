@@ -21,9 +21,7 @@ export class UpdatesComponent implements OnInit {
   }
 
   getUpdates() {
-    
     return this.http.get(environment.server_base + 'welcome/updates');
-    
   }
 }
 
