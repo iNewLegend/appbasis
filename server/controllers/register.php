@@ -1,8 +1,8 @@
 <?php
 /**
-* file 		: /app/core/controllers/register.php
-* author 	: czf.leo123@gmail.com
-* todo		:
+* file      : /app/core/controllers/register.php
+* author    : czf.leo123@gmail.com
+* todo      :
 */
 
 namespace Controllers;
@@ -40,24 +40,28 @@ class Register extends \Controller
     protected $config;
 
     /**
-     * Create models that will be used later
+     * The instance of logger
+     *
+     * @var \Monolog\Logger
      */
-    public function __construct()
-    {
-        $this->auth = $this->Library('Auth');
-
-        $this->user = $this->Model("User");
-        $this->attempt = $this->Model('Attempt');
-        $this->config = $this->Model('Config');
-    }
+    protected $logger;
 
     /**
-     * Default method of the controller
-     *
-     * @return void
+     * Create models that will be used later
      */
-    public function index()
+    public function __construct(\Core\Logger $logger,
+        \Models\User $user,
+        \Models\Attempt $attempt,
+        \Models\Config $config,
+        \Library\Auth $auth)
     {
+        $this->logger = $logger;
+
+        $this->user = $user;
+        $this->attempt = $attempt;
+        $this->config = $config;
+
+        $this->auth = $auth;
     }
 
     /**
@@ -69,9 +73,6 @@ class Register extends \Controller
     {
         $request = Request::createFromGlobals();
 
-        if(! $request->isXmlHttpRequest()) {
-            exit(__FUNCTION__ . '() method is only available for ajax requests');
-        }
         $request->request->replace(json_decode($request->getContent(), true));
 
         $ip = $this->auth->getIp();
@@ -80,32 +81,33 @@ class Register extends \Controller
         $password = $request->request->get('password');
         $captcha = $request->request->get('captcha');
 
+        $this->logger->debug("email: `$email`, password: `$password`");
 
         $block_status = $this->attempt->getBlockStatus($ip);
 
-        if($block_status == 'block') {
+        if ($block_status == 'block') {
             return "Your ip have been blocked for a while";
         }
 
         $validEmail = $this->auth->validateEmail($email);
 
-        if($validEmail->error) {
+        if ($validEmail->error) {
             $this->attempt->add($ip);
             return $validEmail->message;
         }
 
-        if($this->user->isEmailTaken($email)) {
+        if ($this->user->isEmailTaken($email)) {
             $this->attempt->add($ip);
             return 'The email is already taken';
         }
 
         $validPassword = $this->auth->validatePassword($password);
 
-        if($validPassword->error) {
+        if ($validPassword->error) {
             return $validPassword->message;
         }
 
-        if(! $this->auth->checkCaptcha($captcha)) {
+        if (! $this->auth->checkCaptcha($captcha)) {
             return ['code' => 'verify'];
         }
 
@@ -115,7 +117,7 @@ class Register extends \Controller
         $user->password = password_hash($password, PASSWORD_BCRYPT, ['cost' => $this->config->get('bcrypt_cost')]);
         $user->isactive = true;
 
-        if($user->save()) {
+        if ($user->save()) {
             return ['code' => 'success'];
         }
 
