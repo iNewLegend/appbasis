@@ -1,15 +1,18 @@
 <?php
 /**
-* file 		: /app/core/controllers/auth.php
-* author 	: czf.leo123@gmail.com
-* todo		:
-*/
+ * @file    : /app/core/controllers/authorization.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    :
+ */
 
 namespace Controllers;
 
-use Symfony\Component\HttpFoundation\Request;
 
-class Authorization extends \Core\Controller
+use Core;
+use Library;
+use Models;
+
+class Authorization extends Core\Controller
 {
     /**
      * The instance of user model
@@ -47,22 +50,23 @@ class Authorization extends \Core\Controller
     protected $auth;
 
     /**
-
      * The instance of logger
      *
-     * @var \Monolog\Logger
+     * @var \Core\Logger
      */
     protected $logger;
 
     /**
      * Initialize the controller and prepare the dependencies
+     *
+     * @param Logger $logger
+     * @param User $user
+     * @param Attempt $attempt
+     * @param Session $session
+     * @param Config $config
+     * @param Auth $auth
      */
-    public function __construct(\Core\Logger $logger,
-        \Models\User $user,
-        \Models\Attempt $attempt,
-        \Models\Session $session,
-        \Models\Config $config,
-        \Library\Auth $auth)
+    public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt, Models\Session $session, Models\Config $config, Library\Auth $auth)
     {
         $this->logger = $logger;
 
@@ -75,16 +79,17 @@ class Authorization extends \Core\Controller
     }
 
     /**
-    * Function used to check authorization status
-    *
-    * @param string $hash
-    */
+     * Function used to check authorization status
+     *
+     * @param string $hash
+     * @return array
+     */
     public function check($hash = '')
     {
         $return = ['code' => 'fail'];
 
-        if(strlen($hash) == 40) {
-            if($this->auth->check($hash)) {
+        if (strlen($hash) == 40) {
+            if ($this->auth->check($hash)) {
                 $return['code'] = 'success';
             }
         }
@@ -93,68 +98,63 @@ class Authorization extends \Core\Controller
     }
 
     /**
-     * Login function
+     * Attempts a user login
      *
-     * @return array|string
+     * @return string|array
      */
     public function login()
     {
-        $request = Request::createFromGlobals();
-        $request->request->replace(json_decode($request->getContent(), true));
-
-        $email = $request->request->get('email');
-        $password = $request->request->get('password');
-        $remember = $request->request->get('remember', 0);
-        $captcha = $request->request->get('captcha');
+        $request = $this->getRequest();
+        
+        $email = $request->get('email');
+        $password = $request->get('password');
+        $remember = $request->get('remember', 0);
+        $captcha = $request->get('captcha');
 
         $this->logger->debug("email: `$email`, password: `$password`, remember: `$remember`");
 
         $ip = $this->auth->getIp();
         $block_status = $this->attempt->getBlockStatus($ip);
 
-        if($block_status == 'verify') {
-            if(! $this->auth->checkCaptcha($captcha)) {
+        $this->logger->debug("ip: `$ip`, block_status: `$block_status`");
+
+        if ($block_status == 'verify') {
+            if (! $this->auth->checkCaptcha($captcha)) {
                 return ['code' => 'verify'];
             }
-        } else if($block_status == 'block') {
+        } elseif ($block_status == 'block') {
             return "your ip address has been blocked";
         }
 
         $validEmail = $this->auth->validateEmail($email);
-        $validPassword = $this->auth->validatePassword($password);
 
-        if($validEmail->error) {
+        if ($validEmail->error) {
             $this->attempt->add($ip);
             return $validEmail->message;
         }
 
-        if($validPassword->error) {
-            $this->attempt->add($ip);
-            return $validPassword->message;
-        }
-
         $id = $this->user->getId(strtolower($email));
 
-        if(! $id) {
+        if (! $id) {
             $this->attempt->add($ip);
             return 'username or password incorrect';
         }
 
         $user = $this->user->getBase($id);
 
-        if(! password_verify($password, $user['password'])) {
+        if (! password_verify($password, $user['password'])) {
             $this->attempt->add($ip);
             return 'username or password incorrect';
         }
 
-        if($user['isactive'] < 1) {
+        if ($user['isactive'] < 1) {
             $this->attempt->add($ip);
             return 'the account is inactive';
         }
 
         $session = $this->auth->login($id, $ip, $remember);
 
-        if(! $session) {
+        if (! $session) {
             return ['code' => 'fail',
                 'error' => 'system error'];
         }
@@ -176,8 +176,8 @@ class Authorization extends \Core\Controller
      */
     public function logout($hash)
     {
-        if(strlen($hash) == 40) {
-            if($this->auth->logout($hash)) {
+        if (strlen($hash) == 40) {
+            if ($this->auth->logout($hash)) {
                 return ['code' => 'success'];
             }
         }

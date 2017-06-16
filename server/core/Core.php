@@ -57,8 +57,6 @@ class Core
      */
     protected $methodParams = [];
 
-
-
     /**
      * Create a new APP instance
      *
@@ -80,7 +78,7 @@ class Core
         $this->methodParams = $cmd->params;
 
         if(! file_exists($this->controllerPath)) {
-            throw new Exception("controller: '{$cmd->controller}' not found, in: " . __FILE__ . '(' . __LINE__. ')');
+            throw new \Exception("controller: '{$cmd->controller}' not found, in: " . __FILE__ . '(' . __LINE__. ')');
         }
 
         # load the controller

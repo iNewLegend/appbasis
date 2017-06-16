@@ -1,13 +1,15 @@
 <?php
 /**
  * @file    : /app/core/controllers/welcome.php
- * @author  : <czf.leo123@gmail.com>
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  * @todo    :
  */
 
 namespace Controllers;
 
-class Welcome extends \Core\Controller
+use Core;
+
+class Welcome extends Controller
 {
     /**
      * Default method of the controller
@@ -19,6 +21,11 @@ class Welcome extends \Core\Controller
         return 'Welcome to AppBasis Server API';
     }
 
+    /**
+     * Return projects update(s)
+     *
+     * @return array
+     */
     public function updates()
     {
         $commits = simplexml_load_file('https://github.com/iNewLegend/AppBasis/commits/master.atom');

@@ -1,13 +1,17 @@
 <?php
 /**
- * file 		: /app/core/controllers/auth.php
- * author 	: czf.leo123@gmail.com
- * todo		:
+ * @file    : /app/core/controllers/user.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    :
  */
 
 namespace Controllers;
 
-class User extends \Controller
+use Core;
+use Library;
+use Models;
+
+class User extends Controller
 {
     /**
      * The instance of user model
@@ -24,27 +28,30 @@ class User extends \Controller
     protected $auth;
 
     /**
-     * Create models that will be used later
+     * Initialize the controller and prepare the dependencies
+     *
+     * @param Auth $auth
+     * @param User $user
      */
-    public function __construct()
+    public function __construct(Auth $auth, User $user)
     {
-        $this->auth = $this->Library('auth');
+        $this->auth = $auth;
 
         if(false == $this->auth->isLogged()) {
             exit( __CLASS__ . '  is only for authorized sessions' );
         }
 
-        $this->user = $this->Model('user');
+        $this->user = $user;
     }
 
     /**
-     * Return the user info
+     * Test function
      *
-     * @param $id int
+     * @param int $id
      * @return array
      */
     public function index($id = null)
     {
         return ['test' => rand()];
     }
-}
+} // EOF user.php

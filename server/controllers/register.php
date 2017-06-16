@@ -1,15 +1,19 @@
 <?php
 /**
-* file      : /app/core/controllers/register.php
-* author    : czf.leo123@gmail.com
-* todo      :
-*/
+ * @file    : /app/core/controllers/register.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    :
+ */
 
 namespace Controllers;
 
 use Symfony\Component\HttpFoundation\Request;
 
-class Register extends \Controller
+use Core;
+use Models;
+use Library;
+
+class Register extends Controller
 {
     /**
      * The instance of auth library
@@ -47,13 +51,15 @@ class Register extends \Controller
     protected $logger;
 
     /**
-     * Create models that will be used later
+     * Initialize the controller and prepare the dependencies
+     *
+     * @param Logger $logger
+     * @param User $user
+     * @param Attempt $attempt
+     * @param Config $config
+     * @param Auth $auth
      */
-    public function __construct(\Core\Logger $logger,
-        \Models\User $user,
-        \Models\Attempt $attempt,
-        \Models\Config $config,
-        \Library\Auth $auth)
+    public function __construct(Logger $logger, User $user, Attempt $attempt, Config $config, Auth $auth)
     {
         $this->logger = $logger;
 
@@ -65,25 +71,24 @@ class Register extends \Controller
     }
 
     /**
-     * Register a new user
+     * Attempts to register an user
      *
      * @return string|array
      */
     public function register()
     {
-        $request = Request::createFromGlobals();
-
-        $request->request->replace(json_decode($request->getContent(), true));
-
-        $ip = $this->auth->getIp();
-
-        $email = $request->request->get('email');
-        $password = $request->request->get('password');
-        $captcha = $request->request->get('captcha');
+        $request = $request->get();
+        
+        $email = $request->get('email');
+        $password = $request->get('password');
+        $captcha = $request->get('captcha');
 
         $this->logger->debug("email: `$email`, password: `$password`");
 
+        $ip = $this->auth->getIp();
         $block_status = $this->attempt->getBlockStatus($ip);
+
+        $this->logger->debug("ip: `$ip`, block_status: `$block_status`");
 
         if ($block_status == 'block') {
             return "Your ip have been blocked for a while";
@@ -111,7 +116,7 @@ class Register extends \Controller
             return ['code' => 'verify'];
         }
 
-        $user = new \Models\User;
+        $user = new User;
 
         $user->email = $email;
         $user->password = password_hash($password, PASSWORD_BCRYPT, ['cost' => $this->config->get('bcrypt_cost')]);
