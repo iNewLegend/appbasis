@@ -1,9 +1,10 @@
 <?php
 /**
-* file 		: /app/core/App.php
-* author 	: czf.leo123@gmail.com
-* todo		:
-*/
+ * @file    : server/core/Core.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    :
+ */
+
 namespace Core;
 
 class Core
@@ -77,7 +78,7 @@ class Core
         $this->method = $cmd->method;
         $this->methodParams = $cmd->params;
 
-        if(! file_exists($this->controllerPath)) {
+        if (! file_exists($this->controllerPath)) {
             throw new \Exception("controller: '{$cmd->controller}' not found, in: " . __FILE__ . '(' . __LINE__. ')');
         }
 
@@ -90,7 +91,7 @@ class Core
         # create controller instance
         $this->controller = $container->get($this->controllerName);
 
-        if(! method_exists($this->controller, $this->method)) {
+        if (! method_exists($this->controller, $this->method)) {
             throw new \Exception("method: '{$this->method}' not found in controller: '{$this->controllerName}, in: " . __FILE__ . '(' . __LINE__. ')');
         }
 
@@ -112,7 +113,7 @@ class Core
         $return->method = $this->method;
         $return->params = [];
 
-        if(! empty($cmd) && is_string($cmd)) {
+        if (! empty($cmd) && is_string($cmd)) {
             # remove forward slash from the end
             $cmd = rtrim($cmd, '/');
 
@@ -120,7 +121,7 @@ class Core
             $cmd = explode('/', $cmd);
 
             # set controller
-            if(isset($cmd[0])) {
+            if (isset($cmd[0])) {
                 # only abc for controller name
                 $cmd[0] = preg_replace("/[^a-zA-Z]+/", "", $cmd[0]);
 
@@ -129,7 +130,7 @@ class Core
             }
 
             # set method
-            if(isset($cmd[1])) {
+            if (isset($cmd[1])) {
                 # only abc and digits for method name
                 $cmd[1] = preg_replace("/[^a-zA-Z0-9]+/", "", $cmd[1]);
 
@@ -138,8 +139,8 @@ class Core
             }
 
             # set params
-            if(! empty($cmd)) {
-                foreach($cmd as $key => $param) {
+            if (! empty($cmd)) {
+                foreach ($cmd as $key => $param) {
                     $cmd[$key] =  filter_var($param, FILTER_SANITIZE_STRING);
                 }
 
@@ -166,9 +167,8 @@ class Core
          * Else just echo the result if its not empty
          */
 
-        if(! empty($r)) {
-
-            if(is_array($r)) {
+        if (! empty($r)) {
+            if (is_array($r)) {
                 header('Content-Type: application/json');
                 echo json_encode($r);
             } else {

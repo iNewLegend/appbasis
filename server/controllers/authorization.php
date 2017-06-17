@@ -1,12 +1,11 @@
 <?php
 /**
- * @file    : /app/core/controllers/authorization.php
+ * @file    : server/controllers/authorization.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  * @todo    :
  */
 
 namespace Controllers;
-
 
 use Core;
 use Library;
@@ -15,7 +14,7 @@ use Models;
 class Authorization extends Core\Controller
 {
     /**
-     * The instance of user model
+     * The instance of User model
      *
      * @var User
      */
@@ -43,14 +42,14 @@ class Authorization extends Core\Controller
     protected $config;
 
     /**
-     * The instance of auth library
+     * The instance of Auth library
      *
      * @var \Library\Auth
      */
     protected $auth;
 
     /**
-     * The instance of logger
+     * The instance of Logger
      *
      * @var \Core\Logger
      */
@@ -160,7 +159,7 @@ class Authorization extends Core\Controller
         }
 
         # delete all attempts after successfully login
-        $this->attempt->deleteAttempts($ip, true);
+        $this->attempt->delete($ip);
 
         return [
             'code' => 'success',

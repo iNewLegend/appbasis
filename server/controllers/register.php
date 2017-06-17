@@ -1,29 +1,27 @@
 <?php
 /**
- * @file    : /app/core/controllers/register.php
+ * @file    : server/controllers/register.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  * @todo    :
  */
 
 namespace Controllers;
 
-use Symfony\Component\HttpFoundation\Request;
-
 use Core;
 use Models;
 use Library;
 
-class Register extends Controller
+class Register extends Core\Controller
 {
     /**
-     * The instance of auth library
+     * The instance of Auth library
      *
      * @var \Library\Auth
      */
     protected $auth;
 
     /**
-     * The instance of user model
+     * The instance of User model
      *
      * @var \Models\User
      */
@@ -44,7 +42,7 @@ class Register extends Controller
     protected $config;
 
     /**
-     * The instance of logger
+     * The instance of Logger
      *
      * @var \Monolog\Logger
      */
@@ -59,7 +57,7 @@ class Register extends Controller
      * @param Config $config
      * @param Auth $auth
      */
-    public function __construct(Logger $logger, User $user, Attempt $attempt, Config $config, Auth $auth)
+    public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt, Models\Config $config, Library\Auth $auth)
     {
         $this->logger = $logger;
 
@@ -77,7 +75,7 @@ class Register extends Controller
      */
     public function register()
     {
-        $request = $request->get();
+        $request = $this->getRequest();
         
         $email = $request->get('email');
         $password = $request->get('password');
@@ -116,7 +114,7 @@ class Register extends Controller
             return ['code' => 'verify'];
         }
 
-        $user = new User;
+        $user = new Models\User;
 
         $user->email = $email;
         $user->password = password_hash($password, PASSWORD_BCRYPT, ['cost' => $this->config->get('bcrypt_cost')]);

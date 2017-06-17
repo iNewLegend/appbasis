@@ -1,85 +1,82 @@
 <?php
 /**
- * @file    : /app/library/Auth.php
- * @author  : czf.leo123@gmail.com
- * @todo    : move from cookies to sessions
- * @desc    : do the actual login
-*/
+ * @file    : server/library/Auth.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    : (IThink) part validate functions to somewhere else...
+ */
+
 namespace Library;
 
 class Auth
 {
     /**
-     * Save self $instance for static use
+     * Self instance
      *
-     * @var Auth
+     * @var [type]
      */
     protected static $instance = null;
 
     /**
-    * The login state of the current authorization
-    *
-    * @var bool
-    */
+     * The login state of the current authorization
+     *
+     * @var boolean
+     */
     protected $logged = false;
 
     /**
-    * The ip of the current authorization
-    *
-    * @var string
-    */
+     * The ip of the current authorization
+     *
+     * @var string
+     */
     protected $ip = null;
 
     /**
-    * Hash of the current authorization
-    *
-    * @var string
-    */
+     * Hash of the current authorization
+     *
+     * @var string
+     */
     protected $hash = '';
 
     /**
-    * the block status of the current authorization
-    *
-    * @var boolean
-    */
+     * The block status of the current authorization
+     *
+     * @var boolean
+     */
     protected $blockStatus = false;
 
     /**
-    * The instance of Attempt model
-    *
-    * @var \Models\Attempt
-    */
+     * The instance of Attempt model
+     *
+     * @var \Models\Attempt
+     */
     protected $attempt;
 
     /**
-    * The instance of Session model
-    *
-    * @var \Models\Session
-    */
+     * The instance of Session model
+     *
+     * @var \Models\Session
+     */
     protected $session;
 
     /**
-    * The instance of Config model
-    *
-    * @var \Models\Config
-    */
+     * The instance of Config model
+     *
+     * @var \Models\Config
+     */
     protected $config;
-    protected $logger;
+
     /**
-    * Initialize the Auth library
-    *
-    */
-    public function __construct(
-        \Models\Attempt $attempt,
-        \Models\Session $session,
-        \Models\Config $config,
-        \Core\Logger $logger
-    ) {
-    
+     * Initialize the Auth library
+     *
+     * @param \Models\Attempt $attempt
+     * @param \Models\Session $session
+     * @param \Models\Config $config
+     */
+    public function __construct(\Models\Attempt $attempt, \Models\Session $session, \Models\Config $config)
+    {
         $this->attempt  = $attempt;
         $this->session  = $session;
         $this->config   = $config;
-        $this->logger   = $logger;
 
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] != '') {
             $this->ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
@@ -93,11 +90,11 @@ class Auth
     }
 
     /**
-    * Check auth by hash and return the authorization status
-    *
-    * @param  string    $hash
-    * @return boolean
-    */
+     * Check auth by hash and return the authorization status
+     *
+     * @param boolean|string $hash
+     * @return boolean
+     */
     public function check($hash = false)
     {
         if (false === $hash) {
@@ -113,6 +110,7 @@ class Auth
 
         return $this->logged;
     }
+
     /**
      * Login a user and return the session
      *
@@ -141,11 +139,11 @@ class Auth
     }
 
     /**
-    * Logout a user
-    *
-    * @param    $hash   string
-    * @return   boolean
-    */
+     * Logout function
+     *
+     * @param string $hash
+     * @return boolean
+     */
     public function logout($hash)
     {
         if (false === $hash) {
@@ -166,11 +164,11 @@ class Auth
     }
 
     /**
-    * Verifies a google captcha code
-    *
-    * @param  string    $captcha
-    * @return boolean
-    */
+     * Verifies a google captcha code
+     *
+     * @param string $captcha
+     * @return mixed
+     */
     public function checkCaptcha($captcha)
     {
         $secret = $this->config->get('captcha_secret_key');
@@ -201,11 +199,11 @@ class Auth
     }
 
     /**
-    * validate email
-    *
-    * @param  string    $email
-    * @return object
-    */
+     * Validate email
+     *
+     * @param string $email
+     * @return object
+     */
     public function validateEmail($email)
     {
         $return = new \stdClass();
@@ -234,11 +232,11 @@ class Auth
     }
 
     /**
-    * validate password
-    *
-    * @param  string    $password
-    * @return object
-    */
+     * Validate email
+     *
+     * @param string $email
+     * @return object
+     */
     public function validatePassword($password)
     {
         $return = new \stdClass();
@@ -263,10 +261,10 @@ class Auth
     }
 
     /**
-    * validate if user is logged in
-    *
-    * @return boolean
-    */
+     * Returns login state
+     *
+     * @return boolean
+     */
     public function isLogged()
     {
         if (isset($this->logged)) {
@@ -277,10 +275,10 @@ class Auth
     }
 
     /**
-    * get user ip
-    *
-    * @return string
-    */
+     * Returns user IP
+     *
+     * @return string
+     */
     public function getIp()
     {
         if (isset($this->ip)) {
@@ -291,10 +289,10 @@ class Auth
     }
 
     /**
-    * get user hash
-    *
-    * @return string
-    */
+     * Returns user hash
+     *
+     * @return string
+     */
     public function getHash()
     {
         if (isset($this->hash)) {
@@ -305,10 +303,10 @@ class Auth
     }
 
     /**
-    * get user block status
-    *
-    * @return string
-    */
+     * Returns user block status
+     *
+     * @return string
+     */
     public function getBlockStatus()
     {
         if (isset($this->blockStatus)) {

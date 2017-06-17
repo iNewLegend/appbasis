@@ -1,16 +1,15 @@
 <?php
 /**
-* file 		: /app/models/user.php
-* author 	: czf.leo123@gmail.com
-* todo		: use Eloquent timestamps
-* desc		: used to play with user table
-*/
+ * @file    : server/models/User.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    :
+ */
 
 namespace Models;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
+use \Illuminate\Database\Eloquent\Model;
 
-class User extends Eloquent
+class User extends Model
 {
     /**
      * Get the user id by email
@@ -21,11 +20,11 @@ class User extends Eloquent
     {
         $return = User::select("id")->where("email", $email)->first();
 
-        if($return) {
+        if ($return) {
             $return = $return->toArray();
         }
 
-        if(! isset($return['id'])) {
+        if (! isset($return['id'])) {
             return false;
         }
 
@@ -51,7 +50,7 @@ class User extends Eloquent
      */
     public function isEmailTaken($email)
     {
-        if(User::select("id")->where("email", $email)->first()) {
+        if (User::select("id")->where("email", $email)->first()) {
             return true;
         }
 

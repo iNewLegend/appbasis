@@ -6,7 +6,7 @@
  * @desc    : used to create the database
  */
 
-if(PHP_SAPI !== 'cli' || isset($_SERVER['HTTP_USER_AGENT'])) {
+if (PHP_SAPI !== 'cli' || isset($_SERVER['HTTP_USER_AGENT'])) {
     exit('Script execute only from CLI');
 }
 
@@ -30,7 +30,7 @@ class DBUilder
     /**
      * DBUilder constructor
      */
-    function __construct() 
+    function __construct()
     {
         $this->logger = new \Core\Logger(get_class($this));
         $this->logger->info("Logger initalized");
@@ -42,7 +42,7 @@ class DBUilder
      * @return void
      */
     public function users()
-    {        
+    {
         # Droping Schema
         Capsule::statement('SET FOREIGN_KEY_CHECKS = 0');
         Capsule::schema()->dropIfExists('users');
@@ -127,10 +127,10 @@ class DBUilder
         $this->logger->warning('Drop if Exists `config` table');
 
         # Creating schema
-       Capsule::schema()->create('config', function (Blueprint $table) {
+        Capsule::schema()->create('config', function (Blueprint $table) {
             $table->string('setting', 100);
             $table->string('value', 100)->nullable();
-       });
+        });
 
         $this->logger->info('Creating `config` table');
         $this->logger->debug(json_encode(Capsule::select('DESCRIBE config')));
@@ -138,6 +138,8 @@ class DBUilder
 
         $this->logger->info('Creating `rows` table');
 
+        # TODO : all config values should be in config.php
+        
         $configs = [
             ['attack_mitigation_time' => '+30 minutes'],
             ['attempts_before_verify' => '3'],
@@ -157,31 +159,26 @@ class DBUilder
             ['captcha_site_key' => CAPTCHA_SITE_KEY]
         ];
 
-        
-
-        foreach($configs as $config) {
+        foreach ($configs as $config) {
             $model = new Models\Config();
             $model->setting = key($config);
             $model->value = $config[key($config)];
             $model->save();
 
             $this->logger->debug(key($config) . ' = ' . $config[key($config)]);
-
         }
 
         $this->logger->notice('`config` rows created');
     }
 }
 
-
 $db = new DBUilder();
 
 try {
-    
     $db->users();
     $db->sessions();
     $db->attempts();
     $db->config();
-} catch(\Exception $e) {
+} catch (\Exception $e) {
     $db->logger->error($e->getMessage());
 }

@@ -1,9 +1,8 @@
 <?php
 /**
- * file 	: # App/config.php
- * author 	: czf.leo123@gmail.com
- * todo		:
- * desc	:
+ * @file    : /server/config.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    : add all configs here
  */
 
 define('DB_USERNAME',   'root');

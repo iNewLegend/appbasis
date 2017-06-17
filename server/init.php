@@ -1,10 +1,9 @@
 <?php
 /**
-* file 		: # App/init.php
-* author 	: czf.leo123@gmail.com
-* todo		:
-* desc		: used to init the app
-*/
+ * @file    : init.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    :
+ */
 require __DIR__ . '/vendor/autoload.php';
 
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -32,4 +31,3 @@ $capsule->setAsGlobal();
 
 header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-

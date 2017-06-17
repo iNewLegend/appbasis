@@ -1,16 +1,15 @@
 <?php
 /**
-* file 		: /app/models/Session.php
-* author 	: czf.leo123@gmail.com
-* todo		:
-* desc		: used to save and mange sessions
-*/
+ * @file    : server/models/Session.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    :
+ */
 
 namespace Models;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
+use \Illuminate\Database\Eloquent\Model;
 
-class Session extends Eloquent
+class Session extends Model
 {
     /**
      * Indicates if the model should be timestamped
@@ -39,7 +38,7 @@ class Session extends Eloquent
         # delete all sessions for the ID
         $this->delete($id);
 
-        if($remember) {
+        if ($remember) {
             $return['expiretime'] = strtotime($return['expire']);
         } else {
             $return['expiretime'] = 0;
@@ -54,7 +53,7 @@ class Session extends Eloquent
         $session->agent = $_SERVER['HTTP_USER_AGENT'];
         $session->cookie_crc = $return['cookie_crc'];
 
-        if(! $session->save()) {
+        if (! $session->save()) {
             return false;
         }
 
@@ -74,7 +73,7 @@ class Session extends Eloquent
     {
         $session = $this->where('hash', $hash)->get()->first();
 
-        if(! $session) {
+        if (! $session) {
             return false;
         }
 
@@ -83,16 +82,16 @@ class Session extends Eloquent
         $expiredate = strtotime($session['expiredate']);
         $currentdate = strtotime(date("Y-m-d H:i:s"));
 
-        if($currentdate > $expiredate) {
+        if ($currentdate > $expiredate) {
             $this->delete($session['id']);
             return false;
         }
 
-        if($ip != $session['ip']) {
+        if ($ip != $session['ip']) {
             return false;
         }
 
-        if($session['cookie_crc'] == sha1($hash . Config::get('captcha_site_key'))) {
+        if ($session['cookie_crc'] == sha1($hash . Config::get('captcha_site_key'))) {
             return true;
         }
 

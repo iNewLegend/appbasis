@@ -1,6 +1,6 @@
 <?php
 /**
- * @file    : /app/core/controllers/welcome.php
+ * @file    : server/controllers/welcome.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  * @todo    :
  */
@@ -9,7 +9,7 @@ namespace Controllers;
 
 use Core;
 
-class Welcome extends Controller
+class Welcome extends Core\Controller
 {
     /**
      * Default method of the controller
@@ -30,14 +30,16 @@ class Welcome extends Controller
     {
         $commits = simplexml_load_file('https://github.com/iNewLegend/AppBasis/commits/master.atom');
 
-        $array = json_decode(json_encode($commits),TRUE);
+        $array = json_decode(json_encode($commits), true);
         $array = $array['entry'];
         $needle = [];
         $maximum = 5;
         $i = 0;
 
-        foreach($array as $update) {
-            if($i >= $maximum) break;
+        foreach ($array as $update) {
+            if ($i >= $maximum) {
+                break;
+            }
 
             $needle [] = [
                 'title' => $update['title'],
@@ -49,5 +51,4 @@ class Welcome extends Controller
 
         return $needle;
     }
-
 } // EOF welcome.php

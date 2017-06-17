@@ -1,11 +1,12 @@
-<?php 
+<?php
+/**
+ * @file    : server/core/Logger.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    :
+ */
 
 namespace Core;
 
-/**
- * Logger class 
- * @todo add log to files.
- */
 class Logger extends \Monolog\Logger
 {
     protected $output;
@@ -26,7 +27,6 @@ class Logger extends \Monolog\Logger
         $this->pushHandler($this->consoleHandler);
     }
 
-
     public function addRecord($level, $message, array $context = []): bool
     {
         //$file = debug_backtrace()[2]['file'];
@@ -40,4 +40,4 @@ class Logger extends \Monolog\Logger
 
         return parent::addRecord($level, $out, $context);
     }
-}
+} // EOF Logger.php    

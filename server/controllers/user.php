@@ -1,6 +1,6 @@
 <?php
 /**
- * @file    : /app/core/controllers/user.php
+ * @file    : server/controllers/user.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  * @todo    :
  */
@@ -11,36 +11,43 @@ use Core;
 use Library;
 use Models;
 
-class User extends Controller
+class User extends Core\Controller 
 {
     /**
-     * The instance of user model
+     * The instance of User model
      *
      * @var \Models\User
      */
     protected $user;
 
     /**
-     * The instance of auth library
+     * The instance of Auth library
      *
-     * @var \Models\Session
+     * @var \Library\Auth
      */
     protected $auth;
+
+    /**
+     * The instance of Guard library
+     *
+     * @var \Library\Guard
+     */
+    protected $guard;
 
     /**
      * Initialize the controller and prepare the dependencies
      *
      * @param Auth $auth
      * @param User $user
+     * @param Guard $guard
      */
-    public function __construct(Auth $auth, User $user)
+    public function __construct(Library\Auth $auth ,Models\User $user)
     {
-        $this->auth = $auth;
-
-        if(false == $this->auth->isLogged()) {
-            exit( __CLASS__ . '  is only for authorized sessions' );
+        if(false == $auth->isLogged()) {
+            exit(__CLASS__ . ' restricted! only for authorized users.');
         }
 
+        $this->auth = $auth;
         $this->user = $user;
     }
 

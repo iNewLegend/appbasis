@@ -1,16 +1,15 @@
 <?php
 /**
- * file 		: /app/models/Config.php
- * author 	    : czf.leo123@gmail.com
- * todo		    :
- * desc		:
+ * @file    : server/models/Config.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    :
  */
 
 namespace Models;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
+use \Illuminate\Database\Eloquent\Model;
 
-class Config extends Eloquent
+class Config extends Model
 {
     /**
      * Indicates if the model should be timestamped
@@ -27,27 +26,28 @@ class Config extends Eloquent
     public $table = 'config';
 
     /**
-     * Avoid getting of the same data from db
+     * A container for saving data from database
      *
      * @var string
+     * @uses as cache
      */
     protected $data = [];
 
     /**
-     * Gets a value of settings from config
+     * Gets a value of each requested key from the databse or data cache
      *
-     * @param  string    $key
-     * @return int
+     * @param string $key
+     * @return mixed
      */
     public function get($key)
     {
-        if(isset($data[$key])) {
+        if (isset($data[$key])) {
             return $data[$key];
         }
 
         $return = Config::select('value')->where('setting', $key)->get()->first();
 
-        if($return) {
+        if ($return) {
             $data[$key] = $return->toArray()['value'];
 
             return $data[$key];

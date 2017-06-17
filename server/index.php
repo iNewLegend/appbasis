@@ -1,12 +1,10 @@
 <?php
 /**
- * file 	: index.php
- * author 	: czf.leo123@gmail.com
- * todo		:
+ * @file    : index.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    :
  */
 require_once 'init.php';
-
-
 
 $cmd = '';
 
