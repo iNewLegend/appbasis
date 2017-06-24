@@ -155,7 +155,7 @@ class Authorization extends Core\Controller
 
         if (! $session) {
             return ['code' => 'fail',
-                'error' => 'system error'];
+                'error' => 'System error, Please contact the Administrator.'];
         }
 
         # delete all attempts after successfully login

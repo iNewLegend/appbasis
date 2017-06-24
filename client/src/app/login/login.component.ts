@@ -43,6 +43,7 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit() {
+ 
   }
 
   clearErrors() {
@@ -88,23 +89,35 @@ export class LoginComponent implements OnInit {
       console.log("[login.component.ts::loginResult] json->");
       console.log(data);
 
-      if (typeof data.code !== 'undefined' && data.code == 'verify') {
-        grecaptcha.reset();
+      if(typeof data.code !== 'undefined') {
+        switch(data.code)
+        {
+          case 'success':
+            if(data.hash.length == 40) {
+              this.toastrService.success("You have been successfuly logged in.", "Welcome");
+            }
+          break;
 
-        this.captchaState = true;
-        this.error = "Please confirm your not a robot";
-      } else if(data.hash.length == 40) {
-        this.toastrService.success("You have been successfuly logged in.", "Welcome");
+          case 'verify':
+            grecaptcha.reset();
+
+            this.captchaState = true;
+            this.error = "Please confirm your not a robot";
+          break;
+
+          case 'fail':
+            this.toastrService.error(data.error, "Error");
+          break;
+
+          default:
+            console.log("Error: in login.comonent.ts unknown logic.");
+        }
       } else {
-        console.log("Error: in lgin.comonent.ts unknown logic.")
+        this.error = response.text();
       }
-
-    } else if (response.text().length > 0) {
-      console.log("[login.component.ts::loginResult] text-> " + response.text());
-      this.error = response.text();
     } else {
-      console.log(response);
-    }
+        console.log(response);
+      }
   }
 
   processForm() {

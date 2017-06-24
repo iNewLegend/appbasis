@@ -27,17 +27,25 @@ class Logger extends \Monolog\Logger
         $this->pushHandler($this->consoleHandler);
     }
 
-    public function addRecord($level, $message, array $context = []): bool
+    public function addRecord($level, $message, array $context = [])
     {
-        //$file = debug_backtrace()[2]['file'];
-        $class = debug_backtrace()[2]['class'];
-        $func = debug_backtrace()[2]['function'];
         $levelName = static::getLevelName($level);
-
+        $debugTrace = debug_backtrace();
         $date = date("d-m-y H:m:s");
 
-        $out = "[$date][$levelName][$class][$func]: $message";
+        $out = "[$date][$levelName]";
 
+        if(isset($debugTrace[2])) {
+            $debugTrace = $debugTrace[2];
+
+            $class = $debugTrace['class'];
+            $func =  $debugTrace['function'];
+
+            $out .= "[$class][$func]: $message";
+        } else {
+            $out .= '[' . basename($debugTrace[1]['file']) . ']:' . $message; 
+        }
+        
         return parent::addRecord($level, $out, $context);
     }
 } // EOF Logger.php    

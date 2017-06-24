@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { Response } from '@angular/http';
 import { Router } from '@angular/router';
 
 import { ToastrService } from 'ngx-toastr';
 
+import { Response } from '@angular/http';
 import { Validator } from '../validator';
-import { environment } from '../../environments/environment';
-
 import { RegisterService } from '../register.service';
+import { environment } from '../../environments/environment';
 
 interface IFormData {
   email: string;
@@ -21,7 +20,8 @@ const errorTimeout: number = 10000;
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css']
+  styleUrls: ['./register.component.css'],
+  providers: [RegisterService]
 })
 
 export class RegisterComponent implements OnInit {

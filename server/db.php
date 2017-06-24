@@ -145,12 +145,7 @@ class DBUilder
             ['attempts_before_verify' => '3'],
             ['attempts_before_ban' => '5'],
             ['bcrypt_cost' => '10'],
-            ['cookie_forget' => '+30 minutes'],
-            ['cookie_http' => '0'],
-            ['cookie_name' => 'authID'],
-            ['cookie_path' => ''],
-            ['cookie_remember' => '1 month'],
-            ['cookie_secure' => '0'],
+            ['session_remember' => '+1 hour'],
             ['password_min_score' => '1'],
             ['verify_email_max_length' => '100'],
             ['verify_email_min_length' => '5'],
@@ -174,7 +169,7 @@ class DBUilder
 
 $db = new DBUilder();
 
-try {
+try {    
     $db->users();
     $db->sessions();
     $db->attempts();

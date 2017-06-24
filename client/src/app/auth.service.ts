@@ -1,13 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
+
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/'
+
 import { environment } from '../environments/environment';
 
 import 'rxjs/add/operator/map'
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import 'rxjs/add/operator/catch';
 
-enum eAuthStates {
+export enum eAuthStates {  
+  PREPARE,
   NONE,
-  UNAUTHORIZED,
+  UNAUTHORIZED, 
   AUTHORIZED
 }
 
@@ -16,9 +21,8 @@ enum eAuthStates {
 export class AuthService {
   public authState: BehaviorSubject<eAuthStates> = new BehaviorSubject<eAuthStates>(eAuthStates.NONE);
 
-
   constructor(private http: Http) {
-    this.try();
+
   }
 
   getState(): eAuthStates {
@@ -53,36 +57,42 @@ export class AuthService {
   }
 
 
-  try() {
+  public try(): Observable<Boolean> {
+    if(this.getStatus()) {
+      return Observable.of(true);
+    }
+  
     let hash = this.getHash();
 
     console.log("[auth.service.ts::try]: " + hash);
 
-    this.http.get(environment.server_base + 'authorization/check/' + hash)
+    this.setState(eAuthStates.PREPARE)
+
+    return this.http.get(environment.server_base + 'authorization/check/' + hash)
       .map((response: Response) => {
         console.log("[auth.service.ts::try:recv]->");
         console.log(response);
-                
-        let data = response.json();
-        console.log("[auth.service.ts::try:recv:json]->");
-        console.log(data);
 
+        let data;
+        try {
+          data = response.json();
+        } catch (error) {
+          data = false;
+        }
 
-        if(typeof data.code !== 'undefined') {
-          if(data.code == 'success') {
-            this.setStatus(true);
-          } else {
-            if(hash.length > 0) {
-              this.setHash('');
+        if (data) {
+          if (typeof data.code !== 'undefined') {
+            if (data.code == 'success') {
+              this.setStatus(true);
+              console.log("[auth.service.ts::try:recv]: success");
+              return true;
             }
+            this.setHash('');
             this.setStatus(false);
           }
         }
 
-      }).subscribe(success => {
-      }, error => {
-        console.log("[auth.service.ts::try:httpError]->");
-        console.log(error);
+        throw data;
       });
   }
 
@@ -109,9 +119,11 @@ export class AuthService {
         }
 
         if (data && typeof data.hash !== 'undefined') {
-          if(data.code == 'success') {
-            this.setHash(data.hash);
-            this.setStatus(true);
+          if (data.code == 'success') {
+            if (data.hash.length == 40) {
+              this.setHash(data.hash);
+              this.setStatus(true);
+            }
           }
         }
 

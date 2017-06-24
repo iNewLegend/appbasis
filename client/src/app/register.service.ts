@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { HttpClient } from './http-client';
 import { environment } from '../environments/environment';
 
 
 @Injectable()
 export class RegisterService {
 
-  constructor(private http: Http) { }
+  constructor(private http: HttpClient) { }
 
-  register(email: string, password: string, captcha: string, callback: (response: Response) => any) {
+  register(email: string, password: string, captcha: string, callback) {
 
     let sendData = JSON.stringify({
       email: email,
@@ -18,11 +18,6 @@ export class RegisterService {
 
     console.log("[auth.register.ts::register]-> " + sendData);
 
-    return this.http.post(environment.server_base + 'register/register', sendData)
-      .map((response: Response) => {
-        console.log(response);
-
-        callback(response);
-      }).subscribe();
+    return this.http.post('register/register', sendData, callback);
   }
 }

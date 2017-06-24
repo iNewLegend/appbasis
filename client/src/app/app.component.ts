@@ -1,9 +1,11 @@
-import { Component, ViewChild, OnInit , ViewEncapsulation} from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ViewChild, OnInit, ViewEncapsulation } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 
-import { ToastContainerDirective , ToastrService, ToastrConfig} from 'ngx-toastr';
+import { ToastContainerDirective, ToastrService, ToastrConfig } from 'ngx-toastr';
 
-import { AuthService } from './auth.service';
+import { AuthGuard } from './auth.guard';
+import { AuthService, eAuthStates } from './auth.service';
+
 
 @Component({
   encapsulation: ViewEncapsulation.None,
@@ -12,37 +14,41 @@ import { AuthService } from './auth.service';
   styleUrls: ['./app.component.css']
 })
 
-export class AppComponent implements OnInit{
-  currentRoute : string;
+export class AppComponent implements OnInit {
+  currentRoute: string;
 
-  isWelcomeRoute : boolean;
+  isWelcomeRoute: boolean;
 
   @ViewChild(ToastContainerDirective) toastContainer: ToastContainerDirective;
-  
-  constructor(private authService: AuthService,
-   private toastrService: ToastrService,
-   private toastrConfig: ToastrConfig,
-   private router: Router) {
 
-    
+  constructor(
+    private authGuard: AuthGuard,
+    private authService: AuthService,
+    private toastrService: ToastrService,
+    private toastrConfig: ToastrConfig,
+    private router: Router) {
+
+
     // route
     this.currentRoute = this.router.url;
 
     this.router.events.subscribe((res) => {
-      this.onRouteChanged(this.router.url);
+      if (res instanceof NavigationEnd) {
+        this.onRouteChanged(this.router.url);
+      }
     });
 
     this.router.events.subscribe();
-    
+
     // toastr configure
     toastrConfig.positionClass = 'position';
     // move to bootstrap style
     toastrConfig.toastClass = 'alert';
     toastrConfig.iconClasses = {
-      error: 'alert-error',
+      error: 'alert-danger',
       info: 'alert-info',
       success: 'alert-success',
-      warning: 'alert-warning',    
+      warning: 'alert-warning',
     }
 
     toastrConfig.timeOut = 5000;
@@ -56,16 +62,19 @@ export class AppComponent implements OnInit{
   }
 
   onRouteChanged(url: string) {
+    if (this.authService.getState() == eAuthStates.NONE) {
+      this.authService.try().subscribe();
+    }
+
     this.currentRoute = this.router.url;
 
-    switch(this.currentRoute)
-    {
+    switch (this.currentRoute) {
       case '/welcome':
         this.isWelcomeRoute = true;
-      break;
+        break;
 
       default:
-      this.isWelcomeRoute = false;
+        this.isWelcomeRoute = false;
     }
   }
 

@@ -12,6 +12,12 @@ if(isset($_GET['cmd'])) {
     $cmd = $_GET['cmd'];
 }
 
+if($cmd == 'phpinfo') {
+    phpinfo();
+    exit();
+}
+
+
 try {
     $core = new \Core\Core($cmd);
 } catch(Exception $e) {

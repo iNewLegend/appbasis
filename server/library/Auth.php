@@ -7,12 +7,14 @@
 
 namespace Library;
 
+use Symfony\Component\HttpFoundation\Request;
+
 class Auth
 {
     /**
      * Self instance
      *
-     * @var [type]
+     * @var Auth
      */
     protected static $instance = null;
 
@@ -87,6 +89,10 @@ class Auth
         $this->blockStatus = $this->attempt->getBlockStatus($this->ip);
 
         self::$instance = $this;
+
+        $request = Request::createFromGlobals();
+        
+        $this->check($request->headers->get('hash'));
     }
 
     /**
@@ -95,20 +101,18 @@ class Auth
      * @param boolean|string $hash
      * @return boolean
      */
-    public function check($hash = false)
+    public function check($hash)
     {
-        if (false === $hash) {
-            $hash = $_COOKIE[$this->config->cookie_name];
-        }
-        
         if (strlen($hash) == 40) {
             if ($this->session->check($hash, $this->ip)) {
-                $this->logged = true;
                 $this->hash = $hash;
+                $this->logged = true;
+
+                return true;
             }
         }
 
-        return $this->logged;
+        return false;
     }
 
     /**
@@ -121,21 +125,14 @@ class Auth
      */
     public function login($id, $ip, $remember)
     {
-        $session = $this->session->add($id, $remember, $ip);
-        
-        if (! $session) {
-            return false;
+        $return = $this->session->add($id, $remember, $ip);
+
+        if(! $return) {
+            $this->logged = true;
+            $this->hash = $return['hash'];
         }
 
-        setcookie($this->config->cookie_name,
-            $session['hash'],
-            $session['expire'],
-            $this->config->cookie_path,
-            $this->config->cookie_domain,
-            $this->config->cookie_secure,
-            $this->config->cookie_http);
-
-        return $session;
+        return $return;
     }
 
     /**
@@ -146,21 +143,7 @@ class Auth
      */
     public function logout($hash)
     {
-        if (false === $hash) {
-            $hash = $_COOKIE[$this->config->cookie_name];
-        }
-
-        if ($ret = $this->session->deleteByHash($hash)) {
-            return setcookie($this->config->cookie_name,
-                "",
-                time() - 3600,
-                $this->config->cookie_pat,
-                $this->config->cookie_domain,
-                $this->config->cookie_secure,
-                $this->config->cookie_http);
-        }
-        
-        return false;
+        return $this->session->deleteByHash($hash);
     }
 
     /**

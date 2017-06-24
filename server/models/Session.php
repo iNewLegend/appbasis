@@ -33,7 +33,7 @@ class Session extends Model
         $return['hash'] = sha1(Config::get('captcha_site_key') . microtime());
         $return['cookie_crc'] = sha1($return['hash'] . Config::get('captcha_site_key'));
 
-        $return['expire'] = date('Y-m-d H:i:s', strtotime(Config::get('cookie_remember')));
+        $return['expire'] = date('Y-m-d H:i:s', strtotime(Config::get('session_remember')));
 
         # delete all sessions for the ID
         $this->delete($id);
@@ -72,7 +72,7 @@ class Session extends Model
     public function check($hash, $ip)
     {
         $session = $this->where('hash', $hash)->get()->first();
-
+  
         if (! $session) {
             return false;
         }

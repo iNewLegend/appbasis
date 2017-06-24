@@ -4,6 +4,13 @@
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  * @todo    :
  */
+ header('Access-Control-Allow-Origin: http://localhost:4200');
+
+ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Hash");
+    exit();
+}
+
 require __DIR__ . '/vendor/autoload.php';
 
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -29,5 +36,3 @@ $capsule->addConnection([
 $capsule->bootEloquent();
 $capsule->setAsGlobal();
 
-header('Access-Control-Allow-Origin: *');
-header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
