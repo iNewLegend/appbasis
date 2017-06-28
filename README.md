@@ -1,9 +1,9 @@
 Hello This is project goal is to make a good base for developers to start thier website without too much sh1t.
-we are two friends that just started the project but the road map is a long distance.
+i just started the project but the road map is a long distance.
 
 we planing to adopt all new technologies to one project
 
-currectly we have this:
+currently we have this:
 
 **Front-End**
 - Quickstart Interface
