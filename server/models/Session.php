@@ -1,8 +1,7 @@
 <?php
 /**
- * @file    : server/models/Session.php
+ * @file    : models/Session.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
 
 namespace Models;

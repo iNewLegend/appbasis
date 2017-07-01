@@ -1,11 +1,11 @@
 <?php
 /**
- * @file    : server/library/Auth.php
+ * @file    : services/Auth.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  * @todo    : (IThink) part validate functions to somewhere else...
  */
 
-namespace Library;
+namespace Services;
 
 use Symfony\Component\HttpFoundation\Request;
 
@@ -215,9 +215,9 @@ class Auth
     }
 
     /**
-     * Validate email
+     * Validate password
      *
-     * @param string $email
+     * @param string $password
      * @return object
      */
     public function validatePassword($password)

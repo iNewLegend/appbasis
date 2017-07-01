@@ -1,6 +1,6 @@
 <?php
 /**
- * @file    : server/models/Config.php
+ * @file    : models/Config.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  * @todo    :
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * @file    : server/controllers/authorization.php
+ * @file    : controllers/authorization.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  * @todo    :
  */
@@ -8,7 +8,7 @@
 namespace Controllers;
 
 use Core;
-use Library;
+use Services;
 use Models;
 
 class Authorization extends Core\Controller
@@ -42,9 +42,9 @@ class Authorization extends Core\Controller
     protected $config;
 
     /**
-     * The instance of Auth library
+     * The instance of Auth service
      *
-     * @var \Library\Auth
+     * @var \Services\Auth
      */
     protected $auth;
 
@@ -65,7 +65,7 @@ class Authorization extends Core\Controller
      * @param Config $config
      * @param Auth $auth
      */
-    public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt, Models\Session $session, Models\Config $config, Library\Auth $auth)
+    public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt, Models\Session $session, Models\Config $config, Services\Auth $auth)
     {
         $this->logger = $logger;
 

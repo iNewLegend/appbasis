@@ -1,14 +1,13 @@
 <?php
 /**
- * @file    : server/controllers/user.php
+ * @file    : controllers/user.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
 
 namespace Controllers;
 
 use Core;
-use Library;
+use Services;
 use Models;
 
 class User extends Core\Controller 
@@ -21,27 +20,19 @@ class User extends Core\Controller
     protected $user;
 
     /**
-     * The instance of Auth library
+     * The instance of Auth service
      *
-     * @var \Library\Auth
+     * @var \Services\Auth
      */
     protected $auth;
-
-    /**
-     * The instance of Guard library
-     *
-     * @var \Library\Guard
-     */
-    protected $guard;
 
     /**
      * Initialize the controller and prepare the dependencies
      *
      * @param Auth $auth
      * @param User $user
-     * @param Guard $guard
      */
-    public function __construct(Library\Auth $auth ,Models\User $user)
+    public function __construct(Services\Auth $auth ,Models\User $user)
     {
         if(false == $auth->isLogged()) {
             exit(__CLASS__ . ' restricted! only for authorized users.');

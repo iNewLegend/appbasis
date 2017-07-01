@@ -1,8 +1,7 @@
 <?php
 /**
- * @file    : server/core/Logger.php
+ * @file    : core/Logger.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
 
 namespace Core;
@@ -13,7 +12,12 @@ class Logger extends \Monolog\Logger
     protected $consoleFormatter;
     protected $consoleHandler;
     
-    public function __construct($name = 'channel')
+    /**
+     * Initialize the Logger
+     *
+     * @param string $name
+     */
+    public function __construct($name = 'global')
     {
         $this->output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
@@ -27,6 +31,14 @@ class Logger extends \Monolog\Logger
         $this->pushHandler($this->consoleHandler);
     }
 
+    /**
+     * Add recored to output
+     *
+     * @param int $level
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
     public function addRecord($level, $message, array $context = [])
     {
         $levelName = static::getLevelName($level);

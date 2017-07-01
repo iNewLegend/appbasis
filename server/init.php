@@ -2,27 +2,18 @@
 /**
  * @file    : init.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
- header('Access-Control-Allow-Origin: http://localhost:4200');
-
- if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Hash");
-    exit();
-}
 
 require __DIR__ . '/vendor/autoload.php';
-
-use Illuminate\Database\Capsule\Manager as Capsule;
 
 require 'config.php';
 require 'core/Controller.php';
 require 'core/Logger.php';
 require 'core/Core.php';
 
-$capsule = new Capsule();
+$DB = new Illuminate\Database\Capsule\Manager;
 
-$capsule->addConnection([
+$DB->addConnection([
     'driver' => 'mysql',
     'host' => DB_HOST,
     'username' => DB_USERNAME,
@@ -33,6 +24,5 @@ $capsule->addConnection([
     'prefix' => ''
 ]);
 
-$capsule->bootEloquent();
-$capsule->setAsGlobal();
-
+$DB->bootEloquent();
+$DB->setAsGlobal();

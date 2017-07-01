@@ -13,7 +13,7 @@ if (PHP_SAPI !== 'cli' || isset($_SERVER['HTTP_USER_AGENT'])) {
 require 'init.php';
 
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Database\Capsule\Manager as DB;
 
 /**
  * DBUilder class
@@ -44,14 +44,14 @@ class DBUilder
     public function users()
     {
         # Droping Schema
-        Capsule::statement('SET FOREIGN_KEY_CHECKS = 0');
-        Capsule::schema()->dropIfExists('users');
-        Capsule::statement('SET FOREIGN_KEY_CHECKS = 1');
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+        DB::schema()->dropIfExists('users');
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->logger->warning('Drop if Exists `users` table');
         
         # Creating schema
-        Capsule::schema()->create('users', function (Blueprint $table) {
+        DB::schema()->create('users', function (Blueprint $table) {
             $table->increments('id');
             $table->boolean('isactive')->default(true);
             $table->string('email');
@@ -60,7 +60,7 @@ class DBUilder
         });
 
         $this->logger->info('Creating `users` table');
-        $this->logger->debug(json_encode(Capsule::select('DESCRIBE users')));
+        $this->logger->debug(json_encode(DB::select('DESCRIBE users')));
         $this->logger->notice('`users` table created');
     }
 
@@ -72,11 +72,11 @@ class DBUilder
     public function sessions()
     {
         # Droping Schema
-        Capsule::schema()->dropIfExists('sessions');
+        DB::schema()->dropIfExists('sessions');
         $this->logger->warning('Drop if Exists `sessions` table');
 
         # Creating schema
-        Capsule::schema()->create('sessions', function (Blueprint $table) {
+        DB::schema()->create('sessions', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('uid')->unsigned();
             $table->foreign('uid')->references('id')->on('users');
@@ -88,7 +88,7 @@ class DBUilder
         });
 
         $this->logger->info('Creating `sessions` table');
-        $this->logger->debug(json_encode(Capsule::select('DESCRIBE sessions')));
+        $this->logger->debug(json_encode(DB::select('DESCRIBE sessions')));
         $this->logger->notice('`sessions` table created');
     }
 
@@ -100,18 +100,18 @@ class DBUilder
     public function attempts()
     {
         # Droping Schema
-        Capsule::schema()->dropIfExists('attempts');
+        DB::schema()->dropIfExists('attempts');
         $this->logger->warning('Drop if Exists `attempts` table');
 
         # Creating schema
-        Capsule::schema()->create('attempts', function (Blueprint $table) {
+        DB::schema()->create('attempts', function (Blueprint $table) {
             $table->increments('id');
             $table->string('ip', 39);
             $table->datetime('expiredate');
         });
 
         $this->logger->info('Creating `attempts` table');
-        $this->logger->debug(json_encode(Capsule::select('DESCRIBE attempts')));
+        $this->logger->debug(json_encode(DB::select('DESCRIBE attempts')));
         $this->logger->notice('`attempts` table created');
     }
 
@@ -120,47 +120,29 @@ class DBUilder
      *
      * @return void
      */
-    public function config()
+    public function config($config)
     {
         # Droping Schema
-        Capsule::schema()->dropIfExists('config');
+        DB::schema()->dropIfExists('config');
         $this->logger->warning('Drop if Exists `config` table');
 
         # Creating schema
-        Capsule::schema()->create('config', function (Blueprint $table) {
+        DB::schema()->create('config', function (Blueprint $table) {
             $table->string('setting', 100);
             $table->string('value', 100)->nullable();
         });
 
         $this->logger->info('Creating `config` table');
-        $this->logger->debug(json_encode(Capsule::select('DESCRIBE config')));
+        $this->logger->debug(json_encode(DB::select('DESCRIBE config')));
         $this->logger->notice('`config` table created');
 
-        $this->logger->info('Creating `rows` table');
-
-        # TODO : all config values should be in config.php
-        
-        $configs = [
-            ['attack_mitigation_time' => '+30 minutes'],
-            ['attempts_before_verify' => '3'],
-            ['attempts_before_ban' => '5'],
-            ['bcrypt_cost' => '10'],
-            ['session_remember' => '+1 hour'],
-            ['password_min_score' => '1'],
-            ['verify_email_max_length' => '100'],
-            ['verify_email_min_length' => '5'],
-            ['verify_password_min_length' => '6'],
-            ['captcha_secret_key' => CAPTCHA_SECRET_KEY],
-            ['captcha_site_key' => CAPTCHA_SITE_KEY]
-        ];
-
-        foreach ($configs as $config) {
+        foreach ($config as $conf) {
             $model = new Models\Config();
-            $model->setting = key($config);
-            $model->value = $config[key($config)];
+            $model->setting = key($conf);
+            $model->value = $conf[key($conf)];
             $model->save();
 
-            $this->logger->debug(key($config) . ' = ' . $config[key($config)]);
+            $this->logger->debug(key($conf) . ' = ' . $conf[key($conf)]);
         }
 
         $this->logger->notice('`config` rows created');
@@ -173,7 +155,7 @@ try {
     $db->users();
     $db->sessions();
     $db->attempts();
-    $db->config();
+    $db->config($config);
 } catch (\Exception $e) {
     $db->logger->error($e->getMessage());
 }

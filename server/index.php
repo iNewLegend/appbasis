@@ -2,9 +2,8 @@
 /**
  * @file    : index.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
-require_once 'init.php';
+require 'headers.php';
 
 $cmd = '';
 
@@ -17,6 +16,7 @@ if($cmd == 'phpinfo') {
     exit();
 }
 
+require 'init.php';
 
 try {
     $core = new \Core\Core($cmd);

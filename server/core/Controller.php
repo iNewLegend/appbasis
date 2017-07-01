@@ -1,8 +1,7 @@
 <?php
 /**
- * @file    : /server/core/Controller.php
+ * @file    : core/Controller.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
 
 namespace Core;
@@ -11,6 +10,11 @@ use Symfony\Component\HttpFoundation\Request;
 
 class Controller
 {
+    /**
+     * Return the current http request
+     *
+     * @return mixed
+     */
     public function getRequest()
     {
         $request = Request::createFromGlobals();

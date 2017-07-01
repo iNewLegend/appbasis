@@ -2,7 +2,6 @@
 /**
  * @file    : server/controllers/welcome.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
 
 namespace Controllers;

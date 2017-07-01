@@ -2,21 +2,20 @@
 /**
  * @file    : server/controllers/register.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
 
 namespace Controllers;
 
 use Core;
 use Models;
-use Library;
+use Services;
 
 class Register extends Core\Controller
 {
     /**
-     * The instance of Auth library
+     * The instance of Auth service
      *
-     * @var \Library\Auth
+     * @var \Services\Auth
      */
     protected $auth;
 
@@ -57,7 +56,7 @@ class Register extends Core\Controller
      * @param Config $config
      * @param Auth $auth
      */
-    public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt, Models\Config $config, Library\Auth $auth)
+    public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt, Models\Config $config, Services\Auth $auth)
     {
         $this->logger = $logger;
 

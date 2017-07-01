@@ -1,8 +1,7 @@
 <?php
 /**
- * @file    : server/models/Attempt.php
+ * @file    : models/Attempt.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
 
 namespace Models;
@@ -57,7 +56,7 @@ class Attempt extends Model
             return 'allow';
         }
 
-         # attempts before ban
+        # attempts before ban
         if ($attempts < intval(Config::get('attempts_before_ban'))) {
             return 'verify';
         }
