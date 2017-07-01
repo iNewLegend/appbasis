@@ -2,7 +2,6 @@
 /**
  * @file    : controllers/authorization.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
 
 namespace Controllers;
@@ -10,6 +9,7 @@ namespace Controllers;
 use Core;
 use Services;
 use Models;
+use Library\Validator;
 
 class Authorization extends Core\Controller
 {
@@ -58,15 +58,20 @@ class Authorization extends Core\Controller
     /**
      * Initialize the controller and prepare the dependencies
      *
-     * @param Logger $logger
-     * @param User $user
-     * @param Attempt $attempt
-     * @param Session $session
-     * @param Config $config
-     * @param Auth $auth
+     * @param Core\Logger $logger
+     * @param Models\User $user
+     * @param Models\Attempt $attempt
+     * @param Models\Session $session
+     * @param Models\Config $config
+     * @param Services\Auth $auth
      */
-    public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt, Models\Session $session, Models\Config $config, Services\Auth $auth)
-    {
+    public function __construct(Core\Logger $logger,
+        Models\User $user,
+        Models\Attempt $attempt,
+        Models\Session $session,
+        Models\Config $config,
+        Services\Auth $auth)  {
+
         $this->logger = $logger;
 
         $this->user = $user;
@@ -118,14 +123,14 @@ class Authorization extends Core\Controller
         $this->logger->debug("ip: `$ip`, block_status: `$block_status`");
 
         if ($block_status == 'verify') {
-            if (! $this->auth->checkCaptcha($captcha)) {
+            if (! Validator::checkCaptcha($captcha)) {
                 return ['code' => 'verify'];
             }
         } elseif ($block_status == 'block') {
             return "your ip address has been blocked";
         }
 
-        $validEmail = $this->auth->validateEmail($email);
+        $validEmail = Validator::validateEmail($email);
 
         if ($validEmail->error) {
             $this->attempt->add($ip);
@@ -159,7 +164,7 @@ class Authorization extends Core\Controller
         }
 
         # delete all attempts after successfully login
-        $this->attempt->delete($ip);
+        $this->attempt->deleteAllAttempts($ip);
 
         return [
             'code' => 'success',

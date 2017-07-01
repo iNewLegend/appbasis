@@ -69,7 +69,6 @@ class Attempt extends Model
      * Delete expired attempts
      *
      * @param string $ip
-     * @param boolean $all
      * @return boolean
      */
     public function deleteExpiredAttempts($ip)
@@ -96,5 +95,18 @@ class Attempt extends Model
         }
 
         return Attempt::whereIn('id', $deleteIds)->delete();
+    }
+
+    /**
+     * Delete all attempts
+     *
+     * @param string $ip
+     * @return boolean
+     */
+    public function deleteAllAttempts($ip)
+    {
+        $attempts = Attempt::where('ip', '=', $ip);
+        
+        return $attempts->delete();
     }
 } // EOF Attempt.php

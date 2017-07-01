@@ -9,6 +9,7 @@ namespace Controllers;
 use Core;
 use Models;
 use Services;
+use Library\Validator;
 
 class Register extends Core\Controller
 {
@@ -50,11 +51,11 @@ class Register extends Core\Controller
     /**
      * Initialize the controller and prepare the dependencies
      *
-     * @param Logger $logger
-     * @param User $user
-     * @param Attempt $attempt
-     * @param Config $config
-     * @param Auth $auth
+     * @param Core\Logger $logger
+     * @param Models\User $user
+     * @param Models\Attempt $attempt
+     * @param Models\Config $config
+     * @param Services\Auth $auth
      */
     public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt, Models\Config $config, Services\Auth $auth)
     {
@@ -91,7 +92,7 @@ class Register extends Core\Controller
             return "Your ip have been blocked for a while";
         }
 
-        $validEmail = $this->auth->validateEmail($email);
+        $validEmail = Validator::validateEmail($email);
 
         if ($validEmail->error) {
             $this->attempt->add($ip);
@@ -103,13 +104,13 @@ class Register extends Core\Controller
             return 'The email is already taken';
         }
 
-        $validPassword = $this->auth->validatePassword($password);
+        $validPassword = Validator::validatePassword($password);
 
         if ($validPassword->error) {
             return $validPassword->message;
         }
 
-        if (! $this->auth->checkCaptcha($captcha)) {
+        if (! Validator::checkCaptcha($captcha)) {
             return ['code' => 'verify'];
         }
 

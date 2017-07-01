@@ -29,8 +29,8 @@ class User extends Core\Controller
     /**
      * Initialize the controller and prepare the dependencies
      *
-     * @param Auth $auth
-     * @param User $user
+     * @param Services\Auth $auth
+     * @param Models\User $user
      */
     public function __construct(Services\Auth $auth ,Models\User $user)
     {

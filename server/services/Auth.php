@@ -2,7 +2,6 @@
 /**
  * @file    : services/Auth.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    : (IThink) part validate functions to somewhere else...
  */
 
 namespace Services;
@@ -61,25 +60,17 @@ class Auth
     protected $session;
 
     /**
-     * The instance of Config model
-     *
-     * @var \Models\Config
-     */
-    protected $config;
-
-    /**
      * Initialize the Auth library
      *
      * @param \Models\Attempt $attempt
      * @param \Models\Session $session
-     * @param \Models\Config $config
      */
-    public function __construct(\Models\Attempt $attempt, \Models\Session $session, \Models\Config $config)
+    
+    public function __construct(\Models\Attempt $attempt, \Models\Session $session)
     {
         $this->attempt  = $attempt;
         $this->session  = $session;
-        $this->config   = $config;
-
+        
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] != '') {
             $this->ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
         } else {
@@ -144,103 +135,6 @@ class Auth
     public function logout($hash)
     {
         return $this->session->deleteByHash($hash);
-    }
-
-    /**
-     * Verifies a google captcha code
-     *
-     * @param string $captcha
-     * @return mixed
-     */
-    public function checkCaptcha($captcha)
-    {
-        $secret = $this->config->get('captcha_secret_key');
-
-        try {
-            $url = 'https://www.google.com/recaptcha/api/siteverify';
-            $data = [
-                'secret'   => $secret,
-                'response' => $captcha,
-                'remoteip' => $_SERVER['REMOTE_ADDR']
-            ];
-
-            $options = [
-                'http' => [
-                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                    'method'  => 'POST',
-                    'content' => http_build_query($data)
-                ]
-            ];
-
-            $context  = stream_context_create($options);
-            $result = file_get_contents($url, false, $context);
-
-            return json_decode($result)->success;
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
-
-    /**
-     * Validate email
-     *
-     * @param string $email
-     * @return object
-     */
-    public function validateEmail($email)
-    {
-        $return = new \stdClass();
-        $return->error = true;
-
-        $emailLength = strlen($email);
-
-        if ($emailLength < intval($this->config->get('verify_email_min_length'))) {
-            $return->message = 'the email is too short';
-            return $return;
-        }
-
-        if ($emailLength > intval($this->config->get('verify_email_max_length'))) {
-            $return->message = 'the email is too long';
-            return $return;
-        }
-
-        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $return->message = 'not valid email';
-            return $return;
-        }
-
-        $return->error = false;
-
-        return $return;
-    }
-
-    /**
-     * Validate password
-     *
-     * @param string $password
-     * @return object
-     */
-    public function validatePassword($password)
-    {
-        $return = new \stdClass();
-        $return->error = true;
-
-        if (strlen($password) < intval($this->config->get('verify_password_min_length'))) {
-            $return->message = 'the password is too short';
-            return $return;
-        }
-
-        $zxcvbn = new \ZxcvbnPhp\Zxcvbn();
-        $passwordScore = $zxcvbn->passwordStrength('-' . $password)['score'];
-
-        if ($passwordScore < intval($this->config->password_min_score)) {
-            $return->message = 'The password is too weak';
-            return $return;
-        }
-
-        $return->error = false;
-
-        return $return;
     }
 
     /**
