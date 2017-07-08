@@ -101,9 +101,10 @@ class Auth
             return false;
         }
 
-       /* if ($session['cookie_crc'] == sha1($hash . Config::get('captcha_site_key'))) {
+        if ($session['cookie_crc'] == sha1($hash . Config::get('captcha_site_key'))) {
+            $this->logged = true;
             return true;
-        }*/
+        }
 
         return false;
     }
