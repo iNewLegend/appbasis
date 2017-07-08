@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
+import { Router } from '@angular/router';
 
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/'
@@ -21,7 +22,7 @@ export enum eAuthStates {
 export class AuthService {
   public authState: BehaviorSubject<eAuthStates> = new BehaviorSubject<eAuthStates>(eAuthStates.NONE);
 
-  constructor(private http: Http) {
+  constructor(private http: Http, private router: Router) {
 
   }
 
@@ -149,6 +150,8 @@ export class AuthService {
 
           this.setHash('');
           this.setState(eAuthStates.UNAUTHORIZED);
+
+          this.router.navigate(['welcome']);
         }
       })
   }

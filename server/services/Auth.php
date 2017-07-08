@@ -6,7 +6,12 @@
 
 namespace Services;
 
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Capsule\Manager as DB;
+
 use Symfony\Component\HttpFoundation\Request;
+
+use Models\Config;
 
 class Auth
 {
@@ -39,20 +44,6 @@ class Auth
     protected $hash = '';
 
     /**
-     * The block status of the current authorization
-     *
-     * @var boolean
-     */
-    protected $blockStatus = false;
-
-    /**
-     * The instance of Attempt model
-     *
-     * @var \Models\Attempt
-     */
-    protected $attempt;
-
-    /**
      * The instance of Session model
      *
      * @var \Models\Session
@@ -61,28 +52,20 @@ class Auth
 
     /**
      * Initialize the Auth library
-     *
-     * @param \Models\Attempt $attempt
      * @param \Models\Session $session
      */
-    
-    public function __construct(\Models\Attempt $attempt, \Models\Session $session)
-    {
-        $this->attempt  = $attempt;
-        $this->session  = $session;
-        
+    public function __construct(\Models\Session $session)
+    {   
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] != '') {
             $this->ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
         } else {
             $this->ip = $_SERVER['REMOTE_ADDR'];
         }
 
-        $this->blockStatus = $this->attempt->getBlockStatus($this->ip);
-
-        self::$instance = $this;
+        $this->session = $session;
 
         $request = Request::createFromGlobals();
-        
+
         $this->check($request->headers->get('hash'));
     }
 
@@ -94,14 +77,33 @@ class Auth
      */
     public function check($hash)
     {
-        if (strlen($hash) == 40) {
-            if ($this->session->check($hash, $this->ip)) {
-                $this->hash = $hash;
-                $this->logged = true;
-
-                return true;
-            }
+        if (strlen($hash) != 40) {
+            return false;
         }
+                
+        $session = $this->session->where('hash', $hash)->get()->first();
+  
+        if (! $session) {
+            return false;
+        }
+
+        $session = $session->toArray();
+
+        $expiredate = strtotime($session['expiredate']);
+        $currentdate = strtotime(date("Y-m-d H:i:s"));
+
+        if ($currentdate > $expiredate) {
+            $this->session->delete($session['id']);
+            return false;
+        }
+
+        if ($this->getIp() != $session['ip']) {
+            return false;
+        }
+
+       /* if ($session['cookie_crc'] == sha1($hash . Config::get('captcha_site_key'))) {
+            return true;
+        }*/
 
         return false;
     }
@@ -116,12 +118,34 @@ class Auth
      */
     public function login($id, $ip, $remember)
     {
-        $return = $this->session->add($id, $remember, $ip);
+        $return = array();
 
-        if(! $return) {
-            $this->logged = true;
-            $this->hash = $return['hash'];
+        $return['hash'] = sha1(Config::get('captcha_site_key') . microtime());
+        $return['cookie_crc'] = sha1($return['hash'] . Config::get('captcha_site_key'));
+        $return['expire'] = date('Y-m-d H:i:s', strtotime(Config::get('session_remember')));
+        $return['expiretime'] = 0;
+
+        # delete all sessions for the ID
+        $this->session->delete($id);
+
+        if ($remember) {
+            $return['expiretime'] = strtotime($return['expire']);
         }
+
+        $session = new \Models\Session();
+
+        $session->uid = $id;
+        $session->hash = $return['hash'];
+        $session->expiredate = $return['expire'];
+        $session->ip = $ip;
+        $session->agent = $_SERVER['HTTP_USER_AGENT'];
+        $session->cookie_crc = $return['cookie_crc'];
+
+        if (! $session->save()) {
+            return false;
+        }
+
+        $return['expire'] = strtotime($return['expire']);
 
         return $return;
     }
@@ -134,7 +158,9 @@ class Auth
      */
     public function logout($hash)
     {
-        return $this->session->deleteByHash($hash);
+        $session = $this->session->where('hash', $hash)->get()->first();
+    
+        return ! empty($session);
     }
 
     /**
@@ -144,11 +170,7 @@ class Auth
      */
     public function isLogged()
     {
-        if (isset($this->logged)) {
-            return $this->logged;
-        }
-
-        return self::$instance->logged;
+        return $this->logged;
     }
 
     /**
@@ -158,11 +180,7 @@ class Auth
      */
     public function getIp()
     {
-        if (isset($this->ip)) {
-            return $this->ip;
-        }
-
-        return self::$instance->ip;
+        return $this->ip;
     }
 
     /**
@@ -172,24 +190,6 @@ class Auth
      */
     public function getHash()
     {
-        if (isset($this->hash)) {
-            return $this->hash;
-        }
-
-        return self::$instance->hash;
-    }
-
-    /**
-     * Returns user block status
-     *
-     * @return string
-     */
-    public function getBlockStatus()
-    {
-        if (isset($this->blockStatus)) {
-            return $this->blockStatus;
-        }
-
-        return self::$instance->blockStatus;
+        return $this->hash;
     }
 } // EOF Auth.php

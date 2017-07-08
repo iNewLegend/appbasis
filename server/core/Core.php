@@ -67,9 +67,8 @@ class Core
      */
     public function __construct($cmd)
     {
-        $container = \DI\ContainerBuilder::buildDevContainer();
-
-
+        global $DB;
+        
         $cmd = $this->parseCmd($cmd);
         
         $this->controllerName = 'Controllers\\' . $cmd->controller;
@@ -82,18 +81,19 @@ class Core
             throw new \Exception("controller: '{$cmd->controller}' not found, in: " . __FILE__ . '(' . __LINE__. ')');
         }
 
+        $container = \DI\ContainerBuilder::buildDevContainer();
+
         # load the controller
         require_once($this->controllerPath);
 
-        # create container for DI
-        $container = \DI\ContainerBuilder::buildDevContainer();
-        
         # create controller instance
         $this->controller = $container->get($this->controllerName);
 
         if (! method_exists($this->controller, $this->method)) {
             throw new \Exception("method: '{$this->method}' not found in controller: '{$this->controllerName}, in: " . __FILE__ . '(' . __LINE__. ')');
         }
+
+        $container->set('DB', $DB);
 
         $this->callMethod($this->controller, $this->method, $this->methodParams);
     }

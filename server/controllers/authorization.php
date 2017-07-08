@@ -121,7 +121,7 @@ class Authorization extends Core\Controller
         $block_status = $this->attempt->getBlockStatus($ip);
 
         $this->logger->debug("ip: `$ip`, block_status: `$block_status`");
-
+        
         if ($block_status == 'verify') {
             if (! Validator::checkCaptcha($captcha)) {
                 return ['code' => 'verify'];
