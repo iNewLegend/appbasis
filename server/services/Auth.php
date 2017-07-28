@@ -30,13 +30,6 @@ class Auth
     protected $logged = false;
 
     /**
-     * The ip of the current authorization
-     *
-     * @var string
-     */
-    protected $ip = null;
-
-    /**
      * Hash of the current authorization
      *
      * @var string
@@ -56,12 +49,6 @@ class Auth
      */
     public function __construct(\Models\Session $session)
     {   
-        if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] != '') {
-            $this->ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } else {
-            $this->ip = $_SERVER['REMOTE_ADDR'];
-        }
-
         $this->session = $session;
 
         $request = Request::createFromGlobals();
@@ -81,13 +68,7 @@ class Auth
             return false;
         }
                 
-        $session = $this->session->where('hash', $hash)->get()->first();
-  
-        if (! $session) {
-            return false;
-        }
-
-        $session = $session->toArray();
+        $session = $this->session->getByHash($hash);
 
         $expiredate = strtotime($session['expiredate']);
         $currentdate = strtotime(date("Y-m-d H:i:s"));
@@ -96,8 +77,16 @@ class Auth
             $this->session->delete($session['id']);
             return false;
         }
+    
+        $ip = '';
 
-        if ($this->getIp() != $session['ip']) {
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] != '') {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+
+        if ($ip != $session['ip']) {
             return false;
         }
 
@@ -129,20 +118,13 @@ class Auth
         # delete all sessions for the ID
         $this->session->delete($id);
 
+        # store the expression date
         if ($remember) {
             $return['expiretime'] = strtotime($return['expire']);
         }
 
-        $session = new \Models\Session();
-
-        $session->uid = $id;
-        $session->hash = $return['hash'];
-        $session->expiredate = $return['expire'];
-        $session->ip = $ip;
-        $session->agent = $_SERVER['HTTP_USER_AGENT'];
-        $session->cookie_crc = $return['cookie_crc'];
-
-        if (! $session->save()) {
+        # add the session
+        if(! $this->session->add($id, $return['hash'], $return['expire'], $ip, $_SERVER['HTTP_USER_AGENT'], $return['cookie_crc'])) {
             return false;
         }
 
@@ -159,9 +141,7 @@ class Auth
      */
     public function logout($hash)
     {
-        $session = $this->session->where('hash', $hash)->get()->first();
-    
-        return ! empty($session);
+        return $this->session->deleteByHash($hash);
     }
 
     /**
@@ -172,16 +152,6 @@ class Auth
     public function isLogged()
     {
         return $this->logged;
-    }
-
-    /**
-     * Returns user IP
-     *
-     * @return string
-     */
-    public function getIp()
-    {
-        return $this->ip;
     }
 
     /**

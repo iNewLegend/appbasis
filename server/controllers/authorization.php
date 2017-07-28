@@ -9,6 +9,7 @@ namespace Controllers;
 use Core;
 use Services;
 use Models;
+use Library\Helper;
 use Library\Validator;
 
 class Authorization extends Core\Controller
@@ -33,14 +34,7 @@ class Authorization extends Core\Controller
      * @var \Models\Session
      */
     protected $session;
-
-    /**
-     * The instance of Config model
-     *
-     * @var \Models\Config
-     */
-    protected $config;
-
+    
     /**
      * The instance of Auth service
      *
@@ -62,22 +56,15 @@ class Authorization extends Core\Controller
      * @param Models\User $user
      * @param Models\Attempt $attempt
      * @param Models\Session $session
-     * @param Models\Config $config
      * @param Services\Auth $auth
      */
-    public function __construct(Core\Logger $logger,
-        Models\User $user,
-        Models\Attempt $attempt,
-        Models\Session $session,
-        Models\Config $config,
-        Services\Auth $auth)  {
-
+    public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt, Models\Session $session, Services\Auth $auth)
+    {
         $this->logger = $logger;
 
         $this->user = $user;
         $this->attempt = $attempt;
         $this->session = $session;
-        $this->config = $config;
 
         $this->auth = $auth;
     }
@@ -117,7 +104,7 @@ class Authorization extends Core\Controller
 
         $this->logger->debug("email: `$email`, password: `$password`, remember: `$remember`");
 
-        $ip = $this->auth->getIp();
+        $ip = Helper::getIp();
         $block_status = $this->attempt->getBlockStatus($ip);
 
         $this->logger->debug("ip: `$ip`, block_status: `$block_status`");

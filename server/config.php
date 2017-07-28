@@ -17,7 +17,6 @@ $config =
     ['attack_mitigation_time' => '+30 minutes'],
     ['attempts_before_verify' => '3'],
     ['attempts_before_ban' => '5'],
-    ['bcrypt_cost' => '10'],
     ['session_remember' => '+1 hour'],
     ['password_min_score' => '1'],
     ['verify_email_max_length' => '100'],

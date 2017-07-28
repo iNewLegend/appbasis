@@ -8,18 +8,11 @@ namespace Controllers;
 
 use Core;
 use Models;
-use Services;
+use Library\Helper;
 use Library\Validator;
 
 class Register extends Core\Controller
 {
-    /**
-     * The instance of Auth service
-     *
-     * @var \Services\Auth
-     */
-    protected $auth;
-
     /**
      * The instance of User model
      *
@@ -35,13 +28,6 @@ class Register extends Core\Controller
     protected $attempt;
 
     /**
-     * The instance of Config model
-     *
-     * @var \Models\Config
-     */
-    protected $config;
-
-    /**
      * The instance of Logger
      *
      * @var \Monolog\Logger
@@ -54,18 +40,13 @@ class Register extends Core\Controller
      * @param Core\Logger $logger
      * @param Models\User $user
      * @param Models\Attempt $attempt
-     * @param Models\Config $config
-     * @param Services\Auth $auth
      */
-    public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt, Models\Config $config, Services\Auth $auth)
+    public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt)
     {
         $this->logger = $logger;
 
         $this->user = $user;
         $this->attempt = $attempt;
-        $this->config = $config;
-
-        $this->auth = $auth;
     }
 
     /**
@@ -83,7 +64,7 @@ class Register extends Core\Controller
 
         $this->logger->debug("email: `$email`, password: `$password`");
 
-        $ip = $this->auth->getIp();
+        $ip = Helper::getIp();
         $block_status = $this->attempt->getBlockStatus($ip);
 
         $this->logger->debug("ip: `$ip`, block_status: `$block_status`");
@@ -114,10 +95,11 @@ class Register extends Core\Controller
             return ['code' => 'verify'];
         }
 
+
         $user = new Models\User;
 
         $user->email = $email;
-        $user->password = password_hash($password, PASSWORD_BCRYPT, ['cost' => $this->config->get('bcrypt_cost')]);
+        $user->password = password_hash($password, PASSWORD_BCRYPT);
         $user->isactive = true;
 
         if ($user->save()) {
