@@ -7,7 +7,6 @@
 require __DIR__ . '/vendor/autoload.php';
 
 require 'config.php';
-require 'core/Controller.php';
 require 'core/Logger.php';
 require 'core/Core.php';
 

@@ -21,4 +21,20 @@ class Helper
 
         return $_SERVER['REMOTE_ADDR'];
     }
+
+    /**
+     * Return the current http request
+     *
+     * @return mixed
+     */
+    public function getRequest()
+    {
+        $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+
+        if ($content = $request->getContent()) {
+            $request->request->replace(json_decode($content, true));
+        }
+
+        return $request->request;
+    }
 } // EOF Helper.php

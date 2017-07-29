@@ -8,7 +8,7 @@ namespace Controllers;
 
 use Core;
 
-class Welcome extends Core\Controller
+class Welcome
 {
     /**
      * Default method of the controller

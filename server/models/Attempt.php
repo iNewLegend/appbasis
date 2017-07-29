@@ -46,9 +46,9 @@ class Attempt extends Model
      */
     public function getBlockStatus($ip)
     {
-        Attempt::deleteExpiredAttempts($ip);
+        $this->deleteExpiredAttempts($ip);
 
-        $attempts = Attempt::where('ip', '=', $ip);
+        $attempts = $this->where('ip', '=', $ip);
         $attempts = ($attempts ? $attempts->count() : 0);
 
         # attempts before verify
@@ -73,7 +73,7 @@ class Attempt extends Model
      */
     public function deleteExpiredAttempts($ip)
     {
-        $attempts = Attempt::where('ip', '=', $ip);
+        $attempts = $this->where('ip', '=', $ip);
 
         $attempts->get();
 
@@ -94,7 +94,7 @@ class Attempt extends Model
             }
         }
 
-        return Attempt::whereIn('id', $deleteIds)->delete();
+        return $this->whereIn('id', $deleteIds)->delete();
     }
 
     /**
@@ -105,7 +105,7 @@ class Attempt extends Model
      */
     public function deleteAllAttempts($ip)
     {
-        $attempts = Attempt::where('ip', '=', $ip);
+        $attempts = $this->where('ip', '=', $ip);
         
         return $attempts->delete();
     }

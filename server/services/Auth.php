@@ -27,7 +27,7 @@ class Auth
      *
      * @var boolean
      */
-    protected $logged = false;
+    protected $state = false;
 
     /**
      * Hash of the current authorization
@@ -44,6 +44,13 @@ class Auth
     protected $session;
 
     /**
+     * Uniqiue id of the currect authorization
+     *
+     * @var int
+     */
+    protected $uid;
+
+    /**
      * Initialize the Auth library
      * @param \Models\Session $session
      */
@@ -52,8 +59,9 @@ class Auth
         $this->session = $session;
 
         $request = Request::createFromGlobals();
-
-        $this->check($request->headers->get('hash'));
+        
+        $this->hash = $request->headers->get('hash');
+        $this->check($this->hash);
     }
 
     /**
@@ -91,7 +99,9 @@ class Auth
         }
 
         if ($session['cookie_crc'] == sha1($hash . Config::get('captcha_site_key'))) {
-            $this->logged = true;
+            $this->state = true;
+            $this->uid = $session['uid'];
+
             return true;
         }
 
@@ -145,22 +155,22 @@ class Auth
     }
 
     /**
-     * Returns login state
+     * Function returns login state 
      *
      * @return boolean
      */
-    public function isLogged()
+    public function isLogged() 
     {
-        return $this->logged;
+        return $this->state;
     }
 
     /**
-     * Returns user hash
+     * Functions returns uid
      *
-     * @return string
+     * @return void
      */
-    public function getHash()
+    public function getUid() 
     {
-        return $this->hash;
+        return $this->uid;
     }
 } // EOF Auth.php

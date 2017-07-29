@@ -2,6 +2,8 @@
 /**
  * @file    : controllers/user.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    : i don't like it that we need load $auth in constructor,
+ * in future it will not be used in all functions, and i need found a solution for this.
  */
 
 namespace Controllers;
@@ -9,8 +11,9 @@ namespace Controllers;
 use Core;
 use Services;
 use Models;
+use Guards;
 
-class User extends Core\Controller 
+class User 
 {
     /**
      * The instance of User model
@@ -22,34 +25,34 @@ class User extends Core\Controller
     /**
      * The instance of Auth service
      *
-     * @var \Services\Auth
+     * @var Services\Auth
      */
     protected $auth;
 
     /**
      * Initialize the controller and prepare the dependencies
      *
-     * @param Services\Auth $auth
      * @param Models\User $user
      */
-    public function __construct(Services\Auth $auth ,Models\User $user)
-    {
-        if(false == $auth->isLogged()) {
-            exit(__CLASS__ . ' restricted! only for authorized users.');
-        }
-
-        $this->auth = $auth;
+    public function __construct(Guards\UserGuard $userGuard, Models\User $user, Services\Auth $auth)
+    {       
         $this->user = $user;
+        $this->auth = $auth;
     }
 
     /**
      * Test function
-     *
-     * @param int $id
+     * $id
      * @return array
      */
-    public function index($id = null)
+    public function index($uid = null)
     {
-        return ['test' => rand()];
+        if(! $uid) {
+            $uid = $this->auth->getUid();
+        }
+
+        $user = $this->user->where("id", $uid)->get()->first();
+
+        return $user;
     }
 } // EOF user.php

@@ -66,9 +66,7 @@ class Core
      * @throws Exception
      */
     public function __construct($cmd)
-    {
-        global $DB;
-        
+    {        
         $cmd = $this->parseCmd($cmd);
         
         $this->controllerName = 'Controllers\\' . $cmd->controller;
@@ -81,19 +79,20 @@ class Core
             throw new \Exception("controller: '{$cmd->controller}' not found, in: " . __FILE__ . '(' . __LINE__. ')');
         }
 
-        $container = \DI\ContainerBuilder::buildDevContainer();
+        $this->container = \DI\ContainerBuilder::buildDevContainer();
+
+        # load guard when available
+        $this->loadGuard($cmd->controller);
 
         # load the controller
         require_once($this->controllerPath);
 
         # create controller instance
-        $this->controller = $container->get($this->controllerName);
+        $this->controller = $this->container->get($this->controllerName);
 
         if (! method_exists($this->controller, $this->method)) {
             throw new \Exception("method: '{$this->method}' not found in controller: '{$this->controllerName}, in: " . __FILE__ . '(' . __LINE__. ')');
         }
-
-        $container->set('DB', $DB);
 
         $this->callMethod($this->controller, $this->method, $this->methodParams);
     }
@@ -149,6 +148,18 @@ class Core
         }
 
         return $return;
+    }
+
+    public function loadGuard($name)
+    {
+        $name = ucfirst($name);
+        $guardPath = 'guards/' . $name . '.php';
+
+        if(file_exists($guardPath)) {
+            require_once($guardPath);
+            
+            $guard = $this->container->get('\\Guards\\' . $name . 'Guard');
+        }
     }
 
     /**

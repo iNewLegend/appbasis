@@ -11,7 +11,7 @@ use Models;
 use Library\Helper;
 use Library\Validator;
 
-class Register extends Core\Controller
+class Register
 {
     /**
      * The instance of User model
@@ -50,13 +50,13 @@ class Register extends Core\Controller
     }
 
     /**
-     * Attempts to register an user
+     * Attempts to register
      *
      * @return string|array
      */
     public function register()
     {
-        $request = $this->getRequest();
+        $request = Helper::getRequest();
         
         $email = $request->get('email');
         $password = $request->get('password');
@@ -94,15 +94,8 @@ class Register extends Core\Controller
         if (! Validator::checkCaptcha($captcha)) {
             return ['code' => 'verify'];
         }
-
-
-        $user = new Models\User;
-
-        $user->email = $email;
-        $user->password = password_hash($password, PASSWORD_BCRYPT);
-        $user->isactive = true;
-
-        if ($user->save()) {
+        
+        if ($user->add($email, password_hash($password, PASSWORD_BCRYPT), true)) {
             return ['code' => 'success'];
         }
 

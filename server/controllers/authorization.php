@@ -12,7 +12,7 @@ use Models;
 use Library\Helper;
 use Library\Validator;
 
-class Authorization extends Core\Controller
+class Authorization 
 {
     /**
      * The instance of User model
@@ -95,7 +95,7 @@ class Authorization extends Core\Controller
      */
     public function login()
     {
-        $request = $this->getRequest();
+        $request = Helper::getRequest();
         
         $email = $request->get('email');
         $password = $request->get('password');
@@ -133,12 +133,12 @@ class Authorization extends Core\Controller
 
         $user = $this->user->getBase($id);
 
-        if (! password_verify($password, $user['password'])) {
+        if (! password_verify($password, $user->password)) {
             $this->attempt->add($ip);
             return 'username or password incorrect';
         }
 
-        if ($user['isactive'] < 1) {
+        if ($user->isactive < 1) {
             $this->attempt->add($ip);
             return 'the account is inactive';
         }
