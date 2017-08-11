@@ -7,8 +7,6 @@
 require __DIR__ . '/vendor/autoload.php';
 
 require 'config.php';
-require 'core/Logger.php';
-require 'core/Core.php';
 
 $DB = new Illuminate\Database\Capsule\Manager;
 

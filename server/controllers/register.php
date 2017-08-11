@@ -95,7 +95,7 @@ class Register
             return ['code' => 'verify'];
         }
         
-        if ($user->add($email, password_hash($password, PASSWORD_BCRYPT), true)) {
+        if ($this->user->add($email, password_hash($password, PASSWORD_BCRYPT), true)) {
             return ['code' => 'success'];
         }
 

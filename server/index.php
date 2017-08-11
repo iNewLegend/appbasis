@@ -19,7 +19,7 @@ if($cmd == 'phpinfo') {
 require 'init.php';
 
 try {
-    $core = new \Core\Core($cmd);
+    $app = new \Core\App($cmd);
 } catch(Exception $e) {
     exit($e->getMessage());
 }

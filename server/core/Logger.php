@@ -32,7 +32,7 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * Add recored to output
+     * Add record to output
      *
      * @param int $level
      * @param string $message

@@ -7,10 +7,13 @@
         "symfony/http-foundation": "^3.0",
         "nackjicholson/monolog-symfony2-console": "^0.0.2",
         "bjeavons/zxcvbn-php": "^0.1.4",
-        "php-di/php-di": "^5.4"
+        "php-di/php-di": "^5.4",
+        "react/event-loop": "^0.4.3",
+        "react/http": "^0.7.2"
     },
     "autoload": {
     	"classmap": [
+            "core",
     		"models",
             "services",
             "library"

@@ -3,10 +3,13 @@
  * @file    : guards/User.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  */
+
 namespace Guards;
 
-class UserGuard
+class UserGuard implements \Core\IGuard
 {
+    protected $auth;
+    
     /**
      * Initialize UserGuard
      *
@@ -14,7 +17,17 @@ class UserGuard
      */
     function __construct(\Services\Auth $auth)
     {
-        if(false == $auth->isLogged()) {
+        $this->auth = $auth;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function run()
+    {
+        if(false == $this->auth->isLogged()) {
             throw new \Exception( get_class() . ': restricted.');
         }
     }
