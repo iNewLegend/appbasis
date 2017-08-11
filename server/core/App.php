@@ -58,7 +58,7 @@ class App
      * @throws Exception
      */
     public function __construct($cmd)
-    {        
+    {
         $cmd = $this->parseCmd($cmd);
 
         # save the controller maybe for later use.
@@ -75,12 +75,11 @@ class App
 
         $this->guard = new \Core\Guard($cmd->controller, $this->container);
 
-        if($this->guard->load()) {
+        if ($this->guard->load()) {
             $this->guard->run();
         }
 
-        if($this->controller->load()) {
-
+        if ($this->controller->load()) {
             if (! $this->controller->methodExists($cmd->method)) {
                 throw new \Exception("method: `{$cmd->method}` not found in controller: `{$cmd->controller}` in: " . __FILE__ . '(' . __LINE__. ')');
             }

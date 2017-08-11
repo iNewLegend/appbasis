@@ -73,11 +73,10 @@ class Session extends Model
     {
         $session = $this->where('hash', $hash)->get()->first();
         
-        if($session) {
+        if ($session) {
             return $session->delete();
         }
 
         return false;
     }
-    
 } // EOF Session.php

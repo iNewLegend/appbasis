@@ -12,7 +12,7 @@ use Models;
 use Library\Helper;
 use Library\Validator;
 
-class Authorization 
+class Authorization
 {
     /**
      * The instance of User model

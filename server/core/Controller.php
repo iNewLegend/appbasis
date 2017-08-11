@@ -2,7 +2,7 @@
 /**
  * @file    : server/core/Controller.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    : 
+ * @todo    :
  */
 
 namespace Core;
@@ -21,12 +21,12 @@ class Controller extends Loader
      */
     public function __construct($name, $container, $autoLoad = false)
     {
-		parent::__construct($name,
-			self::PATH . $name . '.php',
-			self::NAMESPACE . $name,
-			$container,
-			$autoLoad
-		);
+        parent::__construct($name,
+            self::PATH . $name . '.php',
+            self::NAMESPACE . $name,
+            $container,
+            $autoLoad
+        );
     }
 
     /**

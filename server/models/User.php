@@ -15,7 +15,7 @@ class User extends Model
      *
      * @var array
      */
-    protected $hidden = ['password']; 
+    protected $hidden = ['password'];
 
     /**
      * Get the user id by email

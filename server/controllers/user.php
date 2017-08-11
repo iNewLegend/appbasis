@@ -13,7 +13,7 @@ use Services;
 use Models;
 use Guards;
 
-class User 
+class User
 {
     /**
      * The instance of User model
@@ -35,7 +35,7 @@ class User
      * @param Models\User $user
      */
     public function __construct(Guards\UserGuard $userGuard, Models\User $user, Services\Auth $auth)
-    {       
+    {
         $this->user = $user;
         $this->auth = $auth;
     }
@@ -47,7 +47,7 @@ class User
      */
     public function index($uid = null)
     {
-        if(! $uid) {
+        if (! $uid) {
             $uid = $this->auth->getUid();
         }
 

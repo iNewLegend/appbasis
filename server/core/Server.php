@@ -10,6 +10,5 @@ class Server extends Core
 {
     function __construct($host = 'localhost', $port = '777')
     {
-        
     }
 } // EOF Server.php

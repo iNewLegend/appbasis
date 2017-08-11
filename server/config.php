@@ -4,13 +4,13 @@
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  */
 
-define('DB_USERNAME',   'root');
-define('DB_PASSWORD',   'zxc51190');
-define('DB_HOST',       '127.0.0.1');
-define('DB_NAME',       'test');
+define('DB_USERNAME', 'root');
+define('DB_PASSWORD', 'zxc51190');
+define('DB_HOST', '127.0.0.1');
+define('DB_NAME', 'test');
 
 # used by db.php for auto generate config table.
-$config = 
+$config =
 [
     ['captcha_secret_key' => '6Lfx0xMTAAAAAGbOokIN1yRRA9g9gPBpDP8qkqnK'],
     ['captcha_site_key' => '6Lfx0xMTAAAAAIebVmpyUHP2ynuCuPYAeYid2SKk'],

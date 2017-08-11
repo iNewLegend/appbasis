@@ -151,7 +151,7 @@ class DBUilder
 
 $db = new DBUilder();
 
-try {    
+try {
     $db->users();
     $db->sessions();
     $db->attempts();

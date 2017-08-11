@@ -55,7 +55,7 @@ class Auth
      * @param \Models\Session $session
      */
     public function __construct(\Models\Session $session)
-    {   
+    {
         $this->session = $session;
 
         $request = Request::createFromGlobals();
@@ -134,7 +134,7 @@ class Auth
         }
 
         # add the session
-        if(! $this->session->add($id, $return['hash'], $return['expire'], $ip, $_SERVER['HTTP_USER_AGENT'], $return['cookie_crc'])) {
+        if (! $this->session->add($id, $return['hash'], $return['expire'], $ip, $_SERVER['HTTP_USER_AGENT'], $return['cookie_crc'])) {
             return false;
         }
 
@@ -155,11 +155,11 @@ class Auth
     }
 
     /**
-     * Function returns login state 
+     * Function returns login state
      *
      * @return boolean
      */
-    public function isLogged() 
+    public function isLogged()
     {
         return $this->state;
     }
@@ -169,7 +169,7 @@ class Auth
      *
      * @return void
      */
-    public function getUid() 
+    public function getUid()
     {
         return $this->uid;
     }
