@@ -10,7 +10,8 @@ if (environment.production) {
   enableProdMode();
 }
 
-
+platformBrowserDynamic().bootstrapModule(AppModule);
+/*
 var xhttp = new XMLHttpRequest();
 
 xhttp.onreadystatechange = function () {
@@ -27,5 +28,4 @@ xhttp.onreadystatechange = function () {
 
 xhttp.open("GET", environment.server_base, true);
 xhttp.send();
-
-
+*/

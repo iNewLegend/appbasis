@@ -1,88 +1,121 @@
+/**
+ * @file: app/app.component.ts
+ * @author: Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo:
+ * @description: 
+ */
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+
 import { Component, ViewChild, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-
 import { ToastContainerDirective, ToastrService, ToastrConfig } from 'ngx-toastr';
-
-import { AuthGuard } from './auth.guard';
-import { AuthService, eAuthStates } from './auth.service';
-
+import { API_Service } from './api/service';
+import { API_Service_Authorization } from './api/authorization/service';
+import { Logger } from './logger';
+import { API_Model_Authorization_States } from 'app/api/authorization/model';
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Component({
-  encapsulation: ViewEncapsulation.None,
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    encapsulation: ViewEncapsulation.None,
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css'],
+    providers: [
+    ]
 })
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 export class AppComponent implements OnInit {
-  currentRoute: string;
+    private currentRoute: string;
+    private welcomeRoute: boolean;
 
-  isWelcomeRoute: boolean;
+    private logger: Logger;
+    private authStates: API_Model_Authorization_States;
+    //----------------------------------------------------------------------
 
-  @ViewChild(ToastContainerDirective) toastContainer: ToastContainerDirective;
+    @ViewChild(ToastContainerDirective) toastContainer: ToastContainerDirective;
+    //----------------------------------------------------------------------
 
-  constructor(
-    private authGuard: AuthGuard,
-    private authService: AuthService,
-    private toastrService: ToastrService,
-    private toastrConfig: ToastrConfig,
-    private router: Router) {
+    constructor(
+        private router: Router,
+        private toastrService: ToastrService,
+        private toastrConfig: ToastrConfig,
+        private api: API_Service,
+        private auth: API_Service_Authorization) {
+        // ----
+        this.logger = new Logger("AppComponent");
+        this.logger.debug("constructor", "");
+        // ----
+        this.currentRoute = this.router.url;
 
+        this.router.events.subscribe((res) => {
+            if (res instanceof NavigationEnd) {
+                this.onRouteChanged(this.router.url);
+            }
+        });
 
-    // route
-    this.currentRoute = this.router.url;
+        this.router.events.subscribe();
 
-    this.router.events.subscribe((res) => {
-      if (res instanceof NavigationEnd) {
-        this.onRouteChanged(this.router.url);
-      }
-    });
+        toastrConfig.positionClass = 'position';
 
-    this.router.events.subscribe();
+        // # Bootstrap configuration
+        toastrConfig.toastClass = 'alert';
+        toastrConfig.iconClasses = {
+            error: 'alert-danger',
+            info: 'alert-info',
+            success: 'alert-success',
+            warning: 'alert-warning',
+        }
 
-    // toastr configure
-    toastrConfig.positionClass = 'position';
-    // move to bootstrap style
-    toastrConfig.toastClass = 'alert';
-    toastrConfig.iconClasses = {
-      error: 'alert-danger',
-      info: 'alert-info',
-      success: 'alert-success',
-      warning: 'alert-warning',
+        toastrConfig.timeOut = 5000;
+        toastrConfig.extendedTimeOut = 1000;
+        toastrConfig.maxOpened = 2;
+        toastrConfig.autoDismiss = true;
     }
+    //----------------------------------------------------------------------
 
-    toastrConfig.timeOut = 5000;
-    toastrConfig.extendedTimeOut = 1000;
-    toastrConfig.maxOpened = 2;
-    toastrConfig.autoDismiss = true;
-  }
-
-  ngOnInit() {
-    this.toastrService.overlayContainer = this.toastContainer;
-  }
-
-  onRouteChanged(url: string) {
-    if (this.authService.getState() == eAuthStates.NONE) {
-      this.authService.try().subscribe();
+    ngOnInit() {
+        this.toastrService.overlayContainer = this.toastContainer;
     }
+    //----------------------------------------------------------------------
 
-    this.currentRoute = this.router.url;
+    onRouteChanged(url: string) {
+        // # try will work only once
+        this.auth.try();
 
-    switch (this.currentRoute) {
-      case '/welcome':
-        this.isWelcomeRoute = true;
-        break;
 
-      default:
-        this.isWelcomeRoute = false;
+        // # set the current url
+        this.currentRoute = this.router.url;
+
+        // # avoid this.
+        switch (this.currentRoute) {
+            case '/welcome':
+                this.welcomeRoute = true;
+                break;
+
+            default:
+                this.welcomeRoute = false;
+        }
     }
-  }
+    //----------------------------------------------------------------------
 
-  getAuthState() {
-    return this.authService.getState();
-  }
+    getAuthState() {
+        return this.api.getAuthState();
+    }
+    //----------------------------------------------------------------------
 
-  getAuthStatus() {
-    return this.authService.getStatus();
-  }
+    isAuthPreparing() {
+        return (this.getAuthState() == API_Model_Authorization_States.PREPARE ? true : false);
+    }
+    //----------------------------------------------------------------------
+
+    isAuth() {
+        return (this.getAuthState() >= API_Model_Authorization_States.AUTHORIZED ? true : false); 
+    }
+    //----------------------------------------------------------------------
+
+    isWelcomeRoute() {
+        return this.welcomeRoute;
+    }
 }
+//-----------------------------------------------------------------------------------------------------------------------------------------------------

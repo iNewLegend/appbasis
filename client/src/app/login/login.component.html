@@ -7,23 +7,17 @@
 
         <div class="form-group">
             <label>Email</label>
-            <input name="email" id="email" type="email" class="form-control" placeholder="exmaple@domain.com"
-                 [(ngModel)]="formData.email"
-                 />
+            <input name="email" id="email" type="email" class="form-control" placeholder="exmaple@domain.com" [(ngModel)]="formData.email"
+            />
         </div>
 
         <div class="form-group">
             <label>Password</label>
-            <input name="password" type="password" class="form-control" 
-                [(ngModel)]="formData.password" />
+            <input name="password" type="password" class="form-control" [(ngModel)]="formData.password" />
         </div>
 
         <div class="form-group" [hidden]="! captchaState">
-            <re-captcha name="captcha" siteKey="{{captchaKey}}"
-                [(ngModel)]="formData.captcha" 
-                (resolved)="captchaResolved($event)"
-                ngDefaultControl
-            ></re-captcha>
+            <re-captcha name="captcha" siteKey="{{captchaKey}}" [(ngModel)]="formData.captcha" (resolved)="captchaResolved($event)" ngDefaultControl></re-captcha>
         </div>
 
         <button type="submit" class="btn btn-primary">Login</button>

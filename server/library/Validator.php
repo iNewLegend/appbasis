@@ -13,10 +13,11 @@ class Validator
     /**
      * Verifies a google captcha code
      *
+     * @param string $ip
      * @param string $captcha
      * @return mixed
      */
-    public function checkCaptcha($captcha)
+    public function checkCaptcha($ip, $captcha)
     {
         $secret = Config::get('captcha_secret_key');
 
@@ -25,7 +26,7 @@ class Validator
             $data = [
                 'secret'   => $secret,
                 'response' => $captcha,
-                'remoteip' => $_SERVER['REMOTE_ADDR']
+                'remoteip' => $ip,
             ];
 
             $options = [
@@ -49,61 +50,46 @@ class Validator
      * Validate email
      *
      * @param string $email
-     * @return object
+     * @return mixed
      */
-    public function validateEmail($email)
-    {
-        $return = new \stdClass();
-        $return->error = true;
-
+    public function checkEmail($email)
+    {        
         $emailLength = strlen($email);
 
         if ($emailLength < intval(Config::get('verify_email_min_length'))) {
-            $return->message = 'the email is too short';
-            return $return;
+            return 'short';
         }
 
         if ($emailLength > intval(Config::get('verify_email_max_length'))) {
-            $return->message = 'the email is too long';
-            return $return;
+            return 'long';
         }
 
         if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $return->message = 'not valid email';
-            return $return;
+            return 'false';
         }
 
-        $return->error = false;
-
-        return $return;
+        return false;
     }
 
-    /**
-     * Validate password
-     *
-     * @param string $password
-     * @return object
-     */
+     /**
+      * Validate password
+      *
+      * @param string $password
+      * @return mixed
+      */
     public function validatePassword($password)
     {
-        $return = new \stdClass();
-        $return->error = true;
-
         if (strlen($password) < intval(Config::get('verify_password_min_length'))) {
-            $return->message = 'the password is too short';
-            return $return;
+            return 'short';
         }
 
         $zxcvbn = new \ZxcvbnPhp\Zxcvbn();
         $passwordScore = $zxcvbn->passwordStrength('-' . $password)['score'];
 
         if ($passwordScore < intval(Config::get('password_min_score'))) {
-            $return->message = 'The password is too weak';
-            return $return;
+            return 'weak';
         }
 
-        $return->error = false;
-
-        return $return;
+        return false;
     }
 } // EOF Validator.php

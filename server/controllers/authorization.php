@@ -19,35 +19,37 @@ class Authorization
      *
      * @var User
      */
-    protected $user;
+    private $user;
 
     /**
      * The instance of Attempt model
      *
      * @var \Models\Attempt
      */
-    protected $attempt;
+    private $attempt;
 
     /**
      * The instance of session model
      *
      * @var \Models\Session
      */
-    protected $session;
+    private $session;
     
     /**
      * The instance of Auth service
      *
      * @var \Services\Auth
      */
-    protected $auth;
+    private $auth;
 
     /**
      * The instance of Logger
      *
      * @var \Core\Logger
      */
-    protected $logger;
+    private $logger;
+
+    private $blockStatus;
 
     /**
      * Initialize the controller and prepare the dependencies
@@ -58,7 +60,7 @@ class Authorization
      * @param Models\Session $session
      * @param Services\Auth $auth
      */
-    public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt, Models\Session $session, Services\Auth $auth)
+    public function __construct(Core\Logger $logger, Models\User $user, Models\Attempt $attempt, Models\Session $session)
     {
         $this->logger = $logger;
 
@@ -66,7 +68,55 @@ class Authorization
         $this->attempt = $attempt;
         $this->session = $session;
 
-        $this->auth = $auth;
+        $this->auth = new Services\Auth($this->session, Core\App::getIp());
+
+    }
+
+    /**
+     * Check blockStatus, return's data when sees something wrong.
+     *
+     * @param string $ip
+     * @param string $captcha
+     * @return mixed
+     */
+    private function checkBlockStatus($ip = '', $captcha = '')
+    {        
+        if (empty($ip)) {
+            $ip = $this->auth->getIp();   
+        }
+
+        if (empty($blockStatus)) {
+            $blockStatus = $this->attempt->getBlockStatus($ip);
+        }
+
+        $this->logger->debug("ip: `$ip`, blockStatus: `$blockStatus`, captcha: `$captcha`");;
+
+        if($blockStatus !== 'allow') {
+            $return['code'] = "block";
+            
+            switch($blockStatus) 
+            {
+                case 'verify': 
+                    if(Validator::checkCaptcha($ip, $captcha)) {
+                        $this->attempt->deleteAllAttempts($ip);
+
+                        return false;
+                    }
+                    
+                    $return['subcode'] = "verify";  
+                break;
+                    
+                default:
+                    $return['subcode'] = 'block';
+
+            }
+
+            $this->logger->debug("ip: `$ip`, code: `block`, subcode:, `" . $return['subcode'] . "`");
+            
+            return $return;
+        }
+
+        return false;
     }
 
     /**
@@ -78,6 +128,15 @@ class Authorization
     public function check($hash = '')
     {
         $return = ['code' => 'fail'];
+
+        $this->blockStatus = $this->attempt->getBlockStatus($this->auth->getIp());
+
+        if($this->blockStatus !== 'allow') {
+            $return['code'] = 'block';
+            $return['subcode'] = $this->blockStatus;
+
+            return $return;
+        }
 
         if (strlen($hash) == 40) {
             if ($this->auth->check($hash)) {
@@ -93,70 +152,122 @@ class Authorization
      *
      * @return string|array
      */
-    public function login()
+    public function login($email = '', $password = '', $captcha = '', $remember = '')
     {
-        $request = Helper::getRequest();
-        
-        $email = $request->get('email');
-        $password = $request->get('password');
-        $remember = $request->get('remember', 0);
-        $captcha = $request->get('captcha');
+        $ip = $this->auth->getIp();   
+        $blockStatus = $this->attempt->getBlockStatus($ip);
 
-        $this->logger->debug("email: `$email`, password: `$password`, remember: `$remember`");
+        $this->logger->info("ip: `$ip`, email: `$email`, password: `$password`, remember: `$remember`, blockStatus: `$blockStatus`");
 
-        $ip = Helper::getIp();
-        $block_status = $this->attempt->getBlockStatus($ip);
-
-        $this->logger->debug("ip: `$ip`, block_status: `$block_status`");
-        
-        if ($block_status == 'verify') {
-            if (! Validator::checkCaptcha($captcha)) {
-                return ['code' => 'verify'];
-            }
-        } elseif ($block_status == 'block') {
-            return "your ip address has been blocked";
+        if($return = $this->checkBlockStatus($ip, $captcha)) {
+            return $return;
         }
 
-        $validEmail = Validator::validateEmail($email);
+        $checkEmail = Validator::checkEmail($email);
 
-        if ($validEmail->error) {
+        if ($checkEmail) {
             $this->attempt->add($ip);
-            return $validEmail->message;
+            
+            $return = [
+                'code' =>'mail',
+                'subcode' => $checkEmail
+            ];
+
+            $this->logger->debug("ip: `$ip`, code: `".$return['code']."`, subcode:, `".$return['subcode']."`");
+            return $return;
         }
 
         $id = $this->user->getId(strtolower($email));
 
         if (! $id) {
             $this->attempt->add($ip);
-            return 'username or password incorrect';
+            $this->logger->debug("wrong email - ip: `$ip`, code: `wrong`");
+            return ['code' => 'wrong'];
         }
 
         $user = $this->user->getBase($id);
 
         if (! password_verify($password, $user->password)) {
             $this->attempt->add($ip);
-            return 'username or password incorrect';
+            $this->logger->debug("wrong password - ip: `$ip`, code: `wrong`");
+            return ['code' => 'wrong'];
         }
 
         if ($user->isactive < 1) {
             $this->attempt->add($ip);
-            return 'the account is inactive';
+            $this->logger->debug("ip: `$ip`, code: `inactive`");
+            return ['code' => 'inactive'];
         }
 
         $session = $this->auth->login($id, $ip, $remember);
 
         if (! $session) {
-            return ['code' => 'fail',
-                'error' => 'System error, Please contact the Administrator.'];
+            /* System error, Please contact the Administrator. */
+            return ['code' => 'fail'];
         }
 
-        # delete all attempts after successfully login
+        # delete all login attempts after login.
         $this->attempt->deleteAllAttempts($ip);
+
+        $this->logger->debug("ip: `$ip`, email: `$email`, password: `$password`, remember: `$remember`");
 
         return [
             'code' => 'success',
             'hash' => $session['hash']
         ];
+    }
+
+    /**
+     * Attempts to register
+     *
+     * @return string|array
+     */
+    public function register($email = '', $password = '', $captcha = '')
+    {
+        $ip = $this->auth->getIp();   
+        $blockStatus = $this->attempt->getBlockStatus($ip);
+
+        $this->logger->info("ip: `$ip`, email: `$email`, password: `$password`, remember: `$remember`, blockStatus: `$blockStatus`");
+        
+        if($return = $this->checkBlockStatus($ip, $captcha)) {
+            return $return;
+        }
+
+        $checkEmail = Validator::checkEmail($email);
+        
+        if ($checkEmail) {
+            $return = [
+                'code' =>'mail',
+                'subcode' => $checkEmail
+            ];
+
+            $this->logger->debug("ip: `$ip`, code: `".$return['code']."`, subcode:, `".$return['subcode']."`");
+            return $return;
+        }
+
+        $validPassword = Validator::validatePassword($password);
+        
+        if ($validPassword) {
+            $return = [
+                'code' =>'badpass',
+                'subcode' => $validPassword
+            ];
+
+            $this->logger->debug("ip: `$ip`, code: `".$return['code']."`, subcode:, `".$return['subcode']."`");
+            return $return;
+        }
+        
+        if($this->user->isEmailTaken($email)) {
+            $this->attempt->add($ip);
+
+            return ['code' => 'emailtaken'];
+        }
+        
+        if ($this->user->add($email, password_hash($password, PASSWORD_BCRYPT), true)) {
+            return ['code' => 'success'];
+        }
+
+        return ['code' => 'error'];
     }
 
     /**
@@ -172,6 +283,7 @@ class Authorization
                 return ['code' => 'success'];
             }
         }
+
         return ['code' => 'fail'];
     }
 } // EOF authorization.php

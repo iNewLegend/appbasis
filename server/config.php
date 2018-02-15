@@ -5,9 +5,9 @@
  */
 
 define('DB_USERNAME', 'root');
-define('DB_PASSWORD', 'zxc51190');
+define('DB_PASSWORD', 'passw0rd');
 define('DB_HOST', '127.0.0.1');
-define('DB_NAME', 'test');
+define('DB_NAME', 'appbasis');
 
 # used by db.php for auto generate config table.
 $config =

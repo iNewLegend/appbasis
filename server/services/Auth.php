@@ -20,41 +20,48 @@ class Auth
      *
      * @var Auth
      */
-    protected static $instance = null;
+    private static $instance = null;
 
     /**
      * The login state of the current authorization
      *
      * @var boolean
      */
-    protected $state = false;
+    private $state = false;
 
     /**
      * Hash of the current authorization
      *
      * @var string
      */
-    protected $hash = '';
+    private $hash = '';
 
     /**
      * The instance of Session model
      *
      * @var \Models\Session
      */
-    protected $session;
+    private $session;
 
     /**
      * Uniqiue id of the currect authorization
      *
      * @var int
      */
-    protected $uid;
+    private $uid;
+
+    /**
+     * ip of the currect client
+     *
+     * @var string
+     */
+    private $ip;
 
     /**
      * Initialize the Auth library
      * @param \Models\Session $session
      */
-    public function __construct(\Models\Session $session)
+    public function __construct(\Models\Session $session, $ip)
     {
         $this->session = $session;
 
@@ -62,6 +69,8 @@ class Auth
         
         $this->hash = $request->headers->get('hash');
         $this->check($this->hash);
+
+        $this->ip = $ip;
     }
 
     /**
@@ -85,16 +94,8 @@ class Auth
             $this->session->delete($session['id']);
             return false;
         }
-    
-        $ip = '';
 
-        if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] != '') {
-            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } else {
-            $ip = $_SERVER['REMOTE_ADDR'];
-        }
-
-        if ($ip != $session['ip']) {
+        if ($this->ip != $session['ip']) {
             return false;
         }
 
@@ -134,7 +135,7 @@ class Auth
         }
 
         # add the session
-        if (! $this->session->add($id, $return['hash'], $return['expire'], $ip, $_SERVER['HTTP_USER_AGENT'], $return['cookie_crc'])) {
+        if (! $this->session->add($id, $return['hash'], $return['expire'], $ip, $return['cookie_crc'])) {
             return false;
         }
 
@@ -172,5 +173,10 @@ class Auth
     public function getUid()
     {
         return $this->uid;
+    }
+
+    public function getIp() 
+    {
+        return $this->ip;
     }
 } // EOF Auth.php

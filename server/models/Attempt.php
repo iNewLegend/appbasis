@@ -2,9 +2,14 @@
 /**
  * @file    : models/Attempt.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo    : models should never access another model in the same way i do , this is bad practice
+ *          : and should be handled !
  */
 
 namespace Models;
+
+//https://stackoverflow.com/questions/26244817/trouble-with-multiple-model-observers-in-laravel
+//https://www.abeautifulsite.net/a-better-way-to-write-config-files-in-php
 
 use \Illuminate\Database\Eloquent\Model;
 
@@ -24,6 +29,7 @@ class Attempt extends Model
      */
     protected $fillable = ['ip', 'expiredate'];
 
+
     /**
      * Adds an attempt to database
      *
@@ -34,7 +40,7 @@ class Attempt extends Model
         $attempt = new Attempt();
 
         $attempt->ip = $ip;
-        $attempt->expiredate = date("Y-m-d H:i:s", strtotime(Config::get('attack_mitigation_time')));
+        $attempt->expiredate = date("Y-m-d H:i:s", strtotime(Config::get('attack_mitigation_time')));// conifg file
 
         return $attempt->save();
     }
@@ -106,7 +112,7 @@ class Attempt extends Model
     public function deleteAllAttempts($ip)
     {
         $attempts = $this->where('ip', '=', $ip);
-        
+
         return $attempts->delete();
     }
 } // EOF Attempt.php

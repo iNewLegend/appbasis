@@ -9,7 +9,8 @@
         "bjeavons/zxcvbn-php": "^0.1.4",
         "php-di/php-di": "^5.4",
         "react/event-loop": "^0.4.3",
-        "react/http": "^0.7.2"
+        "react/http": "^0.7.2",
+        "react/socket": "^0.8.0"
     },
     "autoload": {
     	"classmap": [

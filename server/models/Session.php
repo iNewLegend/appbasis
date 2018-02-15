@@ -45,7 +45,7 @@ class Session extends Model
      * @param string $crc
      * @return boolean
      */
-    public function add($id, $hash, $expire, $ip, $agent, $crc)
+    public function add($id, $hash, $expire, $ip, $crc)
     {
         $session = new Session();
 
@@ -53,7 +53,7 @@ class Session extends Model
         $session->hash = $hash;
         $session->expiredate = $expire;
         $session->ip = $ip;
-        $session->agent = $agent;
+
         $session->cookie_crc = $crc;
 
         if ($session->save()) {

@@ -2,11 +2,11 @@
 /**
  * @file    : db.php
  * @author  : Leonid Vinikov (czf.leo123@gmail.com)
- * @todo    : Make it better
- * @desc    : used to create the database
+ * @todo    : Make it looks better
+ * @for     : Database creation
  */
 
-if (PHP_SAPI !== 'cli' || isset($_SERVER['HTTP_USER_AGENT'])) {
+if (PHP_SAPI !== 'cli') {
     exit('Script execute only from CLI');
 }
 
@@ -83,7 +83,6 @@ class DBUilder
             $table->string('hash', 40);
             $table->dateTime('expiredate');
             $table->string('ip', 39);
-            $table->string('agent', 200);
             $table->string('cookie_crc', 40);
         });
 

@@ -27,6 +27,17 @@ class Welcome
      */
     public function updates()
     {
+        /*
+        TODD: Create Class Core\Cache
+        - that will handle situation like this.
+        - should have a queue for process
+        - should be executed from another thread\flow
+        / and here you should have something like that
+        function updates(Core\Cache $cache)
+        {
+            return $cache.takeCare(https://github.com/iNewLegend/AppBasis/commits/master.atom, optional limit);
+        } 
+        */
         $commits = simplexml_load_file('https://github.com/iNewLegend/AppBasis/commits/master.atom');
 
         $array = json_decode(json_encode($commits), true);

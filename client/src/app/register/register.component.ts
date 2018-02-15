@@ -1,149 +1,161 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+/**
+ * @file: app/app.component.ts
+ * @author: Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo:
+ * @description: 
+ */
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+import { Component,  OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 
-import { Response } from '@angular/http';
-import { Validator } from '../validator';
-import { RegisterService } from '../register.service';
 import { environment } from '../../environments/environment';
+import { Logger } from '../logger'
+import { Validator } from '../validator';
 
-interface IFormData {
-  email: string;
-  password: string;
-  repassword: string;
-  captcha: string;
-}
+import { API_Service } from '../api/service';
+import { API_Request_Authorization } from '../api/authorization/request';
+import { API_Authorization_Register_Send } from '../api/authorization/model';
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 const errorTimeout: number = 10000;
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Component({
-  selector: 'app-register',
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css'],
-  providers: [RegisterService]
+    selector: 'app-register',
+    templateUrl: './register.component.html',
+    styleUrls: ['./register.component.css'],
+    providers: []
 })
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 export class RegisterComponent implements OnInit {
-  error: boolean | string;
-  timeout: any;
+    //----------------------------------------------------------------------
+    private logger: Logger;
+    private error: boolean | string;
+    private timeout: any;
 
-  captchaKey: string;
-  repassword: string;
-  formData: IFormData;
+    private captchaKey: string;
+    private repassword: string;
+ 
+    private formData: API_Authorization_Register_Send;    
+    //----------------------------------------------------------------------
 
-  constructor(private registerService: RegisterService,
-   private toastrService: ToastrService,
-   private router: Router) {
-    this.captchaKey = environment.captcha_key;
-
-    this.clearForm();
-    this.clearErrors();
-  }
-
-  ngOnInit() {
-
-  }
-
-  clearErrors() {
-    this.error = false;
-  }
-
-  clearForm() {
-    
-    this.formData = {
-      email: '',
-      password: '',
-      repassword: '',
-      captcha: ''
-    }
-    /*
-    [REVIEW LATER]
-    Sometimes anuglar is executed before recaptcha     
-    */
-    if (typeof grecaptcha !== 'undefined') {
-      grecaptcha.reset();
-    }
-  }
-
-  validateForm(): boolean {
-    let frmData = this.formData;
-
-    // validate email
-    if (false == Validator.isEmail(frmData.email)) {
-      this.error = "Please type valid email address";
-      return false;
-    }
-
-    if (frmData.password.length <= 0) {
-      this.error = "Please type password";
-      return false;
-    }
-
-    if (frmData.password != frmData.repassword) {
-      this.error = "the confrim password is not the same as password";
-      return false;
-    }
-
-    if (frmData.captcha.length <= 0) {
-      this.error = "Captcha is required";
-      return false;
-    }
-
-    return true;
-  }
-
-  registerResult(response: Response) {
-    let data;
-
-    try {
-      data = response.json();
-    } catch(e) {
-      data = false;
-    }
-
-    if(data) {
-      console.log("[register.component.ts::loginResult] json->");
-      console.log(data);
-
-      switch(data.code)
-      {
-        case 'verify':
-          this.error = "You have to verify that's your not a robot";
-          grecaptcha.reset();
-        break;
+    constructor(
+        private toastrService: ToastrService,
+        private router: Router,
+        private authRequest: API_Request_Authorization) {
+        // ----
+        this.logger = new Logger("RegisterComponent");
+        this.logger.debug("constructor", "");
         
-        case 'success':
-          this.toastrService.success('you have been created account successfuly.', 'Success: ');
-          this.router.navigateByUrl('welcome');
-        break; 
-
-        default:
-         console.log(response);
-      }
-    } else if (response.text().length > 0) {
-      console.log("[login.component.ts::loginResult] text-> " + response.text());
-      this.error = response.text();
-    } else {
-      console.log(response);
+        // ----
+        this.captchaKey = environment.captcha_key;
+        
+        this.clearForm();
+        this.clearErrors();
     }
-  }
+    //----------------------------------------------------------------------
 
-  processForm() {
-    if (this.validateForm()) {
-      this.registerService.register(
-        this.formData.email,
-        this.formData.password,
-        this.formData.captcha,
-        this.registerResult.bind(this)
-      )
+    public ngOnInit() {
+
     }
+    //----------------------------------------------------------------------
 
-    // clear all errors after x time
-    clearTimeout(this.timeout);
+    private clearErrors() {
+        this.error = false;
+    }
+    //----------------------------------------------------------------------
 
-    this.timeout = setTimeout(() => {
-      this.clearErrors();
-    }, errorTimeout);
-  }
+    private clearForm() {
+
+        this.formData = {
+            email: '',
+            password: '',
+            repassword: '',
+            captcha: ''
+        }
+        /*
+        [REVIEW LATER]
+        Sometimes anuglar is executed before recaptcha     
+        - should i leave it like that ?
+        */
+        if (typeof grecaptcha !== 'undefined') {
+            grecaptcha.reset();
+        }
+    }
+    //----------------------------------------------------------------------
+
+    private validateForm(): boolean {
+        let frmData = this.formData;
+
+        // validate email
+        if (false == Validator.isEmail(frmData.email)) {
+            this.error = "Please type valid email address";
+            return false;
+        }
+
+        if (frmData.password.length <= 0) {
+            this.error = "Please type password";
+            return false;
+        }
+
+        if (frmData.password != frmData.repassword) {
+            this.error = "the confrim password is not the same as password";
+            return false;
+        }
+
+        if (frmData.captcha.length <= 0) {
+            this.error = "Captcha is required";
+            return false;
+        }
+
+        return true;
+    }
+    //----------------------------------------------------------------------
+
+    private registerResult(data: any) {
+        this.logger.startWith("registerResult", data);
+
+        if (data) {
+            switch (data.code) {
+                case 'verify':
+                    this.error = "You have to verify that's your not a robot";
+                    grecaptcha.reset();
+                    break;
+                
+                case 'emailtaken':
+                    this.error = "Your email address already exist in our database.";
+                    //grecaptcha.reset();
+                    break;
+
+                case 'success':
+                    this.toastrService.success('you have been created account successfuly.', 'Success: ');
+                    this.router.navigateByUrl('welcome');
+                    break;
+
+                    
+                default:
+                    //this.logger.alert
+                    this.logger.debug("registerResult", " unknown code `" + data.code + "`");
+            }
+        }
+    }
+    //----------------------------------------------------------------------
+
+    private processForm() {
+        if (this.validateForm()) {
+            this.authRequest.register(this.formData ,this.registerResult.bind(this))
+        }
+
+        // clear all errors after x time
+        clearTimeout(this.timeout);
+
+        this.timeout = setTimeout(() => {
+            this.clearErrors();
+        }, errorTimeout);
+    }
+    //----------------------------------------------------------------------
 }
+//-----------------------------------------------------------------------------------------------------------------------------------------------------

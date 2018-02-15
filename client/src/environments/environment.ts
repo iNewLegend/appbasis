@@ -5,6 +5,6 @@
 
 export const environment = {
   production: false,
-  server_base: 'http://78.129.184.10:8080/?cmd=',
+  server_base: 'http://localhost:777/',
   captcha_key: '6Lfx0xMTAAAAAIebVmpyUHP2ynuCuPYAeYid2SKk',
 };

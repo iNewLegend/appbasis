@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-// TEST
-import { HttpClient } from '../http-client';
+//import { Api } from '../api/api';
 
 @Component({
   selector: 'app-user',
@@ -9,10 +8,10 @@ import { HttpClient } from '../http-client';
 })
 export class UserComponent implements OnInit {
 
-  constructor(private http: HttpClient) {
+  constructor(/*private api: Api*/) {
   }
 
-  test(response: Response) {
+  public test(response: Response) {
     let data;
 
     try {
@@ -25,7 +24,7 @@ export class UserComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.http.get('user/index', this.test);
+    //this.api.user().index(this.test);
   }
 
 }

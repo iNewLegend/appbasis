@@ -1,40 +1,44 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '../http-client';
-import { environment } from '../../environments/environment';
+/**
+ * @file: app/updates/updates.component.ts
+ * @author: Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo:
+ * @description: 
+ */
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-interface IUpdates
-{
-  href: string,
-  title: string,
-  date: string
-}
+import { Component, ViewChild, OnInit, ViewEncapsulation } from '@angular/core';
+import { Router } from '@angular/router';
+import { ToastContainerDirective, ToastrService, ToastrConfig } from 'ngx-toastr';
+import { API_Service } from '../api/service';
+import { API_Request_Welcome } from '../api/welcome/request';
+import { API_Model_Welcome_Updates } from '../api/welcome/model';
+import { Logger } from '../logger';
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Component({
-  selector: 'app-updates',
-  templateUrl: './updates.component.html',
-  styleUrls: ['./updates.component.css'],
+    selector: 'app-updates',
+    templateUrl: './updates.component.html',
+    styleUrls: ['./updates.component.css'],
 })
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 export class UpdatesComponent implements OnInit {
-  updates: IUpdates[];
+    private logger: Logger;
+    private updates: API_Model_Welcome_Updates[];
+    //----------------------------------------------------------------------
 
+    constructor(private welcomeRequest: API_Request_Welcome) {
+        // ----
+        this.logger = new Logger("RegisterComponent");
+        this.logger.debug("constructor", "");
+    }
+    //----------------------------------------------------------------------
 
-  constructor(private http: HttpClient) { 
-  
-  }
-
-  ngOnInit() {
-    this.getUpdates()
-      .subscribe(updates => {
-        try {
-          this.updates = updates.json()
-        } catch(error) {
-          console.log(error);
-        }
-      });
-  }
-
-  getUpdates() {
-    return this.http.get('welcome/updates');
-  }
+    ngOnInit() {
+        this.welcomeRequest.updates(function (data) {
+            this.updates = data;
+        }.bind(this));
+    }
+    //----------------------------------------------------------------------
 }
+//-----------------------------------------------------------------------------------------------------------------------------------------------------

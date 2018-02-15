@@ -3,26 +3,8 @@ i just started the project but the road map is a long distance.
 
 we planing to adopt all new technologies to one project
 
-currently we have this:
 
-**Front-End**
-- Quickstart Interface
-- Angular 4
-- Bootstrap 3
-- Toastr
 
-**Back-End**
-- Simple MVC
-- Laravel eloquent
-- Login
-- Register
-- Blueprint DB Builder
-- Password Score(zxcvbn)
-- Captcha (google) 
-- Dependency Injection
-
-demo:
-
-**frontend:** 	http://78.129.184.10/
-
-**backend** 	http://78.129.184.10:8080
+**IMPORTANT**
+TASK Create Terminal like live connection to client for logs 
+ADD Groups who can access it.

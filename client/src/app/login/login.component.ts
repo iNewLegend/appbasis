@@ -1,145 +1,159 @@
-import { Component, OnInit } from '@angular/core';
-import { Response } from '@angular/http'
+/**
+ * @file: app/login/login.component.ts
+ * @author: Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo: avoid console.log
+ */
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-import { Validator } from '../validator';
-import { AuthService } from '../auth.service';
-import { ToastrService} from 'ngx-toastr';
-
-
-import { environment } from '../../environments/environment';
-
-interface IFormData {
-  email: string;
-  password: string;
-  captcha: string;
-}
+import { Logger } from "../logger";
+import { environment } from "../../environments/environment";
+import { Component, OnInit } from "@angular/core";
+import { ToastrService } from "ngx-toastr";
+import { Validator } from "../validator";
+import { API_Service } from "app/api/service";
+import { API_Service_Authorization } from "../api/authorization/service";
+import { API_Request_Authorization } from "../api/authorization/request";
+import {
+    API_Model_Authorization_Send,
+    API_Model_Authorization_Recv,
+    API_Model_Authorization_States
+} from "../api/authorization/model";
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 const errorTimeout: number = 10000;
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+    selector: "app-login",
+    templateUrl: "./login.component.html",
+    styleUrls: ["./login.component.css"],
+    providers: []
 })
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 export class LoginComponent implements OnInit {
-  error: boolean | string;
-  captchaState: boolean;
-  formData: IFormData;
-  timeout: any;
-  captchaKey: string;
+    //----------------------------------------------------------------------
+    private logger: Logger;
+    private timeout: any;
+    private error: boolean | string;
 
-  constructor(private authService: AuthService, private toastrService: ToastrService) {
-    this.error = false;
-    this.captchaState = false;
+    private formData: API_Model_Authorization_Send;
+    private captchaState: boolean;
 
-    this.captchaKey = environment.captcha_key;
+    private captchaKey: string;
+    //----------------------------------------------------------------------
 
-    this.formData = {
-      email: '',
-      password: '',
-      captcha: ''
+    constructor(
+        private auth: API_Service_Authorization,
+        private api: API_Service,
+        private toastr: ToastrService) {
+        // ----
+        this.logger = new Logger("LoginComponent");
+        this.logger.debug("constructor", "");
+
+        this.error = false;
+        this.captchaState = false;
+
+        this.captchaKey = environment.captcha_key;
+
+        this.formData = {
+            email: "",
+            password: "",
+            captcha: ""
+        }
+
+        // Listen to changes in api
+        api.authState$.subscribe((newAuthState: API_Model_Authorization_States) => this.onAuthChanges(newAuthState));
     }
-  }
+    //----------------------------------------------------------------------
 
-  ngOnInit() {
- 
-  }
-
-  clearErrors() {
-    this.error = false;
-  }
-
-  validateForm(): boolean {
-    var frmData = this.formData;
-
-    // validate email
-    if (false == Validator.isEmail(frmData.email)) {
-      this.error = "Please type valid email address";
-      return false;
-    }
-
-    if (frmData.password.length <= 0) {
-      this.error = "Please type password";
-      return false;
-    }
-
-    if (true == this.captchaState) {
-      if (frmData.captcha.length <= 0) {
-        this.error = "Captcha is required";
-        return false;
-      }
-    }
-
-    this.clearErrors();
-
-    return true;
-  }
-
-  loginResult(response: Response) {
-    let data;
-
-    try {
-      data = response.json();
-    } catch(e) {
-      data = false;
-    }
-
-    if(data) {
-      console.log("[login.component.ts::loginResult] json->");
-      console.log(data);
-
-      if(typeof data.code !== 'undefined') {
-        switch(data.code)
-        {
-          case 'success':
-            if(data.hash.length == 40) {
-              this.toastrService.success("You have been successfuly logged in.", "Welcome");
-            }
-          break;
-
-          case 'verify':
-            grecaptcha.reset();
+    private onAuthChanges(newAuthState: API_Model_Authorization_States) {
+        if (newAuthState == API_Model_Authorization_States.VERIFY) {
 
             this.captchaState = true;
-            this.error = "Please confirm your not a robot";
-          break;
-
-          case 'fail':
-            this.toastrService.error(data.error, "Error");
-          break;
-
-          default:
-            console.log("Error: in login.comonent.ts unknown logic.");
+            this.error = "Please confirm your not a robot.";
         }
-      } else {
-        this.error = response.text();
-      }
-    } else {
-        console.log(response);
-      }
-  }
 
-  processForm() {
-    if (this.validateForm()) {
-      this.authService.login(
-        this.formData.email,
-        this.formData.password,
-        this.formData.captcha,
-        this.loginResult.bind(this)
-      )
     }
+    //----------------------------------------------------------------------
 
-    // clear all errors after x time
-    clearTimeout(this.timeout);
+    public ngOnInit() {
+    }
+    //----------------------------------------------------------------------
 
-    this.timeout = setTimeout(() => {
-      this.clearErrors();
-    }, errorTimeout);
-  }
+    private clearErrors() {
+        this.error = false;
+    }
+    //----------------------------------------------------------------------
 
-  captchaResolved($event) {
-    
-  }
+    private validateForm(): boolean {
+        var frmData = this.formData;
+
+        if (false == Validator.isEmail(frmData.email)) {
+            this.error = "Please type valid email address";
+            return false;
+        }
+
+        if (frmData.password.length <= 0) {
+            this.error = "Please type password";
+            return false;
+        }
+
+        if (true == this.captchaState) {
+            if (frmData.captcha.length <= 0) {
+                this.error = "Captcha is required";
+                return false;
+            }
+        }
+
+        this.clearErrors();
+
+        return true;
+    }
+    //----------------------------------------------------------------------
+
+    private loginResult(result: API_Model_Authorization_Recv) {
+        this.logger.startWith("loginResult", result);
+
+        switch (result.code) {
+            case "success":
+                this.toastr.success("You have been successfuly logged in.", "Welcome");
+                break;
+
+            case "block":
+                switch (result.subcode) {
+                    case "verify":
+                        grecaptcha.reset();
+
+                        this.captchaState = true;
+                        this.error = "Please confirm your not a robot.";
+                        break;
+                    
+                    default:
+                        //this.toastr.error("You have been blocked", "Error");
+                        this.error = "You have been blocked.";
+                }
+                break;
+
+            case "wrong":
+                this.error = "Wrong username or password.";
+                break;
+        }
+    }
+    //----------------------------------------------------------------------
+
+    private processForm() {
+        if (this.validateForm()) {
+            this.auth.login(this.formData, this.loginResult.bind(this));
+        }
+        // # clear all errors after x time
+        // ----
+        clearTimeout(this.timeout);
+        // ----
+        this.timeout = setTimeout(() => {
+            this.clearErrors();
+        }, errorTimeout);
+    }
+    //----------------------------------------------------------------------
 }
-
+//-----------------------------------------------------------------------------------------------------------------------------------------------------

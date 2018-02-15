@@ -2,7 +2,10 @@
 /**
  * @file    : server/core/App.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
+ * @todo    : add App and AppCommand in same folder app
+ * Core\App()
+ * Core\App\Command()
+ * Possible ??
  */
 
 namespace Core;
@@ -14,130 +17,106 @@ class App
      *
      * @var \DI\Container
      */
-    protected $container;
+    private $container;
     
     /**
      * The controller instance
      *
      * @var \Core\Controller
      */
-    protected $controller;
+    private $controller;
 
     /**
      * The guard
      *
      * @var \Core\Guard
      */
-    protected $guard;
+    private $guard;
 
     /**
-     * The name of controller
+     * The AppCommand
      *
-     * @var string
+     * @var \Core\AppCommand
      */
-    protected $controllerName = 'welcome';
+    private $cmd;
 
-    /**
-     * The method that will be called
-     *
-     * @var string
-     */
-    protected $method = 'index';
-
-    /**
-     * The parameters of the method
-     *
-     * @var array
-     */
-    protected $methodParams = [];
+    private $logger;
     
+    private static $output = "null";
+    private static $ip = null;  
+
     /**
      * Initialize App
      *
      * @param string $cmd
+     * @param string $ip
      * @throws Exception
      */
-    public function __construct($cmd)
+    public function __construct($cmd, $ip)
     {
-        $cmd = $this->parseCmd($cmd);
+        $containerBuilder = new \DI\ContainerBuilder();
+        $containerBuilder->useAutowiring(true);
 
-        # save the controller maybe for later use.
-        $this->controllerName = $cmd->controller;
-        $this->method = $cmd->method;
-        $this->methodParams = $cmd->params;
+        # Init logger
+        $this->logger = new Logger(App::class);
 
-        $this->container = \DI\ContainerBuilder::buildDevContainer();
-        $this->controller = new \Core\Controller($cmd->controller, $this->container);
+        # Too lazy to sudy how PHP-DI working, and looks like this trick works for older php versions.
+        # so this the way i set some of the globals for now.
 
+        $containerBuilder->addDefinitions([
+            'Core\Logger' => function ($name) {
+                return $this->logger;
+            },        
+        ]);
+
+        # Build php-di container.
+        $this->container = $containerBuilder->build();
+
+        # Parase command
+        $this->cmd = new AppCommand($cmd);
+        
+        # print before and after parse
+        $this->logger->debug("cmd: `$cmd`");
+        $this->logger->debug($this->cmd);
+
+        # Create Controller
+        $this->controller = new \Core\Controller($this->cmd->getName(), $this->container);
+
+        # Check the IP
+        self::$ip = new Ip($ip);
+
+        # Check if the controller is avialable
         if (! $this->controller->isAvialable()) {
-            throw new \Exception("controller: `{$cmd->controller}` not found, in: " . __FILE__ . '(' . __LINE__. ')');
+            throw new \Exception("controller: `{$this->cmd->getName()}` not found, in: " . __FILE__ . '(' . __LINE__. ')');
         }
 
-        $this->guard = new \Core\Guard($cmd->controller, $this->container);
+        # Create guard
+        $this->guard = new \Core\Guard($this->cmd->getName(), $this->container);
 
+        # Attempt to load guard
         if ($this->guard->load()) {
             $this->guard->run();
         }
 
+        # Attempt to load controller
         if ($this->controller->load()) {
-            if (! $this->controller->methodExists($cmd->method)) {
-                throw new \Exception("method: `{$cmd->method}` not found in controller: `{$cmd->controller}` in: " . __FILE__ . '(' . __LINE__. ')');
+            if (! $this->controller->methodExists($this->cmd->getMethod())) {
+                throw new \Exception("method: `{$this->cmd->getMethod()}` not found in controller: `{$this->cmd->getMethod()}` in: " . __FILE__ . '(' . __LINE__. ')');
             }
 
-            $this->controller->callMethod($this->method, $this->methodParams);
+            # Call to controller method
+            self::$output = $this->controller->callMethod($this->cmd->getMethod(), $this->cmd->getParams());
         }
     }
 
-    /**
-     * Parse the cmd aka 'CMD?' aka $_GET['cmd']
-     *
-     * @param  string    $cmd
-     * @return object
-     */
-    public function parseCmd($cmd)
+    public static function getOutput()
     {
-        $return = new \stdClass();
-
-        # setting defaults
-        $return->controller = $this->controllerName;
-        $return->method = $this->method;
-        $return->params = [];
-
-        if (! empty($cmd) && is_string($cmd)) {
-            # remove forward slash from the end
-            $cmd = rtrim($cmd, '/');
-
-            # removes all illegal URL characters from a string
-            $cmd = explode('/', $cmd);
-
-            # set controller
-            if (isset($cmd[0])) {
-                # only abc for controller name
-                $cmd[0] = preg_replace("/[^a-zA-Z]+/", "", $cmd[0]);
-
-                $return->controller = $cmd[0];
-                unset($cmd[0]);
-            }
-
-            # set method
-            if (isset($cmd[1])) {
-                # only abc and digits for method name
-                $cmd[1] = preg_replace("/[^a-zA-Z0-9]+/", "", $cmd[1]);
-
-                $return->method = $cmd[1];
-                unset($cmd[1]);
-            }
-
-            # set params
-            if (! empty($cmd)) {
-                foreach ($cmd as $key => $param) {
-                    $cmd[$key] =  filter_var($param, FILTER_SANITIZE_STRING);
-                }
-
-                $return->params = array_values($cmd);
-            }
-        }
-
-        return $return;
+        return self::$output;
     }
+
+    public static function getIp()
+    {
+        return self::$ip;
+    }
+
 } // EOF App.php

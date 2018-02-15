@@ -30,14 +30,18 @@ class Controller extends Loader
     }
 
     /**
-     * Check if the method exist in the controller.
+     * Check if the method exist in the controller. & and callable
      *
      * @param string $method
      * @return boolean
      */
     public function methodExists($method)
     {
-        return method_exists($this->handler, $method);
+        if($return = method_exists($this->handler, $method)) {
+            return is_callable([$this->handler, $method]);
+        }
+
+        return $return;
     }
 
     /**
@@ -49,18 +53,6 @@ class Controller extends Loader
      */
     public function callMethod($method, $params = [])
     {
-        $r = call_user_func_array([$this->handler, $method], $params);
-        /*
-         * If the the controller method returns array print it as json
-         * Else just echo the result if its not empty
-         */
-        if (! empty($r)) {
-            if (is_array($r)) {
-                header('Content-Type: application/json');
-                echo json_encode($r);
-            } else {
-                echo $r;
-            }
-        }
+        return call_user_func_array([$this->handler, $method], $params);
     }
 } // EOF Controller.php

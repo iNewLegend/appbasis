@@ -1,5 +1,4 @@
-<div [hidden]="! getAuthState()">
-
+<div [hidden]="isAuthPreparing()">
   <app-navbar></app-navbar>
 
   <div toastContainer class="myToast"></div>
@@ -9,11 +8,11 @@
       <app-updates></app-updates>
     </div>
 
-    <div [ngClass]="{'col-xs-10 col-md-10 col-sm-12': ! isWelcomeRoute || getAuthStatus()}" class="col-xs-7">
+    <div [ngClass]="{'col-xs-10 col-md-10 col-sm-12': ! isWelcomeRoute() || isAuth()}" class="col-xs-7">
       <router-outlet></router-outlet>
     </div>
     
-    <div *ngIf="isWelcomeRoute && ! getAuthStatus()">
+    <div *ngIf="isWelcomeRoute() && false == isAuth()">
       <div class="col-xs-4 col-sm-3">
         <app-login></app-login>
       </div>
@@ -22,6 +21,3 @@
   </div>
 </div>
 
-<div [hidden]="getAuthState()">
-  Loading...
-</div>
