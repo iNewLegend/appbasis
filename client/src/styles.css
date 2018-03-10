@@ -16,3 +16,10 @@ body {
 [hidden] {
     display: none !important;
 }
+
+/* temporar */
+re-captcha iframe {
+	width: 180px;
+    border-right: 1px solid #d3d3d3;
+    border-radius: 3px;
+}

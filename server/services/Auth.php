@@ -57,6 +57,8 @@ class Auth
      */
     private $ip;
 
+    private $config;
+
     /**
      * Initialize the Auth library
      * @param \Models\Session $session
@@ -71,6 +73,8 @@ class Auth
         $this->check($this->hash);
 
         $this->ip = $ip;
+
+        $this->config = \Core\Config::get("Main");
     }
 
     /**
@@ -99,7 +103,8 @@ class Auth
             return false;
         }
 
-        if ($session['cookie_crc'] == sha1($hash . Config::get('captcha_site_key'))) {
+        // ## Check it
+        if ($session['cookie_crc'] == sha1($hash . $this->config->captcha_site_key)) {
             $this->state = true;
             $this->uid = $session['uid'];
 
@@ -121,9 +126,9 @@ class Auth
     {
         $return = array();
 
-        $return['hash'] = sha1(Config::get('captcha_site_key') . microtime());
-        $return['cookie_crc'] = sha1($return['hash'] . Config::get('captcha_site_key'));
-        $return['expire'] = date('Y-m-d H:i:s', strtotime(Config::get('session_remember')));
+        $return['hash'] = sha1($this->config->captcha_site_key . microtime());
+        $return['cookie_crc'] = sha1($return['hash'] . $this->config->captcha_site_key);
+        $return['expire'] = date('Y-m-d H:i:s', strtotime($this->config->session_remember));
         $return['expiretime'] = 0;
 
         # delete all sessions for the ID

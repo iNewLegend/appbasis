@@ -81,6 +81,7 @@ export class RegisterComponent implements OnInit {
         Sometimes anuglar is executed before recaptcha     
         - should i leave it like that ?
         */
+
         if (typeof grecaptcha !== 'undefined') {
             grecaptcha.reset();
         }
@@ -120,6 +121,30 @@ export class RegisterComponent implements OnInit {
 
         if (data) {
             switch (data.code) {
+                case "block":
+                switch (data.subcode) {
+                    case "verify":
+                        grecaptcha.reset();
+
+                        this.error = "Please confirm your not a robot.";
+                        break;
+                    
+                    default:
+                        this.error = "You have been blocked.";
+                }
+                break;
+
+                case "badpass":
+                switch (data.subcode) {
+                    case "weak":
+                        this.error ="The password is too weak.";
+                        break;
+                    
+                        default:
+                            this.error = "Bad password";
+                }
+                break;
+
                 case 'verify':
                     this.error = "You have to verify that's your not a robot";
                     grecaptcha.reset();

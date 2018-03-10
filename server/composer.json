@@ -15,9 +15,10 @@
     "autoload": {
     	"classmap": [
             "core",
-    		"models",
-            "services",
-            "library"
+            "config",
+            "models",
+            "library",
+            "services"
     	]
     }
 }

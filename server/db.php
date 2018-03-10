@@ -2,8 +2,9 @@
 /**
  * @file    : db.php
  * @author  : Leonid Vinikov (czf.leo123@gmail.com)
- * @todo    : Make it looks better
- * @for     : Database creation
+ * @todo    : its ugly
+ * 
+ * Database table(s) maker.
  */
 
 if (PHP_SAPI !== 'cli') {
@@ -113,39 +114,6 @@ class DBUilder
         $this->logger->debug(json_encode(DB::select('DESCRIBE attempts')));
         $this->logger->notice('`attempts` table created');
     }
-
-    /**
-     * Used to create config table
-     *
-     * @return void
-     */
-    public function config($config)
-    {
-        # Droping Schema
-        DB::schema()->dropIfExists('config');
-        $this->logger->warning('Drop if Exists `config` table');
-
-        # Creating schema
-        DB::schema()->create('config', function (Blueprint $table) {
-            $table->string('setting', 100);
-            $table->string('value', 100)->nullable();
-        });
-
-        $this->logger->info('Creating `config` table');
-        $this->logger->debug(json_encode(DB::select('DESCRIBE config')));
-        $this->logger->notice('`config` table created');
-
-        foreach ($config as $conf) {
-            $model = new Models\Config();
-            $model->setting = key($conf);
-            $model->value = $conf[key($conf)];
-            $model->save();
-
-            $this->logger->debug(key($conf) . ' = ' . $conf[key($conf)]);
-        }
-
-        $this->logger->notice('`config` rows created');
-    }
 }
 
 $db = new DBUilder();
@@ -154,7 +122,6 @@ try {
     $db->users();
     $db->sessions();
     $db->attempts();
-    $db->config($config);
 } catch (\Exception $e) {
     $db->logger->error($e->getMessage());
 }

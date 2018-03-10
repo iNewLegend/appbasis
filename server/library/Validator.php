@@ -6,7 +6,7 @@
 
 namespace Library;
 
-use Models\Config;
+use Core;
 
 class Validator
 {
@@ -17,12 +17,12 @@ class Validator
      * @param string $captcha
      * @return mixed
      */
-    public function checkCaptcha($ip, $captcha)
+    public static function checkCaptcha($ip, $captcha)
     {
-        $secret = Config::get('captcha_secret_key');
+        $secret = Core\Config::get("Main")->captcha_secret_key;
 
         try {
-            $url = 'https://www.google.com/recaptcha/api/siteverify';
+            $url  = 'https://www.google.com/recaptcha/api/siteverify';
             $data = [
                 'secret'   => $secret,
                 'response' => $captcha,
@@ -33,12 +33,12 @@ class Validator
                 'http' => [
                     'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
                     'method'  => 'POST',
-                    'content' => http_build_query($data)
-                ]
+                    'content' => http_build_query($data),
+                ],
             ];
 
-            $context  = stream_context_create($options);
-            $result = file_get_contents($url, false, $context);
+            $context = stream_context_create($options);
+            $result  = file_get_contents($url, false, $context);
 
             return json_decode($result)->success;
         } catch (\Exception $e) {
@@ -52,41 +52,46 @@ class Validator
      * @param string $email
      * @return mixed
      */
-    public function checkEmail($email)
-    {        
+    public static function checkEmail($email)
+    {
+        $config = Core\Config::get("User");
+
         $emailLength = strlen($email);
 
-        if ($emailLength < intval(Config::get('verify_email_min_length'))) {
+        if ($emailLength < intval($config->verify_email_min_length)) {
             return 'short';
         }
 
-        if ($emailLength > intval(Config::get('verify_email_max_length'))) {
+        if ($emailLength > intval($config->verify_email_max_length)) {
             return 'long';
         }
 
-        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return 'false';
         }
 
         return false;
     }
 
-     /**
-      * Validate password
-      *
-      * @param string $password
-      * @return mixed
-      */
-    public function validatePassword($password)
+    /**
+     * checks if $password is bad password
+     *
+     * @param string $password
+     * @return mixed
+     */
+    public static function isBadPassword($password)
     {
-        if (strlen($password) < intval(Config::get('verify_password_min_length'))) {
+        $config = Core\Config::get("User");
+
+        if (strlen($password) < intval($config->verify_password_min_length)) {
             return 'short';
         }
 
-        $zxcvbn = new \ZxcvbnPhp\Zxcvbn();
-        $passwordScore = $zxcvbn->passwordStrength('-' . $password)['score'];
+        $zxcvbn        = new \ZxcvbnPhp\Zxcvbn();
+        $passwordScore = $zxcvbn->passwordStrength('-' . $password);
+        $passwordScore = $passwordScore['score'];
 
-        if ($passwordScore < intval(Config::get('password_min_score'))) {
+        if ($passwordScore < intval($config->password_min_score)) {
             return 'weak';
         }
 

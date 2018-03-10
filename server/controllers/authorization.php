@@ -69,7 +69,6 @@ class Authorization
         $this->session = $session;
 
         $this->auth = new Services\Auth($this->session, Core\App::getIp());
-
     }
 
     /**
@@ -128,21 +127,30 @@ class Authorization
     public function check($hash = '')
     {
         $return = ['code' => 'fail'];
+     
+        $ip = $this->auth->getIp();
 
-        $this->blockStatus = $this->attempt->getBlockStatus($this->auth->getIp());
+        $this->logger->debug("ip: `$ip`, hash: `$hash`");
+        
+        $this->blockStatus = $this->attempt->getBlockStatus($ip);
 
         if($this->blockStatus !== 'allow') {
             $return['code'] = 'block';
             $return['subcode'] = $this->blockStatus;
-
-            return $return;
-        }
-
-        if (strlen($hash) == 40) {
-            if ($this->auth->check($hash)) {
+        } else if(strlen($hash) == 40 && $this->auth->check($hash)) {
                 $return['code'] = 'success';
-            }
         }
+
+        # debug
+        $debug = "ip: `$ip`, code: `" . $return['code'] . "`";
+
+        if(isset($return['subcode'])) {
+            $debug .= ", subcode:, `" . $return['subcode'] . "`";
+        }
+
+        $this->logger->debug($debug);
+
+        # return
 
         return $return;
     }
@@ -164,6 +172,7 @@ class Authorization
         }
 
         $checkEmail = Validator::checkEmail($email);
+		$this->logger->debug("Validator::checkEmail(`$email`) return `" .var_export($checkEmail, true) . "`");
 
         if ($checkEmail) {
             $this->attempt->add($ip);
@@ -209,6 +218,7 @@ class Authorization
         # delete all login attempts after login.
         $this->attempt->deleteAllAttempts($ip);
 
+		$this->logger->notice("ip: `" . $this->auth->getIp() . "` - Register success");
         $this->logger->debug("ip: `$ip`, email: `$email`, password: `$password`, remember: `$remember`");
 
         return [
@@ -222,7 +232,7 @@ class Authorization
      *
      * @return string|array
      */
-    public function register($email = '', $password = '', $captcha = '')
+    public function register($email = "", $password = "", $repassword = "", $captcha = "", $remember = "")
     {
         $ip = $this->auth->getIp();   
         $blockStatus = $this->attempt->getBlockStatus($ip);
@@ -234,6 +244,7 @@ class Authorization
         }
 
         $checkEmail = Validator::checkEmail($email);
+        $this->logger->debug("Validator::checkEmail(`$email`) return `" .var_export($checkEmail, true) . "`");
         
         if ($checkEmail) {
             $return = [
@@ -245,25 +256,35 @@ class Authorization
             return $return;
         }
 
-        $validPassword = Validator::validatePassword($password);
+        $badPassword = Validator::isBadPassword($password);
+        $this->logger->debug("Validator::isBadPassword(`$password`) return: `" .var_export($badPassword, true) . "`");
         
-        if ($validPassword) {
+        if ($badPassword) {
             $return = [
                 'code' =>'badpass',
-                'subcode' => $validPassword
+                'subcode' => $badPassword
             ];
 
             $this->logger->debug("ip: `$ip`, code: `".$return['code']."`, subcode:, `".$return['subcode']."`");
             return $return;
         }
         
-        if($this->user->isEmailTaken($email)) {
+        $isEmailTaken = $this->user->isEmailTaken($email);
+        $this->logger->debug("Validator::checkEmail(`$email`) return `" .var_export($isEmailTaken, true) . "`");
+
+        if($isEmailTaken) {
             $this->attempt->add($ip);
 
-            return ['code' => 'emailtaken'];
+			$return = ['code' => 'emailtaken'];
+
+			$this->logger->debug("ip: `$ip`, code: `".$return['code']."`");
+			
+            return $return;
         }
-        
+
         if ($this->user->add($email, password_hash($password, PASSWORD_BCRYPT), true)) {
+        	$this->logger->notice("ip: `" . $this->auth->getIp() . "` - Register success");
+
             return ['code' => 'success'];
         }
 
@@ -278,11 +299,16 @@ class Authorization
      */
     public function logout($hash)
     {
+    	$this->logger->debug("hash: `$hash`, len: `" . strlen($hash) . "`");
+
         if (strlen($hash) == 40) {
             if ($this->auth->logout($hash)) {
+            	$this->logger->notice("ip: `" . $this->auth->getIp() . "` - Logout success");
                 return ['code' => 'success'];
             }
         }
+
+        $this->logger->info("ip: `" . $this->auth->getIp() . "` - Logout fail");
 
         return ['code' => 'fail'];
     }

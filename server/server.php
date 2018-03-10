@@ -4,14 +4,11 @@
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  * @todo    : 
  */
-
  
 if (PHP_SAPI == 'cli') {
     require 'init.php';
     
     try {
-        echo "[ DATE ]    [ LEVEL ]    [ Logger Owner ]    [ Current  Class ]    [ Current Function ]:    [ Log ] \n\n"; 
-
         $server = new \Core\Server('127.0.0.1', 777);
     } catch (Exeption $e) {
         exit($e->getMessage());

@@ -6,15 +6,16 @@
  *          : and should be handled !
  */
 
+
 namespace Models;
 
-//https://stackoverflow.com/questions/26244817/trouble-with-multiple-model-observers-in-laravel
-//https://www.abeautifulsite.net/a-better-way-to-write-config-files-in-php
-
 use \Illuminate\Database\Eloquent\Model;
+use Core;
 
 class Attempt extends Model
 {
+    private $config;
+
     /**
      * Indicates if the model should be timestamped
      *
@@ -29,6 +30,12 @@ class Attempt extends Model
      */
     protected $fillable = ['ip', 'expiredate'];
 
+    public function __construct($attributes = array())
+    {
+        parent::__construct($attributes);
+
+        $this->config = Core\Config::get("User");
+    }
 
     /**
      * Adds an attempt to database
@@ -40,7 +47,8 @@ class Attempt extends Model
         $attempt = new Attempt();
 
         $attempt->ip = $ip;
-        $attempt->expiredate = date("Y-m-d H:i:s", strtotime(Config::get('attack_mitigation_time')));// conifg file
+                
+        $attempt->expiredate = date("Y-m-d H:i:s", strtotime($this->config->attack_mitigation_time));
 
         return $attempt->save();
     }
@@ -58,12 +66,12 @@ class Attempt extends Model
         $attempts = ($attempts ? $attempts->count() : 0);
 
         # attempts before verify
-        if ($attempts < Config::get('attempts_before_verify')) {
+        if ($attempts < $this->config->attempts_before_verify) {
             return 'allow';
         }
 
         # attempts before ban
-        if ($attempts < intval(Config::get('attempts_before_ban'))) {
+        if ($attempts < intval($this->config->attempts_before_ban)) {
             return 'verify';
         }
 

@@ -41,6 +41,8 @@ class App
     private $cmd;
 
     private $logger;
+
+    private $config;
     
     private static $output = "null";
     private static $ip = null;  
@@ -67,10 +69,14 @@ class App
             'Core\Logger' => function ($name) {
                 return $this->logger;
             },        
+          
         ]);
 
         # Build php-di container.
         $this->container = $containerBuilder->build();
+
+        # Load Base Config
+        $this->config = Config::get();
 
         # Parase command
         $this->cmd = new AppCommand($cmd);

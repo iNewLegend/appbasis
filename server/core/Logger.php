@@ -8,10 +8,12 @@ namespace Core;
 
 class Logger extends \Monolog\Logger
 {
+    private static $initOnce = false;
     private $output;
     private $consoleFormatter;
     private $consoleHandler;
     private $owner;
+    private $unique;
     
     
     /**
@@ -21,6 +23,7 @@ class Logger extends \Monolog\Logger
      */
     public function __construct($owner = 'global')
     {
+        $this->unique = uniqid();
         $this->owner = $owner;
         
         $this->output = new \Symfony\Component\Console\Output\ConsoleOutput();
@@ -33,6 +36,16 @@ class Logger extends \Monolog\Logger
         parent::__construct($this->owner);
 
         $this->pushHandler($this->consoleHandler);
+
+        if($owner == "global" && self::$initOnce == false) {
+            echo "[ DATE ]    [ LEVEL ]    [ Uniuqe ]       [ Logger Owner ]    [ Running  Class ]    [ Running Function ]:    [ Log ] \n\n"; 
+        }
+
+
+        if(self::$initOnce === false) {
+            self::$initOnce = true;
+        }
+
 
         $this->debug("Owner `" . $this->owner . "` log initialized");
     }
@@ -47,11 +60,13 @@ class Logger extends \Monolog\Logger
      */
     public function addRecord($level, $message, array $context = [])
     {
-        $levelName = static::getLevelName($level);
-        $debugTrace = debug_backtrace();
         $date = date("d-m-y H:m:s");
+        $levelName = static::getLevelName($level);
+        $unique = $this->unique;
 
-        $out = "[$date][$levelName]";
+        $out = "[$date][$levelName][$unique]";
+
+        $debugTrace = debug_backtrace();
 
         if(isset($debugTrace[2])) {
             $debugTrace = $debugTrace[2];
@@ -65,7 +80,14 @@ class Logger extends \Monolog\Logger
 
             $func =  $debugTrace['function'];
 
-            $out .= "\033[2m[$name][$class][$func]\033[0m: $message";
+            
+            # this is not good at night vison
+            //$out .= "\033[2m[$name][$class][$func]\033[0m: $message";
+            # this better
+            $out .= "\033[1m[$name][$class][$func]\033[0m: $message";
+            
+
+
         } else {
             $out .= '[' . basename($debugTrace[1]['file']) . ']:' . $message; 
         }
