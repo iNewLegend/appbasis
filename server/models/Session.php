@@ -26,8 +26,8 @@ class Session extends Model
     public function getByHash($hash)
     {
         $session = $this->where('hash', $hash)->get()->first();
-  
-        if (! $session) {
+
+        if (!$session) {
             return false;
         }
 
@@ -37,11 +37,10 @@ class Session extends Model
     /**
      * Add new session
      *
-     * @param int $id
+     * @param string $id
      * @param string $hash
      * @param string $expire
      * @param string $ip
-     * @param string $agent
      * @param string $crc
      * @return boolean
      */
@@ -49,17 +48,17 @@ class Session extends Model
     {
         $session = new Session();
 
-        $session->uid = $id;
-        $session->hash = $hash;
+        $session->uid        = $id;
+        $session->hash       = $hash;
         $session->expiredate = $expire;
-        $session->ip = $ip;
+        $session->ip         = $ip;
 
         $session->cookie_crc = $crc;
 
         if ($session->save()) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -72,7 +71,7 @@ class Session extends Model
     public function deleteByHash($hash)
     {
         $session = $this->where('hash', $hash)->get()->first();
-        
+
         if ($session) {
             return $session->delete();
         }

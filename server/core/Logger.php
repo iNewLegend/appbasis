@@ -8,14 +8,48 @@ namespace Core;
 
 class Logger extends \Monolog\Logger
 {
+    /**
+     * Is initialized?
+     *
+     * @var boolean
+     */
     private static $initOnce = false;
+
+    /**
+     * Console output
+     *
+     * @var \Symfony\Component\Console\Output\ConsoleOutput
+     */
     private $output;
+
+    /**
+     * Console formatter
+     *
+     * @var \Nack\Monolog\Formatter\Symfony2ConsoleFormatter
+     */
     private $consoleFormatter;
+
+    /**
+     * Console Handler
+     *
+     * @var \Nack\Monolog\Handler\Symfony2ConsoleHandler
+     */
     private $consoleHandler;
+
+    /**
+     * Name of logger owner
+     *
+     * @var string
+     */
     private $owner;
+
+    /**
+     * Unique id of logger instance
+     *
+     * @var [type]
+     */
     private $unique;
-    
-    
+
     /**
      * Initialize the Logger
      *
@@ -24,8 +58,8 @@ class Logger extends \Monolog\Logger
     public function __construct($owner = 'global')
     {
         $this->unique = uniqid();
-        $this->owner = $owner;
-        
+        $this->owner  = $owner;
+
         $this->output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
         $this->consoleFormatter = new \Nack\Monolog\Formatter\Symfony2ConsoleFormatter();
@@ -37,17 +71,15 @@ class Logger extends \Monolog\Logger
 
         $this->pushHandler($this->consoleHandler);
 
-        if($owner == "global" && self::$initOnce == false) {
-            echo "[ DATE ]    [ LEVEL ]    [ Uniuqe ]       [ Logger Owner ]    [ Running  Class ]    [ Running Function ]:    [ Log ] \n\n"; 
+        if (!self::$initOnce) {
+            echo "[ DATE ]\t[ LEVEL ]\t[ Instance ]\t[ Logger Owner ]\t[ Running  Class ]\t[ Running Function ]:\t[ Log ] \n\n";
         }
-
-
-        if(self::$initOnce === false) {
-            self::$initOnce = true;
-        }
-
 
         $this->debug("Owner `" . $this->owner . "` log initialized");
+
+        if (self::$initOnce === false) {
+            self::$initOnce = true;
+        }
     }
 
     /**
@@ -60,38 +92,35 @@ class Logger extends \Monolog\Logger
      */
     public function addRecord($level, $message, array $context = [])
     {
-        $date = date("d-m-y H:m:s");
+        $date      = date("d-m-y H:m:s");
         $levelName = static::getLevelName($level);
-        $unique = $this->unique;
+        $unique    = $this->unique;
 
         $out = "[$date][$levelName][$unique]";
 
         $debugTrace = debug_backtrace();
 
-        if(isset($debugTrace[2])) {
+        if (isset($debugTrace[2])) {
             $debugTrace = $debugTrace[2];
 
             $name = $this->name;
-            if(isset($debugTrace['class'])) {
+            if (isset($debugTrace['class'])) {
                 $class = $debugTrace['class'];
             } else {
                 $class = $debugTrace['file'];
             }
 
-            $func =  $debugTrace['function'];
+            $func = $debugTrace['function'];
 
-            
             # this is not good at night vison
             //$out .= "\033[2m[$name][$class][$func]\033[0m: $message";
             # this better
             $out .= "\033[1m[$name][$class][$func]\033[0m: $message";
-            
-
 
         } else {
-            $out .= '[' . basename($debugTrace[1]['file']) . ']:' . $message; 
+            $out .= '[' . basename($debugTrace[1]['file']) . ']:' . $message;
         }
-        
+
         return parent::addRecord($level, $out, $context);
     }
-} // EOF Logger.php    
+} // EOF Logger.php

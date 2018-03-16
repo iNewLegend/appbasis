@@ -7,6 +7,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 import { API_Service } from '../api/service';
 import { API_Model_Authorization_States } from '../api/authorization/model'
 import { API_Service_Authorization } from '../api/authorization/service'
@@ -26,6 +27,7 @@ export class NavbarComponent implements OnInit {
     //----------------------------------------------------------------------
 
     constructor(
+        private router: Router,
         private toastr: ToastrService,
         private api: API_Service,
         private auth: API_Service_Authorization) {
@@ -56,7 +58,9 @@ export class NavbarComponent implements OnInit {
     private logout() {
         this.auth.logout(function () {
             // called only on success
-            this.toastr.info('you have been successfully logged out.', 'Thank you');
+            this.toastr.info("you have been successfully logged out.", "Thank you");
+            
+            this.router.navigateByUrl("welcome");
         }.bind(this));
     }
     //----------------------------------------------------------------------

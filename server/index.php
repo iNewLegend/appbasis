@@ -4,22 +4,22 @@
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  * @desc    : used for integrated HTTP server
  * ----
- * [ cmd format ] 
+ * [ cmd format ]
  * $params = 'parm1/param2/parm3/etc...'
- * controller/method/$params  
+ * controller/method/$params
  */
 require 'headers.php';
 require 'init.php';
 
 try {
-    # Prepare 
+    # Prepare
     $cmd = $_SERVER["REQUEST_URI"];
 
     # Parse $_POST as cmd params
-    foreach($_POST as $post) {
-        $cmd . '/' . $post; 
+    foreach ($_POST as $post) {
+        $cmd . '/' . $post;
     }
-    
+
     # Get IP Address
     $ip = $_SERVER['REMOTE_ADDR'];
 
@@ -34,8 +34,8 @@ try {
     $r = $app->getOutput();
 
     # Print the result
-    if (! empty($r)) {  
-    	if (is_array($r)) {
+    if (!empty($r)) {
+        if (is_array($r)) {
             header('Content-Type: application/json');
             echo json_encode($r);
         } else {

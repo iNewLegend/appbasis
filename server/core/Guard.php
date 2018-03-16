@@ -1,12 +1,14 @@
 <?php
 /**
- * @file    : server/core/Guard.php
+ * @file    : core/Guard.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
 
 namespace Core;
 
+/**
+ * TODO: should be in better place
+ */
 interface IGuard
 {
     public function run();
@@ -14,9 +16,10 @@ interface IGuard
 
 class Guard extends Loader
 {
-    const PATH = 'guards/';
-    const NAMESPACE = '\\Guards\\';
-    const PREFIX = 'Guard';
+    const PATH       = 'guards/';
+    const namespace  = '\\Guards\\';
+
+    const PREFIX     = 'Guard';
 
     /**
      * Initialize Guard loader
@@ -29,14 +32,15 @@ class Guard extends Loader
     {
         parent::__construct($name,
             self::PATH . ucfirst($name) . '.php',
-            self::NAMESPACE . $name . SELF::PREFIX,
+            self::namespace  . $name . SELF::PREFIX,
             $container,
             $autoLoad
         );
+
     }
 
     /**
-     * Function do run the guard
+     * run the guard
      *
      * @return void
      */

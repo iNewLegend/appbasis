@@ -6,22 +6,10 @@
 
 namespace Services;
 
-use Illuminate\Database\Query\Builder;
-use Illuminate\Database\Capsule\Manager as DB;
-
 use Symfony\Component\HttpFoundation\Request;
-
-use Models\Config;
 
 class Auth
 {
-    /**
-     * Self instance
-     *
-     * @var Auth
-     */
-    private static $instance = null;
-
     /**
      * The login state of the current authorization
      *
@@ -44,19 +32,24 @@ class Auth
     private $session;
 
     /**
-     * Uniqiue id of the currect authorization
+     * Unique id of the current authorization
      *
      * @var int
      */
     private $uid;
 
     /**
-     * ip of the currect client
+     * Ip of the current client
      *
      * @var string
      */
     private $ip;
 
+    /**
+     * Instance of config
+     *
+     * @var \Core\Config
+     */
     private $config;
 
     /**
@@ -68,7 +61,7 @@ class Auth
         $this->session = $session;
 
         $request = Request::createFromGlobals();
-        
+
         $this->hash = $request->headers->get('hash');
         $this->check($this->hash);
 
@@ -80,7 +73,7 @@ class Auth
     /**
      * Check auth by hash and return the authorization status
      *
-     * @param boolean|string $hash
+     * @param string $hash
      * @return boolean
      */
     public function check($hash)
@@ -88,10 +81,10 @@ class Auth
         if (strlen($hash) != 40) {
             return false;
         }
-                
+
         $session = $this->session->getByHash($hash);
 
-        $expiredate = strtotime($session['expiredate']);
+        $expiredate  = strtotime($session['expiredate']);
         $currentdate = strtotime(date("Y-m-d H:i:s"));
 
         if ($currentdate > $expiredate) {
@@ -106,7 +99,7 @@ class Auth
         // ## Check it
         if ($session['cookie_crc'] == sha1($hash . $this->config->captcha_site_key)) {
             $this->state = true;
-            $this->uid = $session['uid'];
+            $this->uid   = $session['uid'];
 
             return true;
         }
@@ -117,18 +110,18 @@ class Auth
     /**
      * Login a user and return the session
      *
-     * @param int       $id
-     * @param string    $ip
-     * @param boolean   $remember
+     * @param int $id
+     * @param string $ip
+     * @param boolean $remember
      * @return array|boolean
      */
     public function login($id, $ip, $remember)
     {
         $return = array();
 
-        $return['hash'] = sha1($this->config->captcha_site_key . microtime());
+        $return['hash']       = sha1($this->config->captcha_site_key . microtime());
         $return['cookie_crc'] = sha1($return['hash'] . $this->config->captcha_site_key);
-        $return['expire'] = date('Y-m-d H:i:s', strtotime($this->config->session_remember));
+        $return['expire']     = date('Y-m-d H:i:s', strtotime($this->config->session_remember));
         $return['expiretime'] = 0;
 
         # delete all sessions for the ID
@@ -140,7 +133,7 @@ class Auth
         }
 
         # add the session
-        if (! $this->session->add($id, $return['hash'], $return['expire'], $ip, $return['cookie_crc'])) {
+        if (!$this->session->add($id, $return['hash'], $return['expire'], $ip, $return['cookie_crc'])) {
             return false;
         }
 
@@ -161,7 +154,7 @@ class Auth
     }
 
     /**
-     * Function returns login state
+     * Returns login state
      *
      * @return boolean
      */
@@ -171,16 +164,21 @@ class Auth
     }
 
     /**
-     * Functions returns uid
+     * Returns uid
      *
-     * @return void
+     * @return string
      */
     public function getUid()
     {
         return $this->uid;
     }
 
-    public function getIp() 
+    /**
+     * Returns IP Address
+     *
+     * @return string
+     */
+    public function getIp()
     {
         return $this->ip;
     }

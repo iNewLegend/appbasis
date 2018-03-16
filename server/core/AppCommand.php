@@ -1,30 +1,51 @@
 <?php
+/**
+ * @file    : core/AppCommand.php
+ * @author  : Leonid Vinikov <czf.leo123@gmail.com>
+ */
 
 namespace Core;
 
-Class AppCommand
+class AppCommand
 {
+    /**
+     * Default command name (controller)
+     *
+     * @var string
+     */
     private $name = 'welcome';
+
+    /**
+     * Default command method (function)
+     *
+     * @var string
+     */
     private $method = 'index';
+
+    /**
+     * Command parameters
+     *
+     * @var string
+     */
     private $params = [];
 
+    /**
+     * The Logger instance
+     *
+     * @var \Core\Logger
+     */
     protected $logger;
 
-
-    function __construct($cmd = '')
+    /**
+     * Initialize AppCommand and parse $cmd
+     *
+     * @param string $cmd
+     */
+    public function __construct($cmd = '')
     {
-        if(! empty($cmd)) {
+        if (!empty($cmd)) {
             $this->parse($cmd);
         }
-    }
-
-    function __toString()
-    {
-        return json_encode([
-            $this->name,
-            $this->method,
-            $this->params
-        ]);
     }
 
     /**
@@ -35,9 +56,9 @@ Class AppCommand
      */
     public function parse($cmd)
     {
-        if (! empty($cmd) && is_string($cmd)) {
+        if (!empty($cmd) && is_string($cmd)) {
             # remove forward slash from the start & end
-            
+
             $cmd = trim($cmd, '/');
             $cmd = rtrim($cmd, '/');
 
@@ -45,14 +66,13 @@ Class AppCommand
             $cmd = explode('/', $cmd);
 
             # set controller
-            if (isset($cmd[0]) && ! empty($cmd[0])) {
+            if (isset($cmd[0]) && !empty($cmd[0])) {
                 # only abc for controller name
                 $cmd[0] = preg_replace("/[^a-zA-Z]+/", "", $cmd[0]);
 
                 $this->name = $cmd[0];
                 unset($cmd[0]);
             }
-            
 
             # set method
             if (isset($cmd[1])) {
@@ -64,9 +84,9 @@ Class AppCommand
             }
 
             # set params
-            if (! empty($cmd)) {
+            if (!empty($cmd)) {
                 foreach ($cmd as $key => $param) {
-                    $cmd[$key] =  filter_var($param, FILTER_SANITIZE_STRING);
+                    $cmd[$key] = filter_var($param, FILTER_SANITIZE_STRING);
                 }
 
                 $this->params = array_values($cmd);
@@ -74,33 +94,80 @@ Class AppCommand
         }
     }
 
+    /**
+     * Get command name
+     *
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
     }
 
+    /**
+     * Set command name
+     *
+     * @param  string $name
+     * @return void
+     */
     public function setName($name)
     {
         $this->name = $name;
     }
 
+    /**
+     * Get command method name
+     *
+     * @return string
+     */
     public function getMethod()
     {
         return $this->method;
     }
 
+    /**
+     * Set method name
+     *
+     * @param  string $method
+     * @return void
+     */
     public function setMethod($method)
     {
         $this->method = $method;
     }
 
+    /**
+     * Get command parameters
+     *
+     * @return array
+     */
     public function getParams()
     {
         return $this->params;
     }
 
+    /**
+     * Set command parameters
+     *
+     * @param array $params
+     * @return void
+     */
     public function setParams($params)
     {
         $this->params = $params;
     }
-}
+
+    /**
+     * Return's command in JSON format
+     *
+     * @return array
+     */
+    public function __toString()
+    {
+        return json_encode([
+            $this->name,
+            $this->method,
+            $this->params,
+        ]);
+    }
+} // EOF AppCommand.php

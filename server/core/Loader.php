@@ -1,8 +1,7 @@
 <?php
 /**
- * @file    : server/core/Loader.php
+ * @file    : core/Loader.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
 
 namespace Core;
@@ -29,7 +28,7 @@ class Loader
      * @var string
      */
     private $name;
-    
+
     /**
      * Object path
      *
@@ -38,11 +37,11 @@ class Loader
     private $path;
 
     /**
-     * Is the object avialable
+     * Is the object available
      *
      * @var boolean
      */
-    private $avialable = false;
+    private $available = false;
 
     /**
      * Is the object Loaded
@@ -54,23 +53,23 @@ class Loader
     /**
      * Initialize loader
      *
-     * @param [type] $name
-     * @param [type] $path
-     * @param [type] $fullName
-     * @param [type] $container
+     * @param string $name
+     * @param string $path
+     * @param string $fullName
+     * @param \DI\Container $container
      * @param boolean $autoLoad
      */
     public function __construct($name, $path, $fullName, $container, $autoLoad = false)
     {
-        $this->name = $name;
+        $this->name      = $name;
         $this->container = $container;
-        $this->path = $path;
-        $this->fullName = $fullName;
+        $this->path      = $path;
+        $this->fullName  = $fullName;
 
         if (file_exists($this->path)) {
-            $this->avialable = true;
+            $this->available = true;
         }
-    
+
         if ($autoLoad) {
             $this->load();
         }
@@ -79,11 +78,11 @@ class Loader
     /**
      * Function that load the file into container
      *
-     * @return void
+     * @return boolean
      */
     public function load()
     {
-        if ($this->isAvialable() && require_once($this->path)) {
+        if ($this->isAvailable() && require_once ($this->path)) {
             $this->handler = $this->container->get($this->fullName);
 
             if ($this->handler) {
@@ -95,17 +94,17 @@ class Loader
     }
 
     /**
-     * Checks if the handler avialable
+     * Checks if the handler available
      *
      * @return boolean
      */
-    public function isAvialable()
+    public function isAvailable()
     {
-        return $this->avialable;
+        return $this->available;
     }
-    
+
     /**
-     * Checks if the hanlder is loaded
+     * Checks if the handler is loaded
      *
      * @return boolean
      */
@@ -113,4 +112,4 @@ class Loader
     {
         return $this->loaded;
     }
-} // EOF Loader.php    
+} // EOF Loader.php

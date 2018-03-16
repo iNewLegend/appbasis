@@ -6,40 +6,81 @@
 
 namespace Core;
 
-use React\Socket\ConnectionInterface;
 use React\Http\ServerRequest;
-
+use React\Socket\ConnectionInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class Server
 {
-    protected $loop;
-    protected $socket;
-    protected $logger;
-    protected $server;
-    protected $app;
+    /**
+     * Event loop
+     *
+     * @var \React\EventLoop
+     */
+    private $loop;
 
-    protected $binaryShare = [];
+    /**
+     * Server socket
+     *
+     * @var \React\Socket
+     */
+    private $socket;
 
-    public $port;
-    public $host;
+    /**
+     * Logger instance
+     *
+     * @var \Core\Logger
+     */
+    private $logger;
 
-    protected $on = [
+    /**
+     * Plain file sharing
+     *
+     * @var array
+     */
+    private $binaryShare = [];
+
+    /**
+     * Server port
+     *
+     * @var string
+     */
+    private $port;
+
+    /**
+     * Server host
+     *
+     * @var string
+     */
+    private $host;
+
+    /**
+     * Callbacks
+     *
+     * @var array
+     */
+    private $on = [
         'data' => null,
         'http' => null,
     ];
 
-    function __construct($host = '127.0.0.1', $port = '777')
+    /**
+     * Initialize server
+     *
+     * @param string $host
+     * @param string $port
+     */
+    public function __construct($host = '127.0.0.1', $port = '777')
     {
         $this->host = $host;
         $this->port = $port;
 
         # init.
         $this->logger = new \Core\Logger(self::class);
-        $this->loop = \React\EventLoop\Factory::create();
-        
+        $this->loop   = \React\EventLoop\Factory::create();
+
         $this->socket = new \React\Socket\Server('tcp://' . $host . ':' . $port, $this->loop);
-        
+
         $this->socket->on('connection', function (ConnectionInterface $client) {
             $this->_onConnect($client);
         });
@@ -47,6 +88,17 @@ class Server
         $this->socket->on('error', function (Exception $e) {
             $this->logger->error($e->getMessage());
         });
+    }
+
+    /**
+     * Start event loop
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $this->logger->info('' . $this->host . ':' . $this->port . ' - Starting event LOOP.');
+        $this->loop->run();
     }
 
     /**
@@ -61,7 +113,7 @@ class Server
     }
 
     /**
-     * logFromExternal function - used to access loger from owner
+     * logFromExternal function - used to access logger from owner
      *
      * @param string $message
      * @return void
@@ -71,16 +123,29 @@ class Server
         $this->logger->info($message);
     }
 
-    protected function _onConnect(ConnectionInterface $client)
+    /**
+     * Called on client connection
+     *
+     * @param ConnectionInterface $client
+     * @return void
+     */
+    private function _onConnect(ConnectionInterface $client)
     {
-        $this->logger->info('' . $this->host . ':' .$this->port . ' - new connection from ' . $client->getRemoteAddress());
+        $this->logger->info('' . $this->host . ':' . $this->port . ' - new connection from ' . $client->getRemoteAddress());
 
         $client->on('data', function ($data) use ($client) {
-            
+
             $this->_onData($client, $data);
         });
     }
 
+    /**
+     * Called when data received
+     *
+     * @param mixed $client
+     * @param string $data
+     * @return void
+     */
     protected function _onData($client, $data)
     {
         $httpRequest = null;
@@ -88,10 +153,10 @@ class Server
         try {
             $httpRequest = $this->parseRequest($data);
         } catch (\Exception $e) {
-            # probaly not an http request.
+            # probably not an http request.
             $this->logger->debug($e->getMessage());
         }
-        
+
         if ($httpRequest) {
             return $this->_onHttp($client, $httpRequest, $data);
         }
@@ -101,26 +166,34 @@ class Server
         }
     }
 
+    /**
+     * Handle https request(s)
+     *
+     * @param ConnectionInterface $client
+     * @param ServerRequest $request
+     * @param string $data
+     * @return void
+     */
     protected function _onHttp(ConnectionInterface $client, ServerRequest $request, $data)
     {
         # if there is binary share
-        if (! empty($this->binaryShare)) {
+        if (!empty($this->binaryShare)) {
             $requestedPath = $request->getUri()->getPath();
             $requestedPath = trim($requestedPath, '/');
 
             foreach ($this->binaryShare as $key => $value) {
                 if ($key == $requestedPath) {
-                    if(file_exists($value)) {
+                    if (file_exists($value)) {
                         $contentType = 'text/html';
 
-                        switch(pathinfo($value, PATHINFO_EXTENSION)) {
+                        switch (pathinfo($value, PATHINFO_EXTENSION)) {
                             case 'js':
                             case 'map':
-                            $contentType = 'application/javascript';
+                                $contentType = 'application/javascript';
                         }
 
-                        $this->logger->debug($client->getRemoteAddress() .' - sharing `' . realpath($value) . '`');
-                        
+                        $this->logger->debug($client->getRemoteAddress() . ' - sharing `' . realpath($value) . '`');
+
                         $response = new Response(file_get_contents($value), 200, ['content-type' => $contentType]);
                     } else {
                         $response = new Response('Share: `' . $value . '` not found', 404);
@@ -128,7 +201,7 @@ class Server
 
                     $client->write($response);
                     $client->end();
-                    
+
                     return;
                 }
             }
@@ -140,22 +213,34 @@ class Server
         }
     }
 
-    public function onData(callable $funciton)
+    /**
+     * Called when data received
+     *
+     * @param callable $function
+     * @return void
+     */
+    public function onData(callable $function)
     {
-        $this->on['data'] = $funciton;
+        $this->on['data'] = $function;
     }
 
+    /**
+     * Call on new http request
+     *
+     * @param callable $function
+     * @return void
+     */
     public function onHttp(callable $function)
     {
         $this->on['http'] = $function;
     }
 
-    public function run()
-    {
-        $this->logger->info('' . $this->host . ':' .$this->port . ' - Starting event LOOP.');
-        $this->loop->run();
-    }
-
+    /**
+     * Parse http request
+     *
+     * @param string $headers
+     * @return void
+     */
     private function parseRequest($headers)
     {
         # NOTICE: Should i really import this function to the project? or it can be avoided.
@@ -172,36 +257,36 @@ class Server
         $originalTarget = null;
         if (strpos($headers, 'OPTIONS * ') === 0) {
             $originalTarget = '*';
-            $headers = 'OPTIONS / ' . substr($headers, 10);
+            $headers        = 'OPTIONS / ' . substr($headers, 10);
         } elseif (strpos($headers, 'CONNECT ') === 0) {
             $parts = explode(' ', $headers, 3);
-            $uri = parse_url('tcp://' . $parts[1]);
+            $uri   = parse_url('tcp://' . $parts[1]);
             // check this is a valid authority-form request-target (host:port)
             if (isset($uri['scheme'], $uri['host'], $uri['port']) && count($uri) === 3) {
                 $originalTarget = $parts[1];
-                $parts[1] = 'http://' . $parts[1] . '/';
-                $headers = implode(' ', $parts);
+                $parts[1]       = 'http://' . $parts[1] . '/';
+                $headers        = implode(' ', $parts);
             } else {
                 throw new \InvalidArgumentException('CONNECT method MUST use authority-form request target');
             }
         }
-            // parse request headers into obj implementing RequestInterface
-            $request = \RingCentral\Psr7\parse_request($headers);
-            // create new obj implementing ServerRequestInterface by preserving all
-            // previous properties and restoring original request-target
-            $serverParams = array(
-            'REQUEST_TIME' => time(),
-            'REQUEST_TIME_FLOAT' => microtime(true)
+        // parse request headers into obj implementing RequestInterface
+        $request = \RingCentral\Psr7\parse_request($headers);
+        // create new obj implementing ServerRequestInterface by preserving all
+        // previous properties and restoring original request-target
+        $serverParams = array(
+            'REQUEST_TIME'       => time(),
+            'REQUEST_TIME_FLOAT' => microtime(true),
         );
         $target = $request->getRequestTarget();
-      
+
         $request = new ServerRequest(
-        $request->getMethod(),
-        $request->getUri(),
-        $request->getHeaders(),
-        $request->getBody(),
-        $request->getProtocolVersion(),
-        $serverParams
+            $request->getMethod(),
+            $request->getUri(),
+            $request->getHeaders(),
+            $request->getBody(),
+            $request->getProtocolVersion(),
+            $serverParams
         );
         $request = $request->withRequestTarget($target);
         // Add query params
@@ -219,8 +304,8 @@ class Server
         // re-apply actual request target from above
         if ($originalTarget !== null) {
             $request = $request->withUri(
-            $request->getUri()->withPath(''),
-            true
+                $request->getUri()->withPath(''),
+                true
             )->withRequestTarget($originalTarget);
         }
         // only support HTTP/1.1 and HTTP/1.0 requests

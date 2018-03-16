@@ -111,6 +111,8 @@ export class API_Client_Http {
                 //
             });
         }
+
+        throw 'API_Client_Http::post() error: callback not found';
     }
     //----------------------------------------------------------------------
 }

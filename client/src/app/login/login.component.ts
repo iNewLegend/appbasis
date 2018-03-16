@@ -117,8 +117,22 @@ export class LoginComponent implements OnInit {
 
         switch (result.code) {
             case "success":
-                this.toastr.success("You have been successfuly logged in.", "Welcome");
+                this.toastr.success("You have been successfully logged in.", "Welcome");
                 break;
+
+            case "mail":
+                switch (result.subcode) {
+                    case 'short':
+                        this.error = "Wrong username or password.";
+                        break;
+
+                    default:
+                        this.error ="You have entered invalid email address."
+                        break;
+                }
+                break;
+
+            
 
             case "block":
                 switch (result.subcode) {

@@ -2,15 +2,12 @@
 /**
  * @file    : models/Attempt.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    : models should never access another model in the same way i do , this is bad practice
- *          : and should be handled !
  */
-
 
 namespace Models;
 
-use \Illuminate\Database\Eloquent\Model;
 use Core;
+use \Illuminate\Database\Eloquent\Model;
 
 class Attempt extends Model
 {
@@ -30,6 +27,11 @@ class Attempt extends Model
      */
     protected $fillable = ['ip', 'expiredate'];
 
+    /**
+     * Initialize model
+     *
+     * @param array $attributes
+     */
     public function __construct($attributes = array())
     {
         parent::__construct($attributes);
@@ -40,6 +42,7 @@ class Attempt extends Model
     /**
      * Adds an attempt to database
      *
+     * @param string $ip
      * @return boolean
      */
     public function add($ip)
@@ -47,7 +50,7 @@ class Attempt extends Model
         $attempt = new Attempt();
 
         $attempt->ip = $ip;
-                
+
         $attempt->expiredate = date("Y-m-d H:i:s", strtotime($this->config->attack_mitigation_time));
 
         return $attempt->save();
@@ -56,7 +59,8 @@ class Attempt extends Model
     /**
      * Get block status and delete old attempts if they expires
      *
-     * @return string
+     * @param string $ip
+     * @return boolean
      */
     public function getBlockStatus($ip)
     {
@@ -100,7 +104,7 @@ class Attempt extends Model
         foreach ($attempts as $attempt) {
             $attempt = $attempt->toArray();
 
-            $expiredate = strtotime($attempt['expiredate']);
+            $expiredate  = strtotime($attempt['expiredate']);
             $currentdate = strtotime(date('Y-m-d H:i:s'));
 
             if ($currentdate > $expiredate) {

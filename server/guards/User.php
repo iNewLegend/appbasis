@@ -21,8 +21,9 @@ class UserGuard implements \Core\IGuard
     }
 
     /**
-     * Undocumented function
-     *
+     * Executed when client request the guard. 
+     * 
+     * @throws Exception
      * @return void
      */
     public function run()

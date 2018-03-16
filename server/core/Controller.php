@@ -1,16 +1,15 @@
 <?php
 /**
- * @file    : server/core/Controller.php
+ * @file    : core/Controller.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    :
  */
 
 namespace Core;
 
 class Controller extends Loader
 {
-    const PATH = 'controllers/';
-    const NAMESPACE = '\\Controllers\\';
+    const PATH       = 'controllers/';
+    const namespace  = '\\Controllers\\';
 
     /**
      *  Initialize Controller loader
@@ -23,10 +22,11 @@ class Controller extends Loader
     {
         parent::__construct($name,
             self::PATH . $name . '.php',
-            self::NAMESPACE . $name,
+            self::namespace  . $name,
             $container,
             $autoLoad
         );
+
     }
 
     /**
@@ -37,7 +37,7 @@ class Controller extends Loader
      */
     public function methodExists($method)
     {
-        if($return = method_exists($this->handler, $method)) {
+        if ($return = method_exists($this->handler, $method)) {
             return is_callable([$this->handler, $method]);
         }
 

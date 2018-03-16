@@ -2,16 +2,13 @@
 /**
  * @file    : controllers/user.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    : i don't like it that we need load $auth in constructor,
- * in future it will not be used in all functions, and i need found a solution for this.
  */
 
 namespace Controllers;
 
-use Core;
-use Services;
-use Models;
 use Guards;
+use Models;
+use Services;
 
 class User
 {
@@ -32,7 +29,9 @@ class User
     /**
      * Initialize the controller and prepare the dependencies
      *
+     * @param Guards\UserGuard $userGuard
      * @param Models\User $user
+     * @param Services\Auth $auth
      */
     public function __construct(Guards\UserGuard $userGuard, Models\User $user, Services\Auth $auth)
     {
@@ -41,13 +40,15 @@ class User
     }
 
     /**
-     * Test function
-     * $id
-     * @return array
+     * Default method of the controller
+     *
+     * @param mixed uid
+     * 
+     * @return void
      */
     public function index($uid = null)
     {
-        if (! $uid) {
+        if (!$uid) {
             $uid = $this->auth->getUid();
         }
 

@@ -3,7 +3,7 @@
  * @file    : db.php
  * @author  : Leonid Vinikov (czf.leo123@gmail.com)
  * @todo    : its ugly
- * 
+ *
  * Database table(s) maker.
  */
 
@@ -13,8 +13,8 @@ if (PHP_SAPI !== 'cli') {
 
 require 'init.php';
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Capsule\Manager as DB;
+use Illuminate\Database\Schema\Blueprint;
 
 /**
  * DBUilder class
@@ -27,11 +27,11 @@ class DBUilder
      * @var \Core\Logger
      */
     public $logger;
-    
+
     /**
      * DBUilder constructor
      */
-    function __construct()
+    public function __construct()
     {
         $this->logger = new \Core\Logger(get_class($this));
         $this->logger->info("Logger initalized");
@@ -50,7 +50,7 @@ class DBUilder
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->logger->warning('Drop if Exists `users` table');
-        
+
         # Creating schema
         DB::schema()->create('users', function (Blueprint $table) {
             $table->increments('id');

@@ -1,11 +1,7 @@
 <?php
 /**
- * @file    : server/core/App.php
+ * @file    : core/App.php
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
- * @todo    : add App and AppCommand in same folder app
- * Core\App()
- * Core\App\Command()
- * Possible ??
  */
 
 namespace Core;
@@ -13,39 +9,60 @@ namespace Core;
 class App
 {
     /**
-     * The container of DI
+     * Container of DI instance
      *
      * @var \DI\Container
      */
     private $container;
-    
+
     /**
-     * The controller instance
+     * Controller instance
      *
      * @var \Core\Controller
      */
     private $controller;
 
     /**
-     * The guard
+     * The guard instance
      *
      * @var \Core\Guard
      */
     private $guard;
 
     /**
-     * The AppCommand
+     * The AppCommand instance
      *
      * @var \Core\AppCommand
      */
     private $cmd;
 
+    /**
+     * The Logger instance
+     *
+     * @var \Core\Logger
+     */
     private $logger;
 
+    /**
+     * The Config instance
+     *
+     * @var \Core\Config
+     */
     private $config;
-    
-    private static $output = "null";
-    private static $ip = null;  
+
+    /**
+     * App output
+     *
+     * @var string
+     */
+    private $output = "null";
+
+    /**
+     * Current client ip
+     *
+     * @var string
+     */
+    private $ip = null;
 
     /**
      * Initialize App
@@ -62,67 +79,80 @@ class App
         # Init logger
         $this->logger = new Logger(App::class);
 
-        # Too lazy to sudy how PHP-DI working, and looks like this trick works for older php versions.
-        # so this the way i set some of the globals for now.
-
+        /*
+         * no time to study how PHP-DI working, and looks like this trick works for older php versions.
+         * so this the way i set some of the globals for now.
+         */
         $containerBuilder->addDefinitions([
+            'Core\App'    => function () {
+                return $this;
+            },
             'Core\Logger' => function ($name) {
                 return $this->logger;
-            },        
-          
+            },
         ]);
 
-        # Build php-di container.
+        # build php-di container.
         $this->container = $containerBuilder->build();
 
-        # Load Base Config
+        # load Base Config
         $this->config = Config::get();
 
-        # Parase command
+        # parse command
         $this->cmd = new AppCommand($cmd);
-        
+
         # print before and after parse
         $this->logger->debug("cmd: `$cmd`");
         $this->logger->debug($this->cmd);
 
-        # Create Controller
+        # create controller
         $this->controller = new \Core\Controller($this->cmd->getName(), $this->container);
 
-        # Check the IP
-        self::$ip = new Ip($ip);
+        # check the IP
+        $this->ip = new Ip($ip);
 
-        # Check if the controller is avialable
-        if (! $this->controller->isAvialable()) {
-            throw new \Exception("controller: `{$this->cmd->getName()}` not found, in: " . __FILE__ . '(' . __LINE__. ')');
+        # check if the controller is available
+        if (!$this->controller->isAvailable()) {
+            throw new \Exception("controller: `{$this->cmd->getName()}` not found, in: " . __FILE__ . '(' . __LINE__ . ')');
         }
 
-        # Create guard
+        # create guard
         $this->guard = new \Core\Guard($this->cmd->getName(), $this->container);
 
-        # Attempt to load guard
+        # attempt to load guard
         if ($this->guard->load()) {
             $this->guard->run();
         }
 
-        # Attempt to load controller
+        # attempt to load controller
         if ($this->controller->load()) {
-            if (! $this->controller->methodExists($this->cmd->getMethod())) {
-                throw new \Exception("method: `{$this->cmd->getMethod()}` not found in controller: `{$this->cmd->getMethod()}` in: " . __FILE__ . '(' . __LINE__. ')');
+            if (!$this->controller->methodExists($this->cmd->getMethod())) {
+                throw new \Exception("method: `{$this->cmd->getMethod()}` not found in controller: `{$this->cmd->getMethod()}` in: " . __FILE__ . '(' . __LINE__ . ')');
             }
 
-            # Call to controller method
-            self::$output = $this->controller->callMethod($this->cmd->getMethod(), $this->cmd->getParams());
+            # call to controller method
+            $this->output = $this->controller->callMethod($this->cmd->getMethod(), $this->cmd->getParams());
         }
     }
 
-    public static function getOutput()
+    /**
+     * Return app output
+     *
+     * @return string
+     */
+    public function getOutput()
     {
-        return self::$output;
+        return $this->output;
     }
 
-    public static function getIp()
+    /**
+     * Return user IP Address
+     *
+     * @return string
+     */
+    public function getIp()
     {
-        return self::$ip;
+        return $this->ip;
     }
 
 } // EOF App.php

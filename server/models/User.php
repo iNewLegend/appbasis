@@ -30,7 +30,7 @@ class User extends Model
             $return = $return->toArray();
         }
 
-        if (! isset($return['id'])) {
+        if (!isset($return['id'])) {
             return false;
         }
 
@@ -40,7 +40,7 @@ class User extends Model
     /**
      * Gets basic user data for a given ID and returns an array
      *
-     * @param int $id
+     * @param string $id
      * @return array
      */
     public function getBase($id)
@@ -75,7 +75,7 @@ class User extends Model
     {
         $user = new User;
 
-        $user->email = $email;
+        $user->email    = $email;
         $user->password = $password;
         $user->isactive = true;
 

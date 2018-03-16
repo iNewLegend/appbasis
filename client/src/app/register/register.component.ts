@@ -76,9 +76,10 @@ export class RegisterComponent implements OnInit {
             repassword: '',
             captcha: ''
         }
+
         /*
-        [REVIEW LATER]
-        Sometimes anuglar is executed before recaptcha     
+        CHECK IT LATER:
+        Sometimes angular is executed before recaptcha     
         - should i leave it like that ?
         */
 
