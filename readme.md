@@ -1,5 +1,6 @@
 # AppBasis
 
+## TODO
 #### Server:
   -  if server is non active for long time, the MySQL Connection is gone away.
   -  -  Option #1: make keepAlive method
