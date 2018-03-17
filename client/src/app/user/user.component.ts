@@ -1,30 +1,37 @@
+/**
+ * @file: app/user/user.component.ts
+ * @author: Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo:
+ * @description: 
+ */
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+
 import { Component, OnInit } from '@angular/core';
-//import { Api } from '../api/api';
+import { Logger } from '../logger';
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Component({
-  selector: 'app-user',
-  templateUrl: './user.component.html',
-  styleUrls: ['./user.component.css']
+    selector: 'app-user',
+    templateUrl: './user.component.html',
+    styleUrls: ['./user.component.css'],
 })
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+
 export class UserComponent implements OnInit {
+    private logger: Logger;
 
-  constructor(/*private api: Api*/) {
-  }
+    //----------------------------------------------------------------------
 
-  public test(response: Response) {
-    let data;
-
-    try {
-      data = response.json();
-    } catch(e) {
-      data = false;
+    constructor() {
+        // ----
+        this.logger = new Logger("UserComponent");
+        this.logger.debug("constructor", "");
     }
+    //----------------------------------------------------------------------
 
-    console.log(data);
-  }
-
-  ngOnInit() {
-    //this.api.user().index(this.test);
-  }
-
+    ngOnInit() {
+        
+    }
+    //----------------------------------------------------------------------
 }
+//-----------------------------------------------------------------------------------------------------------------------------------------------------

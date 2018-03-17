@@ -100,7 +100,7 @@ class Authorization
             switch ($blockStatus) {
                 case 'verify':
                     if (Validator::checkCaptcha($ip, $captcha)) {
-                        $this->attempt->deleteAllAttempts($ip);
+                        //$this->attempt->deleteAllAttempts($ip);
 
                         return false;
                     }

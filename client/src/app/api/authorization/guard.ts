@@ -7,7 +7,7 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
 import { API_Service_Authorization } from '../authorization/service';
 import { API_Service } from '../service';
@@ -22,9 +22,7 @@ export class API_Guard_Authorization implements CanActivate {
 
     //----------------------------------------------------------------------
 
-    constructor(
-        private api: API_Service,
-        /*private router: Router*/) {
+    constructor(private api: API_Service) {
         // ----
         this.canActiveState = false;
     }

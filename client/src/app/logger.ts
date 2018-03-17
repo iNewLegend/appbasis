@@ -4,7 +4,7 @@ import { isObject, isFunction } from "util";
  * @file: app/logger.ts
  * @author: Leonid Vinikov <czf.leo123@gmail.com>
  * @description: 
- * @todo: check comments
+ * @todo: check comments, avoid random colors, set static color from parent.
  */
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

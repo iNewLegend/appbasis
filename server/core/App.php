@@ -58,9 +58,9 @@ class App
     private $output = "null";
 
     /**
-     * Current client ip
+     * IP instance
      *
-     * @var string
+     * @var \Core\Ip
      */
     private $ip = null;
 
@@ -75,20 +75,28 @@ class App
     {
         $containerBuilder = new \DI\ContainerBuilder();
         $containerBuilder->useAutowiring(true);
+        $containerBuilder->useAnnotations(false);
 
         # Init logger
         $this->logger = new Logger(App::class);
 
-        /*
-         * no time to study how PHP-DI working, and looks like this trick works for older php versions.
-         * so this the way i set some of the globals for now.
-         */
+        # check the IP
+        $this->ip = new Ip($ip);
+
+        # add definition(s) to container
         $containerBuilder->addDefinitions([
-            'Core\App'    => function () {
+            'Core\App'      => function () {
                 return $this;
             },
-            'Core\Logger' => function ($name) {
+            'Core\Logger'   => function ($name) {
                 return $this->logger;
+            },
+            'Core\Ip'       => function () {
+                return $this->ip;
+            },
+            /* This is not good practice, can be handled in some ways, also check lazy injection */
+            'Services\Auth' => function (\Models\Session $session, \Core\Ip $ip) {
+                return new \Services\Auth($session, $this->ip);
             },
         ]);
 
@@ -107,9 +115,6 @@ class App
 
         # create controller
         $this->controller = new \Core\Controller($this->cmd->getName(), $this->container);
-
-        # check the IP
-        $this->ip = new Ip($ip);
 
         # check if the controller is available
         if (!$this->controller->isAvailable()) {
@@ -146,7 +151,7 @@ class App
     }
 
     /**
-     * Return user IP Address
+     * Return IP instance
      *
      * @return string
      */

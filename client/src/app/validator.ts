@@ -1,7 +1,7 @@
 /**
- * @file: app/app.router.ts
+ * @file: app/validator.ts
  * @author: Leonid Vinikov <czf.leo123@gmail.com>
- * @todo: it should be ? 
+ * @todo: you can avoid this file
  */
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

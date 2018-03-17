@@ -1,15 +1,37 @@
+/**
+ * @file: app/updates/welcome.component.ts
+ * @author: Leonid Vinikov <czf.leo123@gmail.com>
+ * @todo:
+ * @description: 
+ */
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+
 import { Component, OnInit } from '@angular/core';
+import { Logger } from '../logger';
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Component({
-  selector: 'app-welcome',
-  templateUrl: './welcome.component.html',
-  styleUrls: ['./welcome.component.css']
-})
+    selector: 'app-welcome',
+    templateUrl: './welcome.component.html',
+    styleUrls: ['./welcome.component.css']
+  })
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+
 export class WelcomeComponent implements OnInit {
+    private logger: Logger;
 
-  constructor() { }
+    //----------------------------------------------------------------------
 
-  ngOnInit() {
-  }
+    constructor() {
+        // ----
+        this.logger = new Logger("WelcomeComponent");
+        this.logger.debug("constructor", "");
+    }
+    //----------------------------------------------------------------------
 
+    ngOnInit() {
+        
+    }
+    //----------------------------------------------------------------------
 }
+//-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -76,7 +76,7 @@ export class API_Client_Http {
             });
         } 
         
-        throw 'API_Client_Http::get() error: callback not found';
+        throw 'API_Client_Http::get() error: callback is empty';
     }
     //----------------------------------------------------------------------
 
@@ -100,9 +100,6 @@ export class API_Client_Http {
                 }
 
                 this.logger.recv("post", {url: url}, data);
-                /*
-                console.log('API_Client_Http::post() ->> url: `' + url + '` R>');
-                console.log(data);*/
                 // ----
                 // # callback
 
@@ -112,7 +109,7 @@ export class API_Client_Http {
             });
         }
 
-        throw 'API_Client_Http::post() error: callback not found';
+        throw 'API_Client_Http::post() error: callback is empty';
     }
     //----------------------------------------------------------------------
 }

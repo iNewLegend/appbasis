@@ -11,8 +11,8 @@ import { Router, NavigationEnd } from '@angular/router';
 import { ToastContainerDirective, ToastrService, ToastrConfig } from 'ngx-toastr';
 import { API_Service } from './api/service';
 import { API_Service_Authorization } from './api/authorization/service';
-import { Logger } from './logger';
 import { API_Model_Authorization_States } from 'app/api/authorization/model';
+import { Logger } from './logger';
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Component({

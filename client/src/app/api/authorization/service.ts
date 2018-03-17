@@ -12,7 +12,7 @@ import { Logger } from '../../logger';
 import { API_Service } from "../service";
 import { API_Client_Http } from "../clients/http";
 import { API_Request_Authorization } from "../authorization/request";
-import { API_Model_Authorization_States, API_Model_Authorization_Send, API_Model_Authorization_Recv } from "../authorization/model";
+import { API_Model_Authorization_States, API_Model_Authorization_Send } from "../authorization/model";
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Injectable()

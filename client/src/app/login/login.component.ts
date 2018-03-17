@@ -132,8 +132,6 @@ export class LoginComponent implements OnInit {
                 }
                 break;
 
-            
-
             case "block":
                 switch (result.subcode) {
                     case "verify":
@@ -167,6 +165,11 @@ export class LoginComponent implements OnInit {
         this.timeout = setTimeout(() => {
             this.clearErrors();
         }, errorTimeout);
+    }
+    //----------------------------------------------------------------------
+
+    private captchaResolved(response: string) {
+        this.logger.startWith("captchaResolved", { response: response });
     }
     //----------------------------------------------------------------------
 }

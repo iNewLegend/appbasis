@@ -6,10 +6,7 @@
  */
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-import { Component, ViewChild, OnInit, ViewEncapsulation } from '@angular/core';
-import { Router } from '@angular/router';
-import { ToastContainerDirective, ToastrService, ToastrConfig } from 'ngx-toastr';
-import { API_Service } from '../api/service';
+import { Component, OnInit } from '@angular/core';
 import { API_Request_Welcome } from '../api/welcome/request';
 import { API_Model_Welcome_Updates } from '../api/welcome/model';
 import { Logger } from '../logger';
