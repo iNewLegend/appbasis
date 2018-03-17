@@ -3,6 +3,23 @@
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/aMkoqsEBoVc/0.jpg)](https://www.youtube.com/watch?v=aMkoqsEBoVc)
 
+# Install
+```sh
+$ git clone https://github.com/iNewLegend/AppBasis.git
+```
+### Server
+```sh
+$ composer update
+$ php server.php
+```
+### Client
+```sh
+$ ng build
+$ cd dist
+$ php -S localhost:8080
+```
+
+
 ## TODO
 #### Server:
   -  if server is non active for long time, the MySQL Connection is gone away.
