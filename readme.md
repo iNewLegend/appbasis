@@ -7,9 +7,10 @@
       - guards -> secure controllers when they need extra conditioning
       - models -> handle database queries
       - library -> extra functions
+      - services -> .
   
   - frontend
-    - Simple Angular 6 base.
+    - Simple Angular base.
     - Nice Api Structure
     - WebSocket
     
@@ -19,8 +20,16 @@
 ## Goals
   - todo
   
+## Demo
+#### Video:
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/aMkoqsEBoVc/0.jpg)](https://www.youtube.com/watch?v=aMkoqsEBoVc)
+[![YouTube](https://i.ytimg.com/vi/PaGjC5L8tz8/0.jpg)](https://youtu.be/PaGjC5L8tz8)
+
+#### Server:
+[![SERVER](https://i.imgur.com/oEDUVoK.png)](https://github.com/iNewLegend/AppBasis/tree/master/server)
+
+#### Client:
+[![CLIENT](https://i.imgur.com/oxoqz23.png)](https://github.com/iNewLegend/AppBasis/tree/master/client)
 
 ## TODO
 #### Server:
