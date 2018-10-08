@@ -1,1 +1,1 @@
-![Image of Server](https://i.imgur.com/vJIuZQV.png)
+[![SERVER](https://i.imgur.com/oEDUVoK.png)](https://i.imgur.com/oEDUVoK.png)
