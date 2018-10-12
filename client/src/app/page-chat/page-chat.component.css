@@ -1,0 +1,60 @@
+
+*:focus {
+  outline: none;
+}
+
+#frame {
+  height:80vh;
+  overflow:hidden;
+  padding:0;
+}
+
+#messages {
+  height: 70vh;
+  overflow-y: auto;
+}
+
+.sendMessage {
+  border-top: 1px solid #c4c4c4;
+  position: relative;
+}
+
+.sendMessage input {
+  background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
+  border: medium none;
+  color: #4c4c4c;
+  font-size: 15px;
+  min-height: 48px;
+  width: 100%;
+}
+
+.sendMessage button {
+  background: #05728f none repeat scroll 0 0;
+  border: medium none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  font-size: 17px;
+  height: 33px;
+  position: absolute;
+  right: 0;
+  top: 11px;
+  width: 33px;
+}
+
+app-chat-message {
+  margin-bottom: 15px;
+  display: block;
+}
+
+:host ::ng-deep app-chat-message p {
+    -webkit-box-shadow:  1.1px 2px 7px -1px #bfb6b6;
+    box-shadow:  1.1px 2px 7px -1px #bfb6b6;
+    background: #ebebeb none repeat scroll 0 0;
+    border-radius: 3px;
+    color: #646464;
+    font-size: 14px;
+    margin: 0;
+    padding: 5px 10px 5px 12px;
+    width: fit-content;
+}

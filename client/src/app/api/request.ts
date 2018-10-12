@@ -1,8 +1,10 @@
+import { API_Client_Http } from "./clients/http";
+
 /**
  * @file: app/api/request
  * @author: Leonid Vinikov <czf.leo123@gmail.com>
  * @description:
- * @todo:
+ * @todo: this is file should be removed.
  */
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -12,7 +14,6 @@ export class API_Request  {
     //----------------------------------------------------------------------
 
     constructor(client) {
-        this._name = name;
         this._client = client;
     }
     //----------------------------------------------------------------------
@@ -23,7 +24,7 @@ export class API_Request  {
     //----------------------------------------------------------------------
     
     protected post(method: String, params: String, callback = null) {
-        this._client.post(this._name + '/' + method, params, callback);
+        return this._client.post(this._name + '/' + method, params, callback);
     }
     //----------------------------------------------------------------------
 }

@@ -12,6 +12,7 @@ export enum API_Model_Authorization_States {
     VERIFY,
     UNAUTHORIZED,
     AUTHORIZED,
+    BLOCKED,
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -19,6 +20,8 @@ export interface API_Authorization_Register_Send {
     email: string;
     password: string;
     repassword: string;
+    firstName: string;
+    lastName: string;
     captcha: string;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------------

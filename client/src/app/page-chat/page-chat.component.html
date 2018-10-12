@@ -1,0 +1,19 @@
+<div id="chat" style="width: 90%" class="mx-auto">
+
+    <h2>Chat</h2>
+    <hr class="hr-primary" />
+
+    <div id="frame">
+        <div id="messages" #myMessages>
+            <app-chat-message *ngFor="let message of messages" avatar="{{message.avatar}}" date="{{message.date}}"
+                owner="{{message.owner}}" message="{{message.message}}">
+            </app-chat-message>
+        </div>
+
+        <div class="sendMessage">
+            <input (keyup.enter)="sendMessage()" [(ngModel)]="message" type="text" placeholder="Type a message" />
+            <button (click)="sendMessage()" type="button"><i class="fa fa-paper-plane-o" aria-hidden="true"></i></button>
+        </div>
+    </div>
+
+</div>

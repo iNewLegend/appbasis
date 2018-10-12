@@ -19,13 +19,13 @@ xhttp.onreadystatechange = function () {
     if (this.status == 200) {
       platformBrowserDynamic().bootstrapModule(AppModule);
     } else {
-      let out = "cannot connect to API Server: `" + environment.server_base + '`';
+      let out = "cannot connect to API Server: `" + environment.http_base + '`';
 
       document.getElementsByClassName('container')[0].innerHTML = "<pre>" + out + "</pre>";
     }
   }
 };
 
-xhttp.open("GET", environment.server_base, true);
+xhttp.open("GET", environment.http_base, true);
 xhttp.send();
 */

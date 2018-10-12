@@ -1,0 +1,9 @@
+<div class="row no-gutters">
+    <div class="avatar col-1 col-sm-1">
+        <img class="rounded responsive" src="{{ avatar }}" title="{{ owner }}" alt="sunil">
+    </div>
+    <div class="msg col-8 col-lg-11">
+        <p title="at {{date | amDateFormat:'MMMM Do YYYY, h:mm:ss a'}}">{{ message }}</p>
+        <span class="time_date"> By <b>{{ owner }}</b> {{ date | amTimeAgo }}</span>
+    </div>
+</div>

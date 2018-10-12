@@ -12,31 +12,48 @@ import { HttpModule } from '@angular/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { RecaptchaModule } from 'ng-recaptcha';
-import { RecaptchaFormsModule } from 'ng-recaptcha/forms';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgxCaptchaModule } from 'ngx-captcha';
+import { MomentModule } from 'ngx-moment';
 
-import { ToastrModule, ToastContainerModule } from 'ngx-toastr';
+import { routes } from './app.router';
+import { environment } from 'environments/environment';
 
 import { AppComponent } from './app.component';
-import { NavbarComponent } from './navbar/navbar.component';
-import { UpdatesComponent } from './updates/updates.component';
-import { WelcomeComponent } from './welcome/welcome.component';
-import { RegisterComponent } from './register/register.component';
-import { LoginComponent } from './login/login.component';
-  import { UserComponent } from './user/user.component';
 import { API_Module } from './api/module';
-import { routes } from './app.router';
+
+import { HeaderComponent } from './template/header/header.component';
+
+import { RegisterFormComponent } from 'app/template/register-form/register-form.component';
+import { LoginFormComponent } from 'app/template/login-form/login-form.component';
+
+import { PageIndexComponent } from './page-index/page-index.component';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { PageFeedComponent } from './page-feed/page-feed.component';
+
+import { UpdatesComponent } from './template/updates/updates.component';
+import { PageChatComponent } from './page-chat/page-chat.component';
+
+import { ChatMessageComponent } from './template/chat/chat-message/chat-message.component';
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 @NgModule({
   declarations: [
     AppComponent,
-    NavbarComponent,
+    HeaderComponent,
+
+    RegisterFormComponent,
+    LoginFormComponent,
     UpdatesComponent,
-    WelcomeComponent,
-    RegisterComponent,
-    LoginComponent,
-    UserComponent
+
+    PageIndexComponent,
+    PageNotFoundComponent,
+    PageFeedComponent,
+    PageChatComponent,
+
+    ChatMessageComponent,
+    
+
   ],
   imports: [
     routes,
@@ -44,10 +61,11 @@ import { routes } from './app.router';
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
-    RecaptchaModule.forRoot(),
-    RecaptchaFormsModule,
-    ToastrModule.forRoot(),
-    ToastContainerModule.forRoot(),
+    MomentModule,
+    NgbModule,
+    NgxCaptchaModule.forRoot({
+      invisibleCaptchaSiteKey: environment.captcha_key
+    }),
     API_Module.forRoot(),
   ],
   providers: [

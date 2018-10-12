@@ -7,22 +7,36 @@
 
 import { ModuleWithProviders } from "@angular/core";
 import { Routes, RouterModule } from '@angular/router';
-import { WelcomeComponent } from './welcome/welcome.component';
-import { RegisterComponent } from './register/register.component';
-import { UserComponent } from './user/user.component';
-import { API_Guard_Authorization } from './api/authorization/guard';
+
+
+import { PageIndexComponent } from './page-index/page-index.component';
+import { PageNotFoundComponent } from "./page-not-found/page-not-found.component";
+import { PageFeedComponent } from "./page-feed/page-feed.component";
+import { PageChatComponent } from "./page-chat/page-chat.component"
+
+import { 
+    API_Guard_Authorization_Unauthorized,
+    API_Guard_Authorization_Authorized,
+    API_Guard_Authorization_Require,
+} from './api/authorization/guard';
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 export const router: Routes = [
-    { path: '', redirectTo: 'welcome', pathMatch: 'full'},
-    
-    { path: 'welcome', component: WelcomeComponent },
-    { path: 'register', component: RegisterComponent },
-    { path: 'user', component: UserComponent, canActivate: [API_Guard_Authorization]},
+    { path: '404', component: PageNotFoundComponent },
 
-    { path:'**', redirectTo: 'welcome' },
+    { path: 'index/:action', component: PageIndexComponent, canActivate: [API_Guard_Authorization_Unauthorized]},
+
+    { path: 'feed', component: PageFeedComponent, canActivate: [API_Guard_Authorization_Authorized] },
+    { path: 'chat', component: PageChatComponent, canActivate: [API_Guard_Authorization_Require] },
+
+
+    { path: '', redirectTo: 'index/register', pathMatch: 'full'},
+    { path:'**', redirectTo: '404' },
 ];
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-export const routes: ModuleWithProviders = RouterModule.forRoot(router);
+export const routes: ModuleWithProviders = RouterModule.forRoot(router, {
+     useHash: true, 
+     //enableTracing: true 
+});
 //-----------------------------------------------------------------------------------------------------------------------------------------------------

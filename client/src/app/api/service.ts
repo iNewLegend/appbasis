@@ -38,6 +38,7 @@ export class API_Service {
 
     setAuthHash(hash: string) {
         this.logger.startWith("setHash", { hash: hash });
+        //console.log( new Error().stack );
         // ----
         localStorage.setItem('hash', hash);
     }

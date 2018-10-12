@@ -1,23 +1,8 @@
-<div [hidden]="isAuthPreparing()">
-  <app-navbar></app-navbar>
+<app-header></app-header>
 
-  <div toastContainer class="myToast"></div>
+<main role="main">
+    <router-outlet #o="outlet"></router-outlet>
+  </main>
+<template *ngIf="currentRoute !== '/index'">
 
-  <div class="row">
-    <div class="col-xs-2 hidden-xs hidden-sm">
-      <app-updates></app-updates>
-    </div>
-
-    <div [ngClass]="{'col-xs-10 col-md-10 col-sm-12': ! isWelcomeRoute() || isAuth()}" class="col-xs-7">
-      <router-outlet></router-outlet>
-    </div>
-    
-    <div *ngIf="isWelcomeRoute() && false == isAuth()">
-      <div class="col-xs-4 col-sm-3">
-        <app-login></app-login>
-      </div>
-    </div>
-
-  </div>
-</div>
-
+</template>

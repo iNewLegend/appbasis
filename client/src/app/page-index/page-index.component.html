@@ -1,0 +1,39 @@
+<div id="index" class="container">
+  <div [ngSwitch]="pageAction" class="container">
+    <div *ngSwitchCase="'updates'" class="col-md-10 mx-auto">
+      <h2>Updates</h2>
+      <hr class="hr-primary" />
+      <app-updates></app-updates>
+    </div>
+    <div *ngSwitchCase="'login'" class="col-md-5 mx-auto">
+      <div class="row" style="height: 20px">
+        <div class="col">
+          <h2>Login</h2>
+        </div>
+
+        <div class="col">
+          <p class="text-right"><a routerLink="/index/register">Need account?</a></p>
+        </div>
+      </div>
+
+      <hr class="hr-primary" />
+      <app-login-form></app-login-form>
+    </div>
+
+    <div *ngSwitchDefault id="register" class="col-md-10 mx-auto">
+      <div class="row" style="height: 20px">
+        <div class="col">
+          <h2>Register</h2>
+        </div>
+
+        <div class="col">
+          <p class="text-right"><a routerLink="/index/login">Already have account?</a></p>
+        </div>
+      </div>
+
+      <hr class="hr-primary" />
+      <app-register-form></app-register-form>
+    </div>
+
+  </div>
+</div>

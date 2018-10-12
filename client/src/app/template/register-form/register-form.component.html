@@ -1,0 +1,46 @@
+<div [hidden]="! noticeType" class="alert alert-{{ noticeType }}">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <strong>{{noticeMsg}}</strong>
+</div>
+<!--Register Form-->
+<form id='registration_form'  (submit)="processForm()" novalidate>
+  <ngx-invisible-recaptcha #captchaElem (ready)="handleCaptcha('ready')" (load)="handleCaptcha('load')" (success)="handleCaptcha('success', $event)"
+    [type]="type" [badge]="badge" [ngModel]="formData.captcha" [ngModelOptions]="{ standalone: true }">
+  </ngx-invisible-recaptcha>
+
+  <fieldset>
+    <div class="form-group">
+      <label for="firstname" class="sr-only">First </label>
+      <input id="firstname" class="form-control input-group-lg" type="text" name="firstname" title="Enter first name" placeholder="First name"
+        [(ngModel)]="formData.firstName" />
+    </div>
+
+    <div class="form-group">
+      <label for="lastname" class="sr-only">Last Name</label>
+      <input id="lastname" class="form-control input-group-lg" type="text" name="lastname" title="Enter last name" placeholder="Last name"
+        [(ngModel)]="formData.lastName" />
+    </div>
+
+    <div class="form-group">
+      <label for="email" class="sr-only">Email</label>
+      <input id="email" class="form-control input-group-lg" type="text" name="Email" title="Enter Email" placeholder="Your Email"
+        [(ngModel)]="formData.email" />
+    </div>
+
+    <div class="form-group">
+      <label for="password" class="sr-only">Password</label>
+      <input id="password" class="form-control input-group-lg" type="password" name="password" title="Enter password" placeholder="Password"
+        [(ngModel)]="formData.password" />
+    </div>
+
+    <div class="form-group">
+      <label for="repassword" class="sr-only">RE-Password</label>
+      <input id="repassword" class="form-control input-group-lg" type="password" name="repassword" title="Enter password again"
+        placeholder="Password again" [(ngModel)]="formData.repassword" />
+    </div>
+
+    <button class="btn btn-primary">Submit</button>
+  </fieldset>
+
+</form>
+<!--Register Now Form Ends-->

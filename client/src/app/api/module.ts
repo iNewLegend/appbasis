@@ -8,12 +8,20 @@
 
 import { NgModule } from '@angular/core';
 import { ModuleWithProviders } from '@angular/core';
+
 import { API_Service } from './service'
 import { API_Client_Http } from './clients/http';
-import { API_Guard_Authorization } from './authorization/guard';
+
 import { API_Request_Authorization } from './authorization/request';
 import { API_Service_Authorization } from './authorization/service';
-import { API_Request_Welcome } from './welcome/request';
+import { API_Service_User } from './user/service';
+import { API_Request_User } from './user/request';
+
+import { 
+  API_Guard_Authorization_Unauthorized,
+  API_Guard_Authorization_Authorized, 
+  API_Guard_Authorization_Require,
+} from './authorization/guard';
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 @NgModule({
@@ -33,11 +41,17 @@ export class API_Module {
       providers: [
         API_Service,
         API_Client_Http,
+        ,
 
-        API_Guard_Authorization,
-        API_Request_Authorization,
         API_Service_Authorization,
-        API_Request_Welcome
+        API_Guard_Authorization_Unauthorized,
+        API_Guard_Authorization_Authorized,
+        API_Guard_Authorization_Require,
+        API_Request_Authorization,
+
+        API_Service_User,
+        API_Request_User,
+        
       ]
     }
   }

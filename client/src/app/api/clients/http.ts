@@ -15,22 +15,22 @@ import { Logger } from '../../logger';
 import { environment } from '../../../environments/environment';
 
 import { API_Service } from '../service';
-import { API_Guard_Authorization } from '../authorization/guard';
+import { Subject, Observable } from 'rxjs';
+import { API_Model_Authorization_States } from '../authorization/model';
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Injectable()
 
 export class API_Client_Http {
     //----------------------------------------------------------------------
-    protected logger: Logger; 
-    protected headers: Headers;
+    private logger: Logger; 
+    private headers: Headers;
 
     //----------------------------------------------------------------------
 
     constructor(    
         private http: Http,
-        private api: API_Service,
-        private authGuard: API_Guard_Authorization) {
+        private api: API_Service) {
         // ----
         this.logger = new Logger("API_Client_Http");
         this.logger.debug("constructor", "");;
@@ -41,13 +41,13 @@ export class API_Client_Http {
 
     private authHeader() {
         // checks if the authGuard is active and if so try put hash header
-        if (this.authGuard.canActiveState) {
+        if (this.api.getAuthState() >= API_Model_Authorization_States.AUTHORIZED) {
             this.headers.set('hash', this.api.getAuthHash());
         }
     }
     //----------------------------------------------------------------------
 
-    public get(url: string, callback) {
+    public get(url: string, callback) : Observable<any> {
         this.logger.startWith("get", {
             url: url,
             callback: Boolean(callback),
@@ -56,8 +56,11 @@ export class API_Client_Http {
         this.authHeader();
 
         if (callback) {
+
+            let subject = new Subject();
+
             // send get
-            return this.http.get(environment.server_base + url, { headers: this.headers }).map((response: Response) => {
+            this.http.get(environment.http_base + url, { headers: this.headers }).map((response: Response) => {
                 let data;
 
                 try {
@@ -70,10 +73,12 @@ export class API_Client_Http {
                 // ----
                 // # callback
 
-                return callback(data);
+                subject.next(callback(data));
             }).subscribe((error) => {
                 //
             });
+
+            return subject;
         } 
         
         throw 'API_Client_Http::get() error: callback is empty';
@@ -90,7 +95,7 @@ export class API_Client_Http {
         this.authHeader();
 
         if (callback) {
-            return this.http.post(environment.server_base + url, data, { headers: this.headers }).map((response: Response) => {
+            return this.http.post(environment.http_base + url, data, { headers: this.headers }).map((response: Response) => {
                 let data;
 
                 try {
