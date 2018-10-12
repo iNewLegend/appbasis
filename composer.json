@@ -1,0 +1,31 @@
+{
+    "name": "iNewLegend/AppBasis",
+    "description": "",
+    "require": {
+        "monolog/monolog": "@stable",
+        "bjeavons/zxcvbn-php": "@stable",
+        "react/event-loop": "@stable",
+        "react/http": "@stable",
+        "react/socket": "@stable",
+        "react/http-client": "@stable",
+        "react/promise-timer": "@dev",
+        "react/mysql": "dev-master#28b0055",
+        "clue/block-react": "^1.3",
+        "cboden/ratchet": "^0.4.1",
+        "react/filesystem": "^0.1.1",
+        "react/child-process": "@dev"
+        
+    },
+    "autoload": {
+    	"classmap": [
+            "src/core",
+            "src/modules",
+            "src/config",
+            "src/models",
+            "src/library",
+            "src/services",
+            "src/friends",
+            "src/guards"
+    	]
+    }
+}

@@ -4,7 +4,7 @@
  * @author  : Leonid Vinikov <czf.leo123@gmail.com>
  */
 
-require 'server/vendor/autoload.php';
+require 'vendor/autoload.php';
 
 function _exec($input)
 {
@@ -79,6 +79,6 @@ function main()
     //_exec("rm tmp -rf");
 }
 
-$logger = new Core\Logger(__FILE__);
+$logger = new \Modules\Logger(__FILE__);
 
 exit(main());
