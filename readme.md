@@ -30,7 +30,7 @@ http://leonid.viewdns.net:7777/#/
 [![YouTube](https://i.ytimg.com/vi/PaGjC5L8tz8/0.jpg)](https://youtu.be/PaGjC5L8tz8)
 
 #### Server:
-[![SERVER](https://i.imgur.com/oEDUVoK.png)](https://github.com/iNewLegend/AppBasis/tree/master/server)
+[![SERVER](https://i.imgur.com/oEDUVoK.png)](https://github.com/iNewLegend/AppBasis/tree/master/src)
 
 #### Client:
 [![CLIENT](https://i.imgur.com/oxoqz23.png)](https://github.com/iNewLegend/AppBasis/tree/master/client)
