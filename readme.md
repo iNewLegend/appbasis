@@ -23,6 +23,11 @@
 
 ## Goals
   - Full async.
+  - Modular
+  - Well structured
+  - Readable
+  - Multi Engine Support
+  - Front-end(s): Angular, Vue, JQuery
   
 ## Demo
 
@@ -32,14 +37,29 @@ http://leonid.viewdns.net:7777/#/
 
 [![YouTube](https://i.ytimg.com/vi/PaGjC5L8tz8/0.jpg)](https://youtu.be/PaGjC5L8tz8)
 
-#### Server:
-[![SERVER](https://i.imgur.com/oEDUVoK.png)](https://github.com/iNewLegend/AppBasis/tree/master/src)
+#### Backend:
+[![SERVER](https://i.imgur.com/oEDUVoK.png)](https://github.com/iNewLegend/AppBasis/tree/master/doc/backend.md)
 
-#### Client:
-[![CLIENT](https://i.imgur.com/oxoqz23.png)](https://github.com/iNewLegend/AppBasis/tree/master/client)
+#### Frontend:
+[![CLIENT](https://i.imgur.com/oxoqz23.png)](https://github.com/iNewLegend/AppBasis/tree/master/doc/frontend.md)
+
+# Install
+```sh
+$ git clone https://github.com/iNewLegend/AppBasis.git
+```
+### Backend
+```sh
+$ composer update
+$ php appbasis.php server
+```
+### Frontend
+```sh
+$ cd frontend
+$ ng serve
+```
 
 ## TODO
-#### Server:
+#### Backend:
   -  add: log to file with rotate.
   -  think: of adding base for classes to handle destruct
   -  add: switch for server to using allocated memory 
@@ -65,13 +85,11 @@ http://leonid.viewdns.net:7777/#/
   -  add: in database, to handle created_at and updated_at                                https://medium.com/@bengarvey/use-an-updated-at-column-in-your-mysql-table-and-make-it-update-automatically-6bf010873e6a
   -  add: security `wrk -t4 -c500 -d10s http://localhost:51190/authorization/login/czf.leo123@gmail.com/badpass`
   -  think: friends can have parent.
-  
-#### Client:
+  -  move: `release.php` to `appbasis.php`
+
+#### Frontend:
   -  logger should be better, its should better demonstrate  client architecture
   -  handle in nice way, situation when server is offline
-  -  in api `clients` add socket.ts for live connection
-  -  chat at main page.
-  -  bug: at register when u click `reset` and then click `submit`, see!
 
 #### Both:
   -  add switch for debug\production mode
