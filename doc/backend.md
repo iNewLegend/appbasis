@@ -1,6 +1,33 @@
 # Backend
 ###
 
+[![SERVER](https://i.imgur.com/oEDUVoK.png)](https://i.imgur.com/oEDUVoK.png)
+
+````
+$ php appbasis.php
+
+[2018-10-13 10:35:13.640896][DEBUG][0000000000][s\AppBasis][Modules\Logger][initialize]: created new logger with name: `s\AppBasis` caller method: `appbasis.php::enteryPoint`
+[2018-10-13 10:35:13.641265][DEBUG][0000000001][s\Core\Auxiliary][Modules\Logger][initialize]: created new logger with name: `s\Core\Auxiliary` caller method: `Core\Auxiliary::boot`
+[2018-10-13 10:35:13.641315][INFO][0000000000][s\AppBasis][AppBasis][main]: start with command: `["welcome","index",[]]`
+[2018-10-13 10:35:13.641348][INFO][0000000000][s\AppBasis][AppBasis][main]: commands: >>
+{
+    "[ SYNTAX ]": "php appbasis.php <command> <method> <param1> <param2> [ etc ... ]",
+    "[ Command ]": "[ Description ]",
+    "0": "-------------------------------------",
+    "welcome": "Show this screen",
+    "reload": "Reload server vendor",
+    "server": "Run server",
+    "update": "Update core",
+    "backup": "Create self backup",
+    "template": {
+        "Create new template": "php appbasis.php template index"
+    }
+}
+[2018-10-13 10:35:13.641399][DEBUG][0000000000][s\AppBasis][Modules\Logger][__destruct]: destroying logger with name: `s\AppBasis` instance: `0000000000`
+[2018-10-13 10:35:13.641436][DEBUG][0000000001][s\Core\Auxiliary][Modules\Logger][__destruct]: destroying logger with name: `s\Core\Auxiliary` instance: `0000000001`
+
+````
+
 ## Folders;
     config - 
     controllers - 
