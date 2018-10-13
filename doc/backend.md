@@ -1,5 +1,7 @@
+# Backend
+###
 
-### Folders;
+## Folders;
     config - 
     controllers - 
     core - 
@@ -10,7 +12,7 @@
     modules -
     services -
 
-### Files;
+## Files;
 
 #### [*] file names most be one word and small (modesty)  
 
@@ -50,3 +52,9 @@
 * modules : no
 * services: no
 * controllers: no
+
+
+
+## Ideas (any source of inspiration)
+### [-] Database issue with connection gone away read next link https://en.wikipedia.org/wiki/Exponential_backoff
+### [-] For auth regeneration tokens read about next link https://www.google.bg/search?q=key+rotations&oq=key+rotations&aqs=chrome..69i57j0.207j0j1&sourceid=chrome&ie=UTF-8
