@@ -12,9 +12,7 @@
         "react/mysql": "dev-master#28b0055",
         "clue/block-react": "^1.3",
         "cboden/ratchet": "^0.4.1",
-        "react/filesystem": "^0.1.1",
         "react/child-process": "@dev"
-        
     },
     "autoload": {
     	"classmap": [
