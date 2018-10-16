@@ -23,7 +23,7 @@ class Pool
     private $callbacks = [];
 
     /**
-     * Slef Instance
+     * Self Instance
      *
      * @var \Services\Database
      */
@@ -111,10 +111,10 @@ class Pool
                 $this->databases[$i]->connect(function($error) use ($i, $token) {
                     if($error) {
                         $this->logger->callBackFire($token, $error->getMessage());
-                    }
-
-                    if($this->databases[$i]->isConnected()) {
+                    } elseif ($this->databases[$i]->isConnected()) {
                         $this->logger->callBackFire($token, $this->databases[$i]->getConnectionState());
+                    } else {
+                        $this->logger->callBackFire($token, "Unknown error in line: `" . __LINE__ . "`");
                     }
                 });
 
@@ -123,6 +123,8 @@ class Pool
 
             $this->logger->info('memory: ' . \Library\Helper::humanReadableSize(\memory_get_usage(true)));
 
+        } else {
+            $this->logger->critical("test database connection failed");
         }
     }
 
@@ -150,15 +152,15 @@ class Pool
             $loop->stop();    
         });
         
-        // prepare callback
+        // prepare callback logger
         $token = $this->logger->callBackSet("testConnection", "connect", uniqid());
 
         $testConnection->connect(function($error = null) use ($loop, $token, $testConnection) {
             if($error) {
                 $this->logger->callBackFire($token, $error->getMessage());
+            } else {
+                $this->logger->callBackFire($token, $testConnection->getConnectionState());
             }
-
-            $this->logger->callBackFire($token, $testConnection->getConnectionState());
 
             $loop->stop();    
         });
@@ -191,7 +193,7 @@ class Pool
     }
 
     /**
-     * Funciton try_onConnect() : 
+     * Function try_onConnect() : 
      * 
      * @return void
      */
@@ -206,7 +208,7 @@ class Pool
     /**
      * Function getOne() : Get Instance of Database Module
      * 
-     * @todo this just lame exmaple, find smart logic.
+     * @todo this just lame example, find smart logic.
      * 
      * @return mixed
      */

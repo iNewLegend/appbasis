@@ -23,7 +23,7 @@ class Handler
     private $storage = [];
 
     /**
-     * Funciton __construct() : Initialize Handler
+     * Function __construct() : Initialize Handler
      */
     public function __construct()
     {

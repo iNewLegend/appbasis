@@ -297,15 +297,27 @@ class Logger extends \Monolog\Logger
     /**
      * Function callBackFire() : @todo
      * 
-     * @param  [type] $token
-     * @param  [type] $msg
-     * @param  string $context
+     * @param  string   $token
+     * @param  mixed    $msg
+     * @param  string   $context
      * 
-     * @return [type]
+     * @return void
      */
-    public function callBackFire($token, $msg, string $context = '')
+    public function callBackFire(string $token, $msg, string $context = '')
     {
         if (!$this->initialized) {
+            return;
+        }
+
+
+        // object|array -> json
+        if (is_object($msg) || is_array($msg)) {
+            $msg = json_encode($msg);
+        }
+
+        if (! isset($this->callbacksTokens[$token])) {
+            $this->warning("token: `{$token}` not found, msg: `{$msg}` context: `{$context}`");
+
             return;
         }
 
@@ -320,10 +332,6 @@ class Logger extends \Monolog\Logger
         $selfFunction = __FUNCTION__;
         $selfClass    = __CLASS__;
 
-        // object|array -> json
-        if (is_object($msg) || is_array($msg)) {
-            $msg = json_encode($msg);
-        }
 
         if (empty($msg)) {
             if ($context == 'halt-on-null') {
