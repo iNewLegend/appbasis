@@ -61,6 +61,26 @@ class Ip
     }
 
     /**
+     * Function get() : Get IP Address
+     *
+     * @return void
+     */
+    public function getIp()
+    {
+        return $this->ip;
+    }
+
+    /**
+     * Function get() : Get IP Address
+     *
+     * @return void
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * Function __toString() : Return IP Address
      *
      * @return void

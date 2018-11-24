@@ -40,6 +40,20 @@ class Helper
         return sprintf($format, round($size, $round), $units[$i]);
     }
 
+    // test this function
+    public static function getArraySizeInBytes(array $array)
+    {
+        $serializedFoo = serialize($array);
+
+        if (function_exists('mb_strlen')) {
+            $size = mb_strlen($serializedFoo, '8bit');
+        } else {
+            $size = strlen($serializedFoo);
+        }
+        
+        return $size;
+    }
+
     /**
      * Function humanReadableTimeLeft() : Return timeleft from $start in human readable format.
      *

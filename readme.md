@@ -85,7 +85,7 @@ $ ng serve
   -  add: in database, to handle created_at and updated_at                                https://medium.com/@bengarvey/use-an-updated-at-column-in-your-mysql-table-and-make-it-update-automatically-6bf010873e6a
   -  add: security `wrk -t4 -c500 -d10s http://localhost:51190/authorization/login/czf.leo123@gmail.com/badpass`
   -  think: friends can have parent.
-  -  move: `release.php` to `appbasis.php`
+  -  add AppBasis extension(s) option
 
 #### Frontend:
   -  logger should be better, its should better demonstrate  client architecture
@@ -97,3 +97,4 @@ $ ng serve
   -  add debug level
   -  send all backend log to frontend component
   -  each file should have @propose doc.
+  -  add process manager

@@ -149,14 +149,18 @@ class Database
     {
         $deferred = new \React\Promise\Deferred();
 
-        //$token = $this->logger->callBackSet("query", $query, uniqid());
+        $token = null;
 
+        if (\Services\Config::get('logger')->module_database == \Config\Module_Database_Logs::DEEP) {
+            $token = $this->logger->callBackSet("query", $query, uniqid());
+        }
+        
         $this->connection->query($query)->then(
-            function (\React\MySQL\QueryResult $command) use ($deferred) {
-                // #todo: add debug level
-                //$this->logger->debugJson($command->resultRows, 'result');
-
-                //      $this->logger->callBackFire($token, $command->resultRows, 'halt-on-null');
+            function (\React\MySQL\QueryResult $command) use ($deferred, $token) {
+                if ($token) {
+                    $this->logger->debugJson($command->resultRows, 'result');
+                    $this->logger->callBackFire($token, $command->resultRows, 'halt-on-null');
+                }
 
                 $deferred->resolve($command);
             },
@@ -165,7 +169,7 @@ class Database
             }
         );
 
-        //$this->logger->callBackDeclare($token);
+        if ($token) $this->logger->callBackDeclare($token);
 
         return $deferred->promise();
     }

@@ -112,16 +112,22 @@ class WebSocket
             // ----
         ], $data);
 
-        $data = json_encode($data);
+        $json = json_encode($data);
+
+        if ($json == false) {
+            \Core\Auxiliary::getGlobalLogger()->error("json_encode() failed, data:");
+            \Core\Auxiliary::getGlobalLogger()->debugJson($data, "data");
+            return;    
+        }
 
         foreach ($clients as $client) {
             if ($client['ip'] !== $ip) {
                 continue;
             }
 
-            \Core\Auxiliary::getGlobalLogger()->debugJson($data, "sending to ip: `{$ip}`");
+            \Core\Auxiliary::getGlobalLogger()->debugJson($json, "sending to ip: `{$ip}`");
 
-            $client['conn']->send($data);
+            $client['conn']->send($json);
 
             // # CRITICAL;
             return;
@@ -342,7 +348,18 @@ class OnCommand implements \Ratchet\MessageComponentInterface
 
         $output = $this->handler->onCommand($ip, $data, $hash);
 
+        // part of AppBasis websocket protocol
         if (isset($protocol) && get_class($data) == "Modules\Command") {
+            // # NOTICE: this is need to be checked this is code should not be.
+            if (is_string($output)) {
+                $temp = $output;
+
+                $output = array();
+
+                $output['code'] = 'msg';
+                $output['msg'] = $temp;
+            }
+
             /** @var \Modules\Command $data */
             $output['type']   = $protocol->getType();
             $output['name']   = $protocol->getName();
@@ -351,9 +368,9 @@ class OnCommand implements \Ratchet\MessageComponentInterface
 
         // from object to json object
         if (is_string($output)) {
-            $output = json_encode($output);
+            $output = json_encode($output, true);
         } elseif (is_array($output)) {
-            $output = json_encode($output);
+            $output = json_encode($output, true);
         }
 
         $this->logger->debugJson($output);

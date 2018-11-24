@@ -14,6 +14,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgxCaptchaModule } from 'ngx-captcha';
+import { NgxLoadingModule } from 'ngx-loading';
+
 import { MomentModule } from 'ngx-moment';
 
 import { routes } from './app.router';
@@ -22,19 +24,17 @@ import { environment } from 'environments/environment';
 import { AppComponent } from './app.component';
 import { API_Module } from './api/module';
 
-import { HeaderComponent } from './template/header/header.component';
+import { HeaderComponent } from './header/header.component';
 
-import { RegisterFormComponent } from 'app/template/register-form/register-form.component';
-import { LoginFormComponent } from 'app/template/login-form/login-form.component';
+import { RegisterFormComponent } from 'app/iron/register-form/register-form.component';
+import { LoginFormComponent } from 'app/iron/login-form/login-form.component';
+import { UpdatesComponent } from 'app/iron/updates/updates.component';
+import { ChatMessageComponent } from 'app/iron/chat/chat-message/chat-message.component';
 
-import { PageIndexComponent } from './page-index/page-index.component';
-import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
-import { PageFeedComponent } from './page-feed/page-feed.component';
+import { PageIndexComponent } from './pages/page-index/page-index.component';
+import { PageNotFoundComponent } from './pages/page-not-found/page-not-found.component';
+import { PageChatComponent } from './pages/page-chat/page-chat.component';
 
-import { UpdatesComponent } from './template/updates/updates.component';
-import { PageChatComponent } from './page-chat/page-chat.component';
-
-import { ChatMessageComponent } from './template/chat/chat-message/chat-message.component';
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 @NgModule({
@@ -48,7 +48,6 @@ import { ChatMessageComponent } from './template/chat/chat-message/chat-message.
 
     PageIndexComponent,
     PageNotFoundComponent,
-    PageFeedComponent,
     PageChatComponent,
 
     ChatMessageComponent,
@@ -66,6 +65,7 @@ import { ChatMessageComponent } from './template/chat/chat-message/chat-message.
     NgxCaptchaModule.forRoot({
       invisibleCaptchaSiteKey: environment.captcha_key
     }),
+    NgxLoadingModule.forRoot({}),
     API_Module.forRoot(),
   ],
   providers: [

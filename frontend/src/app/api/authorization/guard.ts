@@ -26,7 +26,7 @@ export class API_Guard_Authorization_Require implements CanActivate {
     
     constructor(private auth: API_Service_Authorization) {
         // ----
-        this.logger = new Logger("API_Guard_Authorization_Require");
+        this.logger = new Logger(this);
         this.logger.debug("API_Guard_Authorization_Require", "");
     }
     //----------------------------------------------------------------------
@@ -49,7 +49,7 @@ export class API_Guard_Authorization_Authorized implements CanActivate {
         private auth: API_Service_Authorization,
         private router: Router) {
         // ----
-        this.logger = new Logger("API_Guard_Authorization_Authorized");
+        this.logger = new Logger(this);
         this.logger.debug("constructor", "");
     }
     //----------------------------------------------------------------------
@@ -72,7 +72,7 @@ export class API_Guard_Authorization_Unauthorized implements CanActivate {
         private auth: API_Service_Authorization,
         private router: Router) {
         // ----
-        this.logger = new Logger("API_Guard_Authorization_Unauthorized");
+        this.logger = new Logger(this);
         this.logger.debug("constructor", "");
     }
     //----------------------------------------------------------------------
@@ -86,7 +86,7 @@ export class API_Guard_Authorization_Unauthorized implements CanActivate {
                 let authState = this.api.getAuthState();
                 
                 if(authState == API_Model_Authorization_States.AUTHORIZED) {
-                    this.router.navigate(['feed']);
+                    this.router.navigate(['chat']);
                     //alert();
                 } else if(authState == API_Model_Authorization_States.UNAUTHORIZED) {
                     //this.router.navigate(['index/register']);

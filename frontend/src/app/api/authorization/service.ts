@@ -29,7 +29,7 @@ export class API_Service_Authorization {
         private api: API_Service,
         private request: API_Request_Authorization) {
         // ----
-        this.logger = new Logger("API_Service_Authorization");
+        this.logger = new Logger(this);
         this.logger.debug("constructor", "");
     }
 
@@ -55,6 +55,8 @@ export class API_Service_Authorization {
 
     public passThrough() : Observable<boolean>
     {
+        this.logger.debug("passThrough", "");
+
         let subject = new Subject<boolean>();
         let hash = this.api.getAuthHash();
 
@@ -135,6 +137,8 @@ export class API_Service_Authorization {
     public login(data: API_Model_Authorization_Send, callback): void {
         this.logger.startWith("login", data);
         this.logger.debug("login", " callback: `" + Boolean(callback) + "`")
+
+        this.api.setAuthState(API_Model_Authorization_States.PREPARE);
 
         this.request.login(data, function (data) {
             this.setResult(data);   

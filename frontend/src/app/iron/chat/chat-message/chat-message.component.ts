@@ -31,7 +31,7 @@ export class ChatMessageComponent implements OnInit {
 
     constructor() {
         // ----
-        this.logger = new Logger("ChatMessageComponent");
+        this.logger = new Logger(this);
         this.logger.debug("constructor", "");
         // ----
     }

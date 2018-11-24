@@ -34,7 +34,7 @@ export class UpdatesComponent implements OnInit {
   constructor(
     private welcome: API_Request_Welcome) {
     // ----
-    this.logger = new Logger("UpdatesComponent");
+    this.logger = new Logger(this);
     this.logger.debug("constructor", "");
     // ----
   }

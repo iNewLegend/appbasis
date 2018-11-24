@@ -7,8 +7,7 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 
-import { API_Service } from "../api/service";
-import { API_Model_Authorization_States } from "../api/authorization/model";
+import { API_Service } from "app/api/service";
 
 import { Logger } from 'app/logger';
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -34,7 +33,7 @@ export class PageIndexComponent implements OnInit {
         private router: ActivatedRoute,
         private api: API_Service,) {
         // ----
-        this.logger = new Logger("PageIndexComponent");
+        this.logger = new Logger(this);
         this.logger.debug("constructor", "");
         // ----
    }

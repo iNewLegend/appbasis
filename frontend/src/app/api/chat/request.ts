@@ -17,32 +17,33 @@ import {  API_Chat_Message_Recv } from './model';
 
 @Injectable()
 
-export class API_Request_Chat  {
+export class API_Request_Chat extends API_Request  {
     //----------------------------------------------------------------------
-    protected _name = 'chat';
     private logger: Logger;
     
     //----------------------------------------------------------------------
 
-    constructor(private client: API_Client_WebSocket) {  
+    constructor(protected websocket: API_Client_WebSocket) {  
         // ----
-        this.logger = new Logger("API_Request_Chat");
-        this.logger.startWith("constructor", { client: client.constructor.name });
+        super('chat');
+        // ----
+        this.logger = new Logger(this);
+        this.logger.startWith("constructor", { client: this.constructor.name });
     }
     //----------------------------------------------------------------------
     
     public bind(callback, params = {}) {
-        this.client.create(this._name, callback, params);
-    }
-    //----------------------------------------------------------------------
-
-    public message(message: String, callback) {
-        this.client.post(this._name, "message", message , callback);
+        return this.socketBind(callback, params);
     }
     //----------------------------------------------------------------------
 
     public hook(method, callbackResult, callbackHook) {
-        this.client.customHook(this._name, method, callbackResult, callbackHook);
+        return this.socketHook(method, callbackResult , callbackHook);
+    }
+    //----------------------------------------------------------------------
+
+    public message(message: String, callback) {
+        this.socketPost("message", message , callback);
     }
     //----------------------------------------------------------------------
 }

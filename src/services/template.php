@@ -3,7 +3,7 @@
  * @file: services/template.php
  * @author: Leonid Vinikov <czf.leo123@gmail.com>
  *
- * @todo: rewrite and optimize
+ * @todo: fully rewrite and optimize, think of global function which parse templates
  */
 
 namespace Services;

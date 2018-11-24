@@ -5,7 +5,7 @@
 
 export const environment = {
   production: false,
-  http_base: 'http://leonid.viewdns.net:51190/',
-  websocket_base: 'ws://leonid.viewdns.net:51192/',
+  http_base: 'http://leonid.viewdns.net:51194/',
+  websocket_base: 'ws://leonid.viewdns.net:51196/',
   captcha_key: '6Le5p2kUAAAAAHbrEDT04OhpQolfXyzAv2NtXnAz',
 };

@@ -63,7 +63,7 @@ class Handler
     public function onConnect(\Core\OObject $object, \Modules\Ip $ip)
     {
         if ($this->logger) {
-            $this->logger->info("new connection from: `{$ip}`");
+            $this->logger->info("new connection from: `{$ip->address}`");
         }
 
         // # Notice: this is temporal code, todo find a good way todo it
@@ -89,7 +89,7 @@ class Handler
     public function onCommand(\Modules\Ip $ip, \Modules\Command $command, string $hash = '')
     {
         if ($this->logger) {
-            $this->logger->debug("`{$ip}` command:`{$command}` hash:`{$hash}`");
+            $this->logger->debug("`{$ip->address}` command:`{$command}` hash:`{$hash}`");
         }
 
         /**
@@ -137,7 +137,7 @@ class Handler
                 $output = $e->getMessage();
             }
         } else {
-            $output = "cannot start command ip: `{$ip}` not found in client list";
+            $output = "cannot start command ip: `{$ip->address}` not found in client list";
             if ($this->logger) {
                 $this->logger->critical($output);
             }
@@ -157,7 +157,7 @@ class Handler
     public function onDisconnect(\Modules\Ip $ip)
     {
         if ($this->logger) {
-            $this->logger->info("ip: `{$ip}`");
+            $this->logger->info("ip: `{$ip->address}`");
         }
 
         unset($this->storage[$ip]);

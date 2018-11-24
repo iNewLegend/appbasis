@@ -58,7 +58,7 @@ export class RegisterFormComponent implements OnInit {
         private router: Router,
         private api: API_Service) {
         // ----
-        this.logger = new Logger("SignUpFormComponent");
+        this.logger = new Logger(this);
         this.logger.debug("constructor", "");
         // ----
         this.formData = {

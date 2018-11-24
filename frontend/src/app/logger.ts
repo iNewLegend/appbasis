@@ -4,31 +4,25 @@ import { isObject, isFunction } from "util";
  * @file: app/logger.ts
  * @author: Leonid Vinikov <czf.leo123@gmail.com>
  * @description: 
- * @todo: check comments, avoid random colors, set static color from parent.
+ * @todo:
  */
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 export class Logger {
     //----------------------------------------------------------------------
-    protected name: string;
-    protected color: string;
+    private name: string;
+    private color: string;
 
     //----------------------------------------------------------------------
 
-    constructor(name: string) {
-        this.name = name;
+    public constructor(owner: any) {
+        if (typeof owner == 'string') {
+            this.name = owner;
+        } else {
+            this.name = owner.constructor.name;
+        }
 
-        // handle it somehow in smarter way
-        switch(this.name) {
-            case "API_Service": this.color = "red";
-            return;
-
-            case "API_Client_Http": this.color = "green"; 
-            return;
-
-            default:
-                this.color = this.getRandomColor();
-        }   
+        this.color = this.getRandomColor();
     }
     //----------------------------------------------------------------------
 
@@ -51,7 +45,7 @@ export class Logger {
     }
     //----------------------------------------------------------------------
 
-    getRandomColor() {
+    public getRandomColor() {
         var letters = '0123456789ABCDEF';
         var color = '#';
         for (var i = 0; i < 6; i++) {
@@ -61,12 +55,13 @@ export class Logger {
     }
     //----------------------------------------------------------------------
 
-    debug(source: string, output: string) {
+    public debug(source: string, output: string) {
+        
         console.log("%c" +this.name + "%c::" + source + "()" + output, "color: " + this.color, "color: black");
     }
     //----------------------------------------------------------------------
 
-    startWith(source: string, params: any) : void {
+    public startWith(source: string, params: any) : void {
         if(typeof params == "string") {
             console.log("%c" + this.name +  "%c::" + source + "() ->> string: `" + params + "`", "color: " + this.color, "color: black");
 
@@ -90,7 +85,7 @@ export class Logger {
     }
     //----------------------------------------------------------------------
 
-    recv(source:string, params: any, data: any) : void {
+    public recv(source:string, params: any, data: any) : void {
         if(typeof data === "string") {
             console.log("%c" + this.name +  "%c::" + source + "() ->> R> data: `" + data + "` ", "color: " + this.color, "color: black");
             
@@ -103,7 +98,5 @@ export class Logger {
         }
         console.log(data);
     }
-    //----------------------------------------------------------------------
-
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------------

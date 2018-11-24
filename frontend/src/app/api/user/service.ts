@@ -30,7 +30,7 @@ export class API_Service_User {
         private auth: API_Service_Authorization,
         private request: API_Request_User) {
         // ----
-        this.logger = new Logger("API_Service_User");
+        this.logger = new Logger(this);
         this.logger.debug("constructor", "");
         // ----
         api.authState$.subscribe((newAuthState: API_Model_Authorization_States) => this.onAuthChanges(newAuthState));
@@ -40,23 +40,27 @@ export class API_Service_User {
 
     //----------------------------------------------------------------------
 
-    public onAuthChanges(newAuthState: API_Model_Authorization_States) {
+    private onAuthChanges(newAuthState: API_Model_Authorization_States) {
         if (newAuthState == API_Model_Authorization_States.AUTHORIZED) {
             this.request.index(this.indexResult.bind(this));
         }
     }
     //----------------------------------------------------------------------
 
-
-    public indexResult(data: API_User_Index_Recv) {
+    private indexResult(data: API_User_Index_Recv) {
         this.logger.startWith("indexResult", data);
 
         this.data = data;
     }
     //----------------------------------------------------------------------
 
-    public getAll(): API_User_Index_Recv {
+    public getAll() : API_User_Index_Recv {
         return this.data;
+    }
+    //----------------------------------------------------------------------
+
+    public getId() {
+        return this.data.id;
     }
     //----------------------------------------------------------------------
 

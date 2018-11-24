@@ -15,6 +15,7 @@
     },
     "autoload": {
     	"classmap": [
+            "src/interfaces",
             "src/core",
             "src/modules",
             "src/config",

@@ -247,11 +247,16 @@ class Http
 
         $status = 200; // HTTP_OK
 
+        // output send data parser
+
         if (is_string($output)) {
             $contentType = 'text/plain';
         } else if (is_array($output)) {
             $output      = json_encode($output);
             $contentType = 'application/json';
+        } else if (is_bool($output)) {
+            $contentType = 'text/plain';
+            $output = var_export($output, true);
         } else {
             $status      = 500; // HTTP_INTERNAL_SERVER_ERROR
             $contentType = 'text/plain';

@@ -41,7 +41,6 @@ export class API_Module {
       providers: [
         API_Service,
         API_Client_Http,
-        ,
 
         API_Service_Authorization,
         API_Guard_Authorization_Unauthorized,

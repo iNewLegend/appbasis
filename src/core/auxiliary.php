@@ -40,22 +40,46 @@ class Auxiliary
      * Array of extra services that can be passed from startup.
      * @var array
      */
-    public static $extServices;
+    public static $extServices = array();
+
+    /**
+     * Array of extra controllers that can be passed from startup.
+     * @var array
+     */
+    public static $extControllers = array();
+
+    /**
+     * Bool, heartbeat used as (pointer from AppBasis.php) will run main loop till it false.
+     *
+     * @var boolean
+     */
+    private static $heartbeat;
 
     /**
      * Function boot : AppBasis initial function.
-     *
+     * 
      * @param \Modules\Logger $logger
      *
      * @return void
      */
-    public static function boot(\Modules\Logger $logger = null)
+    public static function boot(\Modules\Logger $logger = null, & $heartbeat_address)
     {
         if (empty($logger)) {
             $logger = new \Modules\Logger(self::class);
         }
 
         self::$globalLogger = $logger;
+        self::$heartbeat = & $heartbeat_address;
+    }
+
+    public static function extServices(array $services)
+    {
+        self::$extServices = $services;
+    }
+
+    public static function extControllers(array $controllers)
+    {
+        self::$extControllers = $controllers;
     }
 
     /**
@@ -68,8 +92,12 @@ class Auxiliary
      *
      * @return \stdClass
      */
-    public static function auto(bool $createCore = false, bool $createLoop = false, array $extraServices = [])
+    public static function auto(bool $createCore = false, bool $createLoop = false)
     {
+        if (! self::$globalLogger) {
+            self::shutdown(0, "auto() function cannot run without boot() first. ", __CLASS__, __FUNCTION__);
+        }
+
         $return = new \stdClass();
 
         $return->core = false;
@@ -81,8 +109,6 @@ class Auxiliary
             self::createLoop();
             $return->loop = true;
         }
-
-        self::$extServices = $extraServices;
 
         if ($createCore) {
             self::$globalCore = new \Core\Core(self::$globalLogger, new \Modules\Ip('0.0.0.0'), self::class, array_merge([
@@ -163,6 +189,11 @@ class Auxiliary
     public static function getGlobalLogger()
     {
         return self::$globalLogger;
+    }
+
+    public static function heartbeat()
+    {
+        return self::$heartbeat;
     }
 
     /**

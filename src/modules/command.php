@@ -59,9 +59,14 @@ class Command
 
         $countParameters = count($this->getParameters());
 
-        if (!$countParameters) {
+        $this->noParameters = true;
+        $this->noSubParameters = true;
+
+        if ($countParameters) {
             $this->noParameters = false;
-        } else if ($countParameters > 1) {
+        }
+        
+        if ($countParameters > 1) {
             $this->noSubParameters = false;
         }
     }
@@ -193,7 +198,7 @@ class Command
     /**
      * Function __toString() : Return's command in JSON format
      *
-     * @return striing
+     * @return string
      */
     public function __toString()
     {

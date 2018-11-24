@@ -82,8 +82,8 @@ class Core
 
         // ack controllers about disconnection
         foreach ($this->getControllers() as $controller) {
-            if (method_exists($controller, 'disconnect')) {
-                $controller->disconnect();
+            if ($controller instanceof \Interfaces\Controller\Disconnect) {
+                $controller->_disconnect();
             }
         }
 
@@ -270,7 +270,7 @@ class Core
     {
         // print debug
         $debugCmd = strlen($cmd) > 50 ? substr($cmd, 0, 50) . "[ and more ... ]" : $cmd;
-        $this->logger->debug($debugCmd);
+        $this->logger->notice($debugCmd);
 
         // parse command to object as needed
         if ($cmd instanceof \Modules\Command) {
@@ -311,9 +311,9 @@ class Core
 
         // here we think that maybe it is controller
         $this->logger->debug("assuming command: `{$name}` is controller");
-
+    
         // create controller
-        $controller = new \Core\Controller($this->cmd->getName(), $this->container, false, false/* debug */ );
+        $controller = new \Core\Controller($this->cmd->getName(), $this->container, false);
 
         // check if the controller is available
         if (!$controller->isAvailable()) {

@@ -29,7 +29,7 @@ export class API_Service {
     authState$: Observable<API_Model_Authorization_States>;
 
     constructor() {
-        this.logger = new Logger("API_Service");
+        this.logger = new Logger(this);
         this.logger.debug("constructor", "");
 
         this.authState$ = this.authState.asObservable();
@@ -38,7 +38,6 @@ export class API_Service {
 
     setAuthHash(hash: string) {
         this.logger.startWith("setHash", { hash: hash });
-        //console.log( new Error().stack );
         // ----
         localStorage.setItem('hash', hash);
     }

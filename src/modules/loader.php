@@ -13,35 +13,35 @@ class Loader
      *
      * @var \Core\Container
      */
-    protected $container;
+    protected $container = null;
 
     /**
      * The handler of the object
      *
      * @var mixed
      */
-    protected $handler;
+    protected $handler = null;
 
     /**
      * Object name
      *
      * @var string
      */
-    protected $name;
+    protected $name = '';
 
     /**
      * Object full namespace + class name
      *
      * @var string
      */
-    protected $fullName;
+    protected $fullName = '';
 
     /**
      * Object path
      *
      * @var string
      */
-    private $path;
+    private $path = '';
 
     /**
      * Is the object available
@@ -77,7 +77,13 @@ class Loader
     {
         $this->name      = $name;
         $this->container = $container;
-        $this->path      = \Library\Helper::basePath() . '/' . $path;
+
+        // we know that we are not dealing with something that needs base path
+        if ($path[0] !== '/') {
+            $this->path = \Library\Helper::basePath() . '/';
+        }
+
+        $this->path      .= $path;
         $this->fullName  = $fullName;
 
         $this->initialize($autoLoad);

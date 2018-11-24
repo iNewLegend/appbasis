@@ -25,18 +25,20 @@ import { Logger } from './logger';
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 export class AppComponent implements OnInit {
-    public currentRoute: string;
     private logger: Logger;
+
+    public loading = true;
+    public disconnected = false;
+    //----------------------------------------------------------------------
 
     constructor(
         private router: Router,
         private api: API_Service,
         private auth: API_Service_Authorization) {
         // ----
-        this.logger = new Logger("AppComponent");
+        this.logger = new Logger(this);
         this.logger.debug("constructor", "");
         // ----
-        this.currentRoute = this.router.url;
 
         this.router.events.subscribe((res) => {
             if (res instanceof NavigationEnd) {
@@ -53,20 +55,31 @@ export class AppComponent implements OnInit {
     //----------------------------------------------------------------------
 
     public ngOnInit() {
-        
+        this.loading = true;
     }
     //----------------------------------------------------------------------
 
     public onRouteChanged(url: string) {
         this.logger.startWith("onRouteChanged", {url: url});
-
-        // # set the current url
-        this.currentRoute = this.router.url;
     }
     //----------------------------------------------------------------------
 
     public onAuthChanges(newAuthState: API_Model_Authorization_States) {
+        switch(newAuthState) {
+            case API_Model_Authorization_States.AUTHORIZED:
+            case API_Model_Authorization_States.UNAUTHORIZED:
+            case API_Model_Authorization_States.VERIFY:
+            this.loading = false;
+            break;
 
+            case API_Model_Authorization_States.DISCONNECTED:
+            this.loading = false;
+            this.disconnected = true;
+            break;
+
+            default:
+            this.loading = true;
+        }
     }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------------

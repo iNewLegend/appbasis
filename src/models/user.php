@@ -107,7 +107,7 @@ class User
      */
     public function getForEndpoint(string $id)
     {
-        $result = $this->database->queryAwait("SELECT isactive, email, firstname, lastname, created_at, updated_at FROM users WHERE id = '{$id}'");
+        $result = $this->database->queryAwait("SELECT id, isactive, email, firstname, lastname, created_at, updated_at FROM users WHERE id = '{$id}'");
 
         if (isset($result->resultRows[0])) {
             $result = $result->resultRows[0];

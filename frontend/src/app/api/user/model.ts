@@ -7,6 +7,7 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 export class API_User_Index_Recv {
+    id: String;
     isactive: Boolean;
     email: String;
     firstname: String;

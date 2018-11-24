@@ -13,5 +13,5 @@ class Database extends \Services\Config\Base
     protected $host = 'localhost';
 
     protected $username = 'root';
-    protected $password = 'passw0rd';
+    protected $password = '';
 } // EOF config/database.php

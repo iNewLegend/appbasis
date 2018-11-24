@@ -9,21 +9,21 @@
 import "rxjs/add/operator/map"
 
 import { Injectable } from "@angular/core";
-import { Http, Response, Headers } from "@angular/http";
+
+import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
+
+import { API_Service } from "../service"
+import { API_Model_Authorization_States } from "../authorization/model";
 
 import { Logger } from "../../logger";
 import { environment } from "../../../environments/environment";
-
-import { API_Service } from "../service";
-import { Subject, Observable } from "rxjs";
-import { WebSocketSubject } from "rxjs/observable/dom/WebSocketSubject";
-import { API_Model_Authorization_States } from "../authorization/model";
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 export class API_Hook {
     //----------------------------------------------------------------------
     constructor(    
         public type,
+        // public controller should be addded.
         public method,
         public callback) {
         // ----
@@ -40,7 +40,6 @@ export class API_Client_WebSocket {
     private logger: Logger; 
     private socket: WebSocketSubject<any>;
 
-
     //----------------------------------------------------------------------
 
     constructor(private api: API_Service) {
@@ -50,7 +49,7 @@ export class API_Client_WebSocket {
     }
     //----------------------------------------------------------------------
 
-    public create(command: string, callback = null, params = null) {
+    public create(command: String, callback = null, params = null) {
         this.logger.startWith("create", {
             command: command,
             callback: Boolean(callback),
@@ -76,7 +75,7 @@ export class API_Client_WebSocket {
             //() => void
         );
      
-        this.post(command, "auth", params, callback);
+        return this.post(command, "auth", params, callback);
     }
     //----------------------------------------------------------------------
 
@@ -126,7 +125,7 @@ export class API_Client_WebSocket {
     }
     //----------------------------------------------------------------------
 
-    public customHook(controller: String, method: String, callbackResult, callBackHook) {
+    public customHook(controller, method, callbackResult, callBackHook) {
         this.logger.startWith("customHook", {
             controller: controller,
             method: method
@@ -153,12 +152,12 @@ export class API_Client_WebSocket {
     
     //----------------------------------------------------------------------
 
-    public get(name: string, method: String, callback = null) : any {
-        /*this.logger.startWith("get", { 
+    public get(name: String, method: String, callback = null) : any {
+        this.logger.startWith("get", { 
             name: name,
             method: method,
             callback: Boolean(callback)
-        });*/
+        });
 
         // hook a callback in necessary 
         if (callback) {
@@ -175,12 +174,12 @@ export class API_Client_WebSocket {
     //----------------------------------------------------------------------
 
     public post(name: String, method: String, params: Object, callback = null) : any {
-        /*this.logger.startWith("post", { 
+        this.logger.startWith("post", { 
             name: name,
             method: method,
             params: JSON.stringify(params),
             callback: Boolean(callback)
-        });*/
+        });
 
         // hook a callback in necessary 
         if (callback) {

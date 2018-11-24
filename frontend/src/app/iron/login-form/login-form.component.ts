@@ -53,7 +53,7 @@ export class LoginFormComponent implements OnInit {
         private api: API_Service,
         private auth: API_Service_Authorization) {
         // ----
-        this.logger = new Logger("LoginFormComponent");
+        this.logger = new Logger(this);
         this.logger.debug("constructor", "");
 
         this.noticeType = null;

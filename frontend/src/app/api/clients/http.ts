@@ -74,9 +74,19 @@ export class API_Client_Http {
                 // # callback
 
                 subject.next(callback(data));
-            }).subscribe((error) => {
-                //
-            });
+            }).subscribe(
+                result => {
+                  // Handle result
+                  console.log(result)
+                },
+                error => {
+                    console.log(error);
+                    this.api.setAuthState(API_Model_Authorization_States.DISCONNECTED);
+                },
+                () => {
+                  // 'onCompleted' callback.
+                  // No errors, route to new page here
+                });
 
             return subject;
         } 

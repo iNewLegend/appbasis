@@ -34,10 +34,24 @@ class Controller extends \Modules\Loader
     {
         $this->logger = new \Modules\Logger(self::class, \Services\Config::get('logger')->core_controller);
 
+        // #notice: this is not good idea, but for while we will use it.
+        # \Core\Auxiliary::$extControllers should be private
+        # this file should not access Auxiliary
+
+        $controllerName = self::SPACE . ucfirst($name);
+        $controllerPath = self::PATH . $name . '.php';
+        $name = ucfirst($name);
+
+        if (in_array($controllerName, \Core\Auxiliary::$extControllers)) {
+            $this->logger->notice("controller: {$controllerName} found in extension folder, attempting to use.");
+            
+            $controllerPath = (new \ReflectionClass($controllerName))->getFileName();
+        }
+
         parent::__construct(
-            ucfirst($name),
-            self::PATH . $name . '.php',
-            self::SPACE . ucfirst($name),
+            $name,
+            $controllerPath,
+            $controllerName,
             $container,
             $autoLoad
         );

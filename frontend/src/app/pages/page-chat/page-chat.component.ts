@@ -1,21 +1,21 @@
 
 /**
- * @file: app/page-index/page.component.ts
+ * @file: app/pages/page-index/page.component.ts
  * @author: Leonid Vinikov <czf.leo123@gmail.com>
  */
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy, AfterViewInit, AfterContentInit } from "@angular/core";
+import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
 
-
-import { API_Service } from "../api/service";
+import { API_Service } from "app/api/service";
 import { API_Request_Chat } from "app/api/chat/request"
 import { API_Chat_Message_Recv } from 'app/api/chat/model'
 
-import { Logger } from 'app/logger';
-import { API_Client_WebSocket } from "../api/clients/websocket";
+import { API_Client_WebSocket } from "app/api/clients/websocket";
 
-import { ChatMessageComponent } from "app/template/chat/chat-message/chat-message.component"
+import { ChatMessageComponent } from "app/iron/chat/chat-message/chat-message.component"
+
+import { Logger } from 'app/logger';
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 declare var window: any;
@@ -71,7 +71,7 @@ export class PageChatComponent implements OnInit {
         private chat: API_Request_Chat,
         private api: API_Service) {
         // ----
-        this.logger = new Logger("PageChatComponent");
+        this.logger = new Logger(this);
         this.logger.debug("constructor", "");
     }
     //---------------------------------------------------------------------------

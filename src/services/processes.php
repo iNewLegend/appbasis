@@ -1,17 +1,17 @@
 <?php
 /**
- * @file: services/_NAME.php
+ * @file: services/processes.php
  * @author: Name <email@email.com>
  */
 
 namespace Services;
 
-class __NAME
+class Processes
 {
     /**
      * Self instance
      *
-     * @var \Services\__NAME
+     * @var \Services\Processes
      */
     private static $instance;
 
@@ -25,20 +25,20 @@ class __NAME
     /**
      * Function get() : Get self service
      *
-     * @return \Services\__NAME | null
+     * @return \Services\Processes | null
      */
     public static function get()
     {
         if (empty(self::$instance)) {
 
-            self::$instance = new __NAME($logger, $database);
+            self::$instance = new Processes($logger, $database);
         }
 
         return self::$instance;
     }
 
     /**
-     * Function __construct() : Construct __NAME Service
+     * Function __construct() : Construct Processes Service
      *
      * @param \Modules\Logger $logger
      * @param \Modules\Database $database
@@ -47,14 +47,13 @@ class __NAME
     {
         $this->logger = $logger;
 
-
-        $this->config = \Services\Config::get("__NAME");
+        $this->config = \Services\Config::get("Processes");
 
         $this->initialize();
     }
 
     /**
-     * Function initialize() : Initialize __NAME Service
+     * Function initialize() : Initialize Processes Service
      * 
      * @return void
      */
@@ -63,4 +62,4 @@ class __NAME
         $this->logger->debug("loaded");
     }
 
-} // EOF services/_NAME.php
+} // EOF services/processes.php

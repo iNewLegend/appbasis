@@ -1,31 +1,58 @@
-import { API_Client_Http } from "./clients/http";
-
 /**
- * @file: app/api/request
+ * @file: app/api/request.ts
  * @author: Leonid Vinikov <czf.leo123@gmail.com>
  * @description:
- * @todo: this is file should be removed.
+ * @todo:
  */
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-export class API_Request  {
-    protected _name = 'welcome';
-    protected _client;
+import { API_Client_WebSocket } from './clients/websocket'
+import { API_Client_Http } from './clients/http';
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+export class API_Request {
+    protected controller: String;
+    protected websocket: API_Client_WebSocket;
+    protected http: API_Client_Http;
     //----------------------------------------------------------------------
 
-    constructor(client) {
-        this._client = client;
+    protected constructor(controller: String) {
+        this.controller = controller;
     }
     //----------------------------------------------------------------------
 
-    protected get(method: String, callback = null) : any {
-        return this._client.get(this._name + '/' + method, callback);
+    protected socketBind(callback = null, params = {}) {
+        return this.websocket.create(this.controller, callback, params);
     }
     //----------------------------------------------------------------------
     
-    protected post(method: String, params: String, callback = null) {
-        return this._client.post(this._name + '/' + method, params, callback);
+    protected socketHook(method, callbackResult, callbackHook) {
+        return this.websocket.customHook(this.controller, method, callbackResult, callbackHook);
     }
     //----------------------------------------------------------------------
+
+    protected socketGet(method: String, callback = null) {
+        return this.websocket.get(this.controller, method, callback);
+    }
+    //----------------------------------------------------------------------
+
+    protected socketPost(method: String, data, callback = null) {
+        return this.websocket.post(this.controller, method, data, callback);
+    }
+    //----------------------------------------------------------------------
+
+    protected httpSet(http: API_Client_Http) {
+        this.http = http;
+    }
+    //----------------------------------------------------------------------
+
+    protected httpGet(method: String, callback = null) {
+        return this.http.get(this.controller + '/' + method, callback);
+    }
+    //----------------------------------------------------------------------
+
+    protected httpPost(method: String, data, callback = null) {
+        return this.http.post(this.controller + '/' + method, data, callback);
+    }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -11,21 +11,3 @@ if (environment.production) {
 }
 
 platformBrowserDynamic().bootstrapModule(AppModule);
-/*
-var xhttp = new XMLHttpRequest();
-
-xhttp.onreadystatechange = function () {
-  if (this.readyState == 4) {
-    if (this.status == 200) {
-      platformBrowserDynamic().bootstrapModule(AppModule);
-    } else {
-      let out = "cannot connect to API Server: `" + environment.http_base + '`';
-
-      document.getElementsByClassName('container')[0].innerHTML = "<pre>" + out + "</pre>";
-    }
-  }
-};
-
-xhttp.open("GET", environment.http_base, true);
-xhttp.send();
-*/

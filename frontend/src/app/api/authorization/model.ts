@@ -13,6 +13,7 @@ export enum API_Model_Authorization_States {
     UNAUTHORIZED,
     AUTHORIZED,
     BLOCKED,
+    DISCONNECTED,
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -24,7 +24,7 @@ export class API_Resolve_User implements Resolve<any> {
     constructor(    
         private request: API_Request_User) {
         // ----
-        this.logger = new Logger("PageTimelineComponent");
+        this.logger = new Logger(this);
         this.logger.debug("constructor", "");
     }
     //----------------------------------------------------------------------

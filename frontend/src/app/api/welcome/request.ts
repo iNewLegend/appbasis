@@ -16,22 +16,22 @@ import { API_Model_Welcome_Updates } from '../welcome/model'
 @Injectable()
 
 export class API_Request_Welcome extends API_Request {
-    protected _name = 'welcome';
     private logger: Logger;
     //----------------------------------------------------------------------
 
-    constructor(private client: API_Client_Http) {
-        super(client);
+    constructor(protected http: API_Client_Http) {
+        // ----
+        super('welcome');
         // ----
         this.logger = new Logger("API_Request_Welcome");
-        this.logger.startWith("constructor", { client: client.constructor.name });
+        this.logger.startWith("constructor", { client: this.constructor.name });
     }
     //----------------------------------------------------------------------
 
-    public updates(callback): void {
+    public updates(callback) {
         this.logger.debug("updates", "");
 
-        return this.get("updates", function (data: API_Model_Welcome_Updates[]) {
+        return this.httpGet("updates", function (data: API_Model_Welcome_Updates[]) {
             for (let i in data) {
                 data[i].date = new Date(data[i].date);
             }
