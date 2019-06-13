@@ -5,7 +5,7 @@
  * 
  * @propose: this file is container for modules or services class instances, called
  * on each new connection, when seeking for service or controller, it will use the container
- * to create new instance with resolved prototype
+ * to create new instance with resolved prototypes
  */
 namespace Core;
 
@@ -53,25 +53,6 @@ class Container
     }
 
     /**
-     * Function check() : Check if class exist
-     *
-     * @param string $className
-     * 
-     * @return bool
-     */
-    private function exist(string $className)
-    {
-        $return = true;
-
-        if (!class_exists($className)) {
-            $this->logger->error("class: `{$className}` does not exist");
-            $return = false;
-        }
-
-        return $return;
-    }
-
-    /**
      * Function getDependencies() : Get prototype->constructor dependencies
      *
      * @param \ReflectionClass $refClass
@@ -93,7 +74,7 @@ class Container
         $params = $constructor->getParameters();
 
         foreach ($params as $key => $param) {
-            // # critical
+            // # CRITICAL
             $dependency[] = $param->getClass();
         }
 
@@ -130,6 +111,7 @@ class Container
      * Function createInstance() : Create new instance
      *
      * @throws \Exception
+     * 
      * @param string $className
      * 
      * @return mixed
@@ -179,15 +161,14 @@ class Container
                 if ($this->logger) {
                     $this->logger->warning(end($warnings));
                 }
-
             }
 
-            // # notice: check later
+            // # NOTICE: check later
             throw new \Exception(json_encode($warnings));
         }
 
         if ($this->logger) {
-            $this->logger->notice("attempting to create new class: `{$refClass->getName()}`");
+            $this->logger->notice("attempting to create new class instance: `{$refClass->getName()}`");
         }
 
         // create the requested instance class with resolved arguments
@@ -209,74 +190,17 @@ class Container
         return $instance;
     }
 
-    /**
-     * Function get() : Get instance by class name
-     * @todo Something with this function its not only get but it also create dissonance
-     * 
-     * @param string $className
-     * 
-     * @return mixed
-     */
-    public function get(string $className)
-    {
-        // # better: this->logger->backTree("requesting $className");
-        $this->logger->notice("getting: `{$className}`");
 
-        if (isset($this->container[$className])) {
-            $this->logger->debug("exist: `{$className}`");
-
-            $object = $this->container[$className];
-
-            if ($this->logger) {
-                if (gettype($object) === 'object') {
-                    $objName = get_class($object);
-                    $this->logger->debug("return obj: `{$objName}`");
-                } else {
-                    $objectDebug = var_export($object, true);
-                    $this->logger->critical("return: `{$objectDebug}`");
-                }
-            }
-
-            // # warning:
-            return $object;
-        }
-
-        return $this->createInstance($className);
-    }
-
-    /**
-     * Function getNamespacePrefix() : Return all objects with specific prefix from the container
-     * 
-     * @param  string $namespace
-     * 
-     * @return mixed
-     */
-    public function getNamespacePrefix(string $namespace)
-    {
-        $this->logger->debug("namespace: `{$namespace}`");
-
-        $return = [];
-
-        $namespace .= '\\';
-
-        foreach($this->container as $instance) {
-            if (strstr(get_class($instance), $namespace)) {
-                $return [] = $instance;
-            }
-        }
-        
-        return $return;
-    }
 
     /**
      * Function set() : Set definition into container
      *
-     * @param string $name
-     * @param mixed $value
+     * @param string    $name
+     * @param mixed     $value
      * 
      * @return void
      */
-    public function set(String $name, $value)
+    public function set(string $name, $value)
     {
         $this->container[$name] = $value;
 
@@ -303,5 +227,92 @@ class Container
 
             $this->container = array_merge($definitions, $this->container);
         }
+    }
+
+    public function create(string $className)
+    {
+        // # ADVISE: this->logger->backTree("requesting $className");
+        $this->logger->info("creating: `{$className}`");
+
+        if (isset($this->container[$className])) {
+            $this->logger->warning("already exist: `{$className}`");
+
+            $object = $this->container[$className];
+
+            if ($this->logger) {
+                if (gettype($object) === 'object') {
+                    $objName = get_class($object);
+                    $this->logger->debug("return obj: `{$objName}`");
+                } else {
+                    $objectDebug = var_export($object, true);
+                    $this->logger->critical("return: `{$objectDebug}`");
+                }
+            }
+
+            // # WARNING:
+            return $object;
+        }
+
+        return $this->createInstance($className);
+    }
+
+    /**
+     * Function get() : Get instance by class name
+     * 
+     * @todo this is function does not only get but also create consider use better name.
+     *
+     * @param string $className
+     * 
+     * @return mixed|bool
+     */
+    public function get(string $className)
+    {
+        // # ADVISE: this->logger->backTree("requesting $className");
+        $this->logger->info("getting: `{$className}`");
+
+        if (isset($this->container[$className])) {
+            $this->logger->debug("exist: `{$className}`");
+
+            $object = $this->container[$className];
+
+            if ($this->logger) {
+                if (gettype($object) === 'object') {
+                    $objName = get_class($object);
+                    $this->logger->debug("return obj: `{$objName}`");
+                } else {
+                    $objectDebug = var_export($object, true);
+                    $this->logger->critical("return: `{$objectDebug}`");
+                }
+            }
+
+            // # WARNING:
+            return $object;
+        }
+
+        return false;
+    }
+
+    /**
+     * Function getNamespacePrefix() : Return all objects with specific prefix from the container
+     * 
+     * @param string $namespace
+     * 
+     * @return mixed
+     */
+    public function getNamespacePrefix(string $namespace)
+    {
+        $this->logger->debug("namespace: `{$namespace}`");
+
+        $return = [];
+
+        $namespace .= '\\';
+
+        foreach ($this->container as $instance) {
+            if (strstr(get_class($instance), $namespace)) {
+                $return[] = $instance;
+            }
+        }
+
+        return $return;
     }
 } // EOF core/container.php

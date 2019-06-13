@@ -11,7 +11,7 @@ class Database
     /**
      * Instances Count\
      *
-     * @var integer
+     * @var int
      */
     private static $instances = 0;
 
@@ -30,19 +30,12 @@ class Database
     private $connection;
 
     /**
-     * Last Error from Database
-     *
-     * @var string
-     */
-    private $lastError;
-
-    /**
      * Function __construct() : Construct Database Module
      *
-     * @param array                                  $config
-     * @param \Modules\Logger|null                   $logger
-     * @param \React\EventLoop\StreamSelectLoop|null $loop
-     * @param boolean                                $autoLoad
+     * @param array                                 $config
+     * @param \Modules\Logger                       $logger
+     * @param \React\EventLoop\StreamSelectLoop     $loop
+     * @param bool                                  $autoLoad
      */
     public function __construct(array $config, \Modules\Logger $logger = null, \React\EventLoop\StreamSelectLoop $loop = null, $autoLoad = true)
     {
@@ -117,7 +110,7 @@ class Database
     /**
      * Function Connect() : (doc-later)
      *
-     * @param  callable|null $callback
+     * @param callable $callback
      *
      * @return void
      */
@@ -129,7 +122,7 @@ class Database
     /**
      * Function close()
      *
-     * @param  callable|null $callback
+     * @param callable $callback
      *
      * @return void
      */
@@ -139,9 +132,9 @@ class Database
     }
 
     /**
-     * Function query() :
+     * Function query() : Run Promise Query
      *
-     * @param  string $query
+     * @param string $query
      *
      * @return mixed
      */
@@ -175,14 +168,15 @@ class Database
     }
 
     /**
-     * Function queryAwait() :
+     * Function queryAwait() : Run query and wait for data to be returned.
      *
-     * @param  string $query
+     * @param string $query
+     * 
      * @return mixed
      */
     public function queryAwait($query)
     {
-        // #todo: add debug level
+        // # TODO: add debug level
         $this->logger->debug($query, ['depth' => 3]);
 
         $request = $this->query($query);
@@ -194,7 +188,7 @@ class Database
     }
 
     /**
-     * Function fakeLongQuery() :
+     * Function fakeLongQuery() : Fakes a query that takes time to to proceed
      *
      * @return mixed
      */
@@ -204,9 +198,9 @@ class Database
     }
 
     /**
-     * Function getConnectionState() :
+     * Function getConnectionState() : Get Connection State
      *
-     * @param  boolean $named
+     * @param bool $named
      *
      * @return mixed
      */
@@ -223,9 +217,9 @@ class Database
     }
 
     /**
-     * Function isConnected() :
+     * Function isConnected() : Check whatever the module connect to database
      *
-     * @return boolean
+     * @return bool
      */
     public function isConnected()
     {
@@ -236,17 +230,7 @@ class Database
     }
 
     /**
-     * Function getLastError() :
-     *
-     * @return mixed
-     */
-    public function getLastError()
-    {
-        return $this->lastError;
-    }
-
-    /**
-     * Function getLoop() :
+     * Function getLoop() : Get working loop
      *
      * @return \React\EventLoop\StreamSelectLoop
      */
@@ -256,7 +240,7 @@ class Database
     }
 
     /**
-     * Function getConnection() :
+     * Function getConnection() : Get the connection to database
      *
      * @return \React\MySQL\Io\Connection
      */
@@ -264,4 +248,4 @@ class Database
     {
         return $this->connection;
     }
-} // EOF database.php
+} // EOF modules/database.php

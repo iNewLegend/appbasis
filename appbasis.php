@@ -6,9 +6,6 @@
  */
 require 'vendor/autoload.php';
 
-// sig_handler, tick use required as of PHP 4.3.0
-declare(ticks = 1);
-
 class AppBasis
 {
     /**
@@ -18,34 +15,54 @@ class AppBasis
      */
     static $logger;
 
-    static $command;
-    static $self;
+    /**
+     * Heartbeat
+     *
+     * @var bool
+     */
+    static private $heartbeat =  true;
 
-    static private $heartbeat =  true; 
+    /**
+     * Array of loaded plugins
+     *
+     * @var array
+     */
+    static private $plugins = [];
 
+    /**
+     * Function signalHandler() : Signal Handler
+     *
+     * @param int $signal
+     * 
+     * @return void
+     */
     public static function signalHandler(int $signal)
     {
         self::$logger->notice("signal: `{$signal}`");
 
         switch ($signal) {
-            case SIGINT:
-            {
-                self::$logger->notice('setting `self::$heartbeat = false;`');
+            case SIGINT: {
+                    self::$logger->notice('setting `self::$heartbeat = false;`');
 
-                self::$heartbeat = false;
+                    self::$heartbeat = false;
 
-                self::$logger->notice('stopping global loop');
-                
-                \Core\Auxiliary::getLoop()->stop();
+                    self::$logger->notice('stopping global loop');
 
-                return;
-            }                
+                    \Core\Auxiliary::getLoop()->stop();
+
+                    return;
+                }
         }
 
         \Core\Auxiliary::shutdown($signal, "unknown signal: `{$signal}", __CLASS__, __FILE__);
     }
 
-    public static function getNextVersion()
+    /**
+     * Function releaseGetNextVersion() : Return the next version for release
+     *
+     * @return int
+     */
+    public static function releaseGetNextVersion()
     {
         $versions = [0];
         $files = glob('release/AppBasis-v-*-.{tar.gz}', GLOB_BRACE);
@@ -69,6 +86,11 @@ class AppBasis
         return $max;
     }
 
+    /**
+     * Function backup() : Create tar backup file for everything
+     *
+     * @return void
+     */
     public static function backup()
     {
         if (!file_exists("backups")) {
@@ -95,6 +117,13 @@ class AppBasis
         \Library\Helper::exec("rm -rf tmp/");
     }
 
+    /**
+     * Function template() : Create a template
+     *
+     * @param \Modules\Command $command
+     * 
+     * @return void
+     */
     public static function template(\Modules\Command $command)
     {
         $method = '';
@@ -108,7 +137,6 @@ class AppBasis
         $appCommand->setParameters($params);
 
         // Create new app, pass needed service in it , will be called later by runCommand.
-
         $app = new \Core\Core(self::$logger, new \Modules\Ip('127.0.0.1'), self::class, [
             \Services\Template::class => [self::$logger, $command],
         ]);
@@ -116,11 +144,25 @@ class AppBasis
         $output = $app->executeCommand($appCommand);
     }
 
-    public static function plugin(string $plugin)
+    /**
+     * Function plugin() : Load a plugin
+     *
+     * @todo function is to big and ugly.
+     * 
+     * @param string $plugin
+     * @param bool   $dependencyFlag
+     * 
+     * @return bool
+     */
+    public static function plugin(string $plugin, bool $dependencyFlag = false)
     {
+        $pluginClass = ucfirst($plugin) . '_Plugin';
+
         $lowercasePlugin = strtolower($plugin);
 
-        self::$logger->notice("attempting to run plugin: `{$plugin}`");
+        $dependencyFlagDebug = json_encode($dependencyFlag);
+
+        self::$logger->notice("attempting to load plugin: `{$pluginClass}` dependencyFlag: `{$dependencyFlagDebug}`");
 
         $plugin_startup_file = "ext/{$plugin}/{$lowercasePlugin}.php";
 
@@ -130,8 +172,8 @@ class AppBasis
             self::$logger->error("plugin startup file:` {$plugin_startup_file}` does not exist");
 
             \Core\Auxiliary::shutdown(0, "plugin start file doest not exist", __class__, __FUNCTION__);
-            
-            return;
+
+            return false;
         }
 
         self::$logger->debug("loading: `{$plugin_startup_file}`");
@@ -139,14 +181,12 @@ class AppBasis
         if (!require($plugin_startup_file)) {
             self::$logger->error("unable to load:` {$plugin_startup_file}`");
 
-            return;
+            return false;
         }
-
-        $pluginClass = $plugin . '_Plugin';
 
         self::$logger->debug("checking if class: `{$pluginClass}` is available");
 
-        if (! class_exists($pluginClass)) {
+        if (!class_exists($pluginClass)) {
             self::$logger->error("unable to load plugin class: `{$pluginClass}` does not available");
             return false;
         }
@@ -155,41 +195,77 @@ class AppBasis
 
         $pluginObject = new $pluginClass(self::$logger);
 
-        if (! $pluginObject) {
+        if (!$pluginObject) {
             self::$logger->error("unable to create plugin object: `{$pluginClass}`");
             return false;
         }
 
-        self::$logger->debug("checking if manual_load() function is available`");
+        self::$logger->debug("plugin: `{$pluginClass}`, checking if dependencies member is available`");
 
-        if (! method_exists($pluginObject, 'manual_load')) {
-            self::$logger->error("unable to load the plugin: `{$plugin}::manual_load()` does not available");
+        if (isset($pluginObject->dependencies)) {
+            self::$logger->notice("attempting to load plugin:: `{$pluginClass}` dependencies");
+
+            foreach ($pluginObject->dependencies as $dependency) {
+                $dependencyLowercase = strtolower($dependency);
+                
+                if (strstr($dependency, '_Plugin')) {
+                    self::$logger->notice("plugin: `{$pluginClass}` attempting to load dependency: `{$dependency}`");
+
+                    if (in_array($dependency, self::$plugins)) {
+                        self::$logger->warning("plugin: `{$pluginClass}` dependency:`{$dependency}`, is already loaded");
+                        continue;
+                    }
+
+                    if (!self::plugin(str_replace('_plugin', '', $dependencyLowercase), true)) {
+                        self::$logger->error("plugin: `{$pluginClass}` unable to load plugin dependency: `{$dependency}`");
+
+                        return false;
+                    }
+
+                    self::$plugins [] = $dependency;
+                } else {
+                    self::$logger->error("unable to load the plugin dependency: `{$dependency}` does not have `_plugin` within the class name");
+                }
+            }
+        } else {
+            self::$logger->debug("function: `{$pluginClass}->dependencies` does not available");
+        }
+
+        self::$logger->debug("checking if load() function is available`");
+
+        if (!method_exists($pluginObject, 'load')) {
+            self::$logger->error("function: `{$pluginClass}::load()` does not available");
+
             return false;
         }
 
-        if (! $pluginObject->manual_load()) {
-            self::$logger->error("unable to load the plugin: `{$plugin}`");
+        if ($pluginObject->load()) {
+            self::$logger->info("plugin: `{$pluginClass}` loaded successfully");
+        } else {
+            self::$logger->error("plugin: `{$pluginClass}` loading failed");
+
             return false;
         }
 
-        self::$logger->info("plugin: `{$plugin}` loaded successfully");
-
-
-        $pluginObject->unload();
+        if (!$dependencyFlag) {
+            self::main(self::class, self::$logger, new \Modules\Command('server-plain'));
+        }
 
         return true;
     }
 
     /**
-     * Function main() : <description>
-     * @param  string           $self       [description]
-     * @param  \Modules\Logger  $logger     [description]
-     * @param  \Modules\Command $command    [description]
-     * @return int                          [description]
+     * Function main() :  AppBasis Entry Point
+     * 
+     * @param string           $self
+     * @param \Modules\Logger  $logger
+     * @param \Modules\Command $command
+     * 
+     * @return void
      */
     public static function main(string $self, \Modules\Logger $logger, \Modules\Command $command)
     {
-        pcntl_signal(SIGINT, "AppBasis::signalHandler");
+        pcntl_signal(SIGINT, 'AppBasis::signalHandler');
 
         // register hearbeat
         \Core\Auxiliary::boot(null, self::$heartbeat);
@@ -214,23 +290,23 @@ class AppBasis
         ];
 
         switch ($command->getName()) {
-            case '':
-                {
+            case '': {
                     self::$logger->warning('assuming empty command using backup command as welcome for empty command');
                 }
 
-            case 'welcome':
-                {
+            case 'welcome': {
                     self::$logger->info("commands", ['json' => $commands, 'depth' => 2]);
                 }
                 break;
 
-            case 'server':
-                {
+            case 'server': {
+                    // #TODO : add base plugins
+                }
+            case 'serverplain': {
                     $startup = \Core\Auxiliary::auto(true, true);
 
-                    \Core\Auxiliary::attachFriend(\Friends\React\Http::class, 51190);
-                    \Core\Auxiliary::attachFriend(\Friends\React\WebSocket::class, 51192);
+                    \Core\Auxiliary::attachFriend(\Friends\React\Http::class, 51194);
+                    \Core\Auxiliary::attachFriend(\Friends\React\WebSocket::class, 51196);
 
                     self::$logger->debugJson($startup, "auto");
 
@@ -240,42 +316,46 @@ class AppBasis
                 }
                 break;
 
-            case 'backup':
-                {
+            case 'backup': {
                     self::backup();
                 }
                 break;
 
             case 'tmpl':
-            case 'template':
-                {
+            case 'template': {
                     \Core\Auxiliary::auto(false);
 
                     self::template($command);
                 }
-            // no break here since reload is needed
+                // no break here since reload is needed
 
-            case 'reload':
-                {
+            case 'reload': {
                     \Library\Helper::exec("composer dump-autoload");
                 }
                 break;
 
-            // should be a service for plugin case
-            case 'plugin':
-                {
+                // should be a service for plugin case
+            case 'plugin': {
                     if ($command->noParameters()) {
                         self::$logger->info("syntax: {$cool} plugin <name>");
                         break;
                     }
 
-                    self::plugin($command->getParameters()[0]);
+                    $parameters = $command->getParameters();
 
+                    foreach ($parameters as $key => $parameter) {
+                        if (!next($parameters)) {
+                            self::plugin($parameter, false);
+
+                            continue;
+                        }
+
+                        self::plugin($parameter, true);
+                    }
                 }
                 break;
 
-            case 'release':
-                {
+            case 'release': {
                     if (!file_exists("tmp")) {
                         self::$logger->info("making tmp folder.");
                         mkdir("tmp");
@@ -288,12 +368,11 @@ class AppBasis
 
                     \Library\Helper::exec("rsync -av  ./ ./tmp --exclude release --exclude tmp --exclude .phpintel --exclude .vscode --exclude .git --exclude .gitignore --exclude *.swp --exclude client/node_modules --exclude server/vendor --exclude server/composer.lock");
 
-                    $nextVersion = self::getNextVersion();
+                    $nextVersion = self::releaseGetNextVersion();
 
                     \Library\Helper::exec("tar czvf release/AppBasis-v-$nextVersion-.tar.gz tmp/*");
                 }
                 break;
-
 
             default:
                 self::$logger->critical("unknown command `{$command->getName()}`");
@@ -301,7 +380,7 @@ class AppBasis
     }
 }
 
-# main;
+// main;
 
 $self = array_shift($argv);
 

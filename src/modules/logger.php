@@ -22,8 +22,6 @@ class Logger extends \Monolog\Logger
     /**
      * Unique serial for each logger, public to be seen in logs.
      *
-     * set to public 4be shown in debug json
-     *
      * @var string
      */
     public $unique;
@@ -38,7 +36,7 @@ class Logger extends \Monolog\Logger
     /**
      * Does this logger initialized?
      *
-     * @var boolean
+     * @var bool
      */
     private $initialized = false;
 
@@ -52,7 +50,7 @@ class Logger extends \Monolog\Logger
     /**
      * Count of created logger instances
      *
-     * @var integer
+     * @var int
      */
     private static $loggersCount = 0;
 
@@ -60,41 +58,39 @@ class Logger extends \Monolog\Logger
      * Function handler() : Static function that called each time the self object constructed
      *
      * @param \Modules\Logger $logger
+     * 
      * @return void
      */
     private static function handler(\Modules\Logger $logger)
     {
         static $calledOnce = null;
 
-        # notice: next code section is uses handler for the first construction of module.
+        // # NOTICE: next code section is uses handler for the first construction of module.
         if (empty($calledOnce)) {
             $calledOnce = true;
             \Monolog\ErrorHandler::register($logger);
 
             set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-                switch ($errno):
+                switch ($errno): case E_WARNING:
+                        $level = \Monolog\Logger::WARNING;
+                        break;
 
-            case E_WARNING:
-                $level = \Monolog\Logger::WARNING;
-                break;
+                    case E_NOTICE:
+                    case E_USER_NOTICE:
+                    case E_DEPRECATED:
+                        $level = \Monolog\Logger::NOTICE;
+                        break;
 
-            case E_NOTICE:
-            case E_USER_NOTICE:
-            case E_DEPRECATED:
-                $level = \Monolog\Logger::NOTICE;
-                break;
+                    case E_RECOVERABLE_ERROR:
+                        $level = \Monolog\Logger::CRITICAL;
+                        break;
 
-            case E_RECOVERABLE_ERROR:
-                $level = \Monolog\Logger::CRITICAL;
-                break;
-
-            default:
-                throw new \Exception("unknown errno: `{$errno}`");
+                    default:
+                        throw new \Exception("unknown errno: `{$errno}`");
                 endswitch;
                 // ----
-
                 if ($gLogger = \Core\Auxiliary::getGlobalLogger()) {
-                        \Core\Auxiliary::getGlobalLogger()->{\Monolog\Logger::getLevelName($level)}($errstr . ". -at line: `{$errline}`", [1]);
+                    \Core\Auxiliary::getGlobalLogger()->{\Monolog\Logger::getLevelName($level)}($errstr . ". -at line: `{$errline}`", [1]);
                 } else {
                     \Core\Auxiliary::shutdown(0, func_get_args(), __CLASS__, 'function: `handler` closure: `set_error_handler`');
                 }
@@ -147,17 +143,16 @@ class Logger extends \Monolog\Logger
 
                 break;
             }
-
         }
 
         return implode('', $array);
     }
 
     /**
-     * Function __construct() : @todo
+     * Function __construct() : Create Logger Module
      *
-     * @param string       $name
-     * @param bool|boolean $autoInit
+     * @param string    $name
+     * @param bool      $autoInit
      */
     public function __construct(string $name = '', bool $autoInit = true)
     {
@@ -172,7 +167,7 @@ class Logger extends \Monolog\Logger
             ];
         }
 
-        # badcode:
+        // # BADCODE:
         $this->owner = [
             'type'     => $backTrace[1]['type'],
             'function' => $backTrace[1]['function'],
@@ -182,7 +177,7 @@ class Logger extends \Monolog\Logger
         if (isset($backTrace[1]['file'])) {
             $this->owner['file'] = $backTrace[1]['file'];
         }
-        # badcode;
+        // # BADCODE;
 
         // force use name
         if (empty($name)) {
@@ -192,7 +187,6 @@ class Logger extends \Monolog\Logger
         }
 
         // add static prefix
-
         if ($this->owner['type'] === '::') {
             $name = 's\\' . $name;
         }
@@ -200,11 +194,10 @@ class Logger extends \Monolog\Logger
         if ($autoInit) {
             $this->initialize($name);
         }
-
     }
 
     /**
-     * Function __destruct() : @todo
+     * Function __destruct() : Destruct Logger
      */
     public function __destruct()
     {
@@ -218,10 +211,10 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * Function initialize() : @todo
+     * Function initialize() : Initialize Logger
      * 
-     * @param  string $name
-     * @param  string $dateFormat
+     * @param string $name
+     * @param string $dateFormat
      * 
      * @return void
      */
@@ -229,7 +222,7 @@ class Logger extends \Monolog\Logger
     {
         $this->unique = self::getFreeIndex();
 
-        // #todo: this is have to be configurable
+        // # TODO: this is have to be configurable
         $output = "[%datetime%][%level_name%][" . $this->unique . "][%channel%]%message%\n";
 
         $streamHandlerStdout = new \Monolog\Handler\StreamHandler('php://stdout');
@@ -251,13 +244,13 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * Function callBackSet() : @todo
+     * Function callBackSet() : Setting callback
      * 
-     * @param  [type] $object
-     * @param  [type] $function
-     * @param  [type] $token
+     * @param mixed $object
+     * @param mixed $function
+     * @param string $token
      * 
-     * @return [type]
+     * @return string
      */
     public function callBackSet($object, $function, $token)
     {
@@ -271,11 +264,11 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * Function callBackDeclare() : @todo
+     * Function callBackDeclare() Declare callback
      * 
-     * @param  [type] $token
+     * @param string $token
      * 
-     * @return [type]
+     * @return void
      */
     public function callBackDeclare($token)
     {
@@ -295,11 +288,11 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * Function callBackFire() : @todo
+     * Function callBackFire() : Fire callback
      * 
-     * @param  string   $token
-     * @param  mixed    $msg
-     * @param  string   $context
+     * @param string   $token
+     * @param mixed    $msg
+     * @param string   $context
      * 
      * @return void
      */
@@ -309,13 +302,12 @@ class Logger extends \Monolog\Logger
             return;
         }
 
-
         // object|array -> json
         if (is_object($msg) || is_array($msg)) {
             $msg = json_encode($msg);
         }
 
-        if (! isset($this->callbacksTokens[$token])) {
+        if (!isset($this->callbacksTokens[$token])) {
             $this->warning("token: `{$token}` not found, msg: `{$msg}` context: `{$context}`");
 
             return;
@@ -323,7 +315,7 @@ class Logger extends \Monolog\Logger
 
         $callback = $this->callbacksTokens[$token];
 
-        // # critical
+        // # CRITICAL
         unset($this->callbacksTokens[$token]);
 
         $object   = $callback[0];
@@ -342,19 +334,16 @@ class Logger extends \Monolog\Logger
             $msg = "null";
         }
 
-        //$this->debug("\e[38;5;38m". __METHOD__ . ": `{$object}::{$function}` with token `{$token}`\033[0m", [ 1 ]);
-
         parent::addRecord(\Monolog\Logger::DEBUG, "\033[1m[$selfClass][$selfFunction]: `{$object}::{$function}` ->\033[0m {$msg} \033[1m->\e[38;5;38m\e[1m callback `{$token}\033[0m`", [0]);
-
     }
 
     /**
-     * Function debugJson() : @todo
+     * Function debugJson() : Print object in JSON Format.
      * 
-     * @param  [type] $content
-     * @param  string $name
+     * @param mixed     $content
+     * @param string    $name
      * 
-     * @return [type]
+     * @return void
      */
     public function debugJson($content, string $name = '')
     {
@@ -366,15 +355,15 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * Function okFailed() : @todo
+     * Function okFailed() : Print ok or failed log
      * 
-     * @param  [type] $status
-     * @param  string $what
-     * @param  [type] $object
+     * @param bool      $status
+     * @param string    $what
+     * @param mixed     $object
      * 
-     * @return [type]
+     * @return void
      */
-    public function okFailed($status, string $what, $object = null)
+    public function okFailed(bool $status, string $what, $object = null)
     {
         if (!$this->initialized) {
             return;
@@ -394,15 +383,15 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * Function addRecord() : @todo
+     * Function addRecord() : Adds a log record.
      *
-     * @todo rewrite this function
+     * @todo rewrite this function, and optimize
      *
-     * @param [type] $level
-     * @param [type] $message
-     * @param array  $context
+     * @param int       $level
+     * @param string    $message
+     * @param array     $context
      */
-    public function addRecord($level, $message, array $context = [])
+    public function addRecord(int $level, string $message, array $context = [])
     {
         if (!$this->initialized) {
             return;
@@ -505,8 +494,9 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * Function getOwnerFile() : @todo
-     * @return [type]
+     * Function getOwnerFile() : Get Owner Filename
+     * 
+     * @return string
      */
     public function getOwnerFile()
     {
@@ -514,8 +504,9 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * Function getOwnerClass() : @todo
-     * @return [type]
+     * Function getOwnerClass() : Get Owner Class
+     * 
+     * @return string
      */
     public function getOwnerClass()
     {
@@ -523,8 +514,9 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * Function getOwnerFunction() : @todo
-     * @return [type]
+     * Function getOwnerFunction() : Get Owner Function
+     * 
+     * @return string
      */
     public function getOwnerFunction()
     {
@@ -532,8 +524,9 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * Function getOwnerType() : @todo
-     * @return [type]
+     * Function getOwnerType() : Get Owner Type
+     * 
+     * @return string
      */
     public function getOwnerType()
     {
@@ -541,19 +534,20 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * Function getOwnerMethod() : @todo
-     * @return [type]
+     * Function getOwnerMethod() : Get Owner Method
+     * 
+     * @return string
      */
     public function getOwnerMethod()
     {
-        # critical;
-
+        // # CRITICAL
         return $this->getOwnerClass() . $this->getOwnerType() . $this->getOwnerFunction();
     }
 
     /**
-     * Function getUnique() : @todo
-     * @return [type]
+     * Function getUnique() : Get Unique
+     * 
+     * @return string
      */
     public function getUnique()
     {

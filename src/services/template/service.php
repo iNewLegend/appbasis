@@ -25,7 +25,7 @@ class __NAME
     /**
      * Function get() : Get self service
      *
-     * @return \Services\__NAME | null
+     * @return \Services\__NAME
      */
     public static function get()
     {
@@ -46,7 +46,6 @@ class __NAME
     public function __construct(\Modules\Logger $logger, \Modules\Database $database)
     {
         $this->logger = $logger;
-
 
         $this->config = \Services\Config::get("__NAME");
 

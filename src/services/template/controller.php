@@ -6,7 +6,7 @@
 
 namespace Controllers;
 
-class __NAME
+class __NAME implements \Interfaces\Controller\Disconnect
 {
     /**
      * Instance of Ip Module

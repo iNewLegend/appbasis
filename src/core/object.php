@@ -23,7 +23,7 @@ class OObject
     private $logger;
 
     /**
-     * Function __construct: Create Object
+     * Function __construct() : Create Object
      */
     public function __construct()
     {
@@ -31,7 +31,7 @@ class OObject
     }
 
     /**
-     * Function __destruct : Destruct Object
+     * Function __destruct() : Destruct Object
      *
      * @return void
      */
@@ -68,7 +68,7 @@ class OObject
     {
         $this->data[$name] = $object;
 
-        // #notice: exit if no logger
+        // # NOTICE: exit if no logger
         if (!$this->logger) {
             return;
         }

@@ -15,16 +15,15 @@ abstract class Module_Database_Logs
 
 class Logger extends \Services\Config\Base
 {
-    public $core_container  = false;
-    public $core_guard      = true;
-    public $core_controller = true;
-    public $core_object     = true;
-    public $core_handler    = true;
+    public $core_container  = true;
+    public $core_controller = false;
+    public $core_object     = false;
+    public $core_handler    = false;
 
-    public $module_loader   = false;
+    public $module_loader   = true;
     public $module_database = Module_Database_Logs::ON;
     public $module_process  = true;
 
-    public static $service_config = true;
+    public static $service_config = false;
 
 } // EOF config/logger.php

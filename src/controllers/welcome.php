@@ -47,7 +47,7 @@ class Welcome
      */
     public function updates()
     {
-        // #badcode: blocking here.
+        // # BADCODE: blocking here.
 
         $commits = \simplexml_load_file('https://github.com/iNewLegend/AppBasis/commits/master.atom');
 

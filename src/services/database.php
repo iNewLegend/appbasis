@@ -16,13 +16,6 @@ class Pool
     private $databases = [];
 
     /**
-     * Callbacks
-     *
-     * @var array
-     */
-    private $callbacks = [];
-
-    /**
      * Self Instance
      *
      * @var \Services\Database
@@ -32,14 +25,13 @@ class Pool
     /**
      * Function get() : Get self Service or Database Module 
      *
-     * @return \Services\Auth | \Modules\Database | null
+     * @return \Modules\Database
      */
     public static function get()
     {
-        # critical;
+        // # CRITICAL;
         
         if(empty(self::$instance)) {
-            //throw new \Exception("trying to get database instance but database pool not exist.");
             self::$instance = new Pool(new \Modules\Logger(self::class), true);
 
             return self::$instance;
@@ -51,9 +43,9 @@ class Pool
     /**
      * Function __construct : Construct Database Service
      * 
-     * @param \Modules\Logger $logger   
-     * @param boolean         $autoLoad 
-     * @param mixed          $config   
+     * @param \Modules\Logger   $logger   
+     * @param bool              $autoLoad 
+     * @param mixed             $config   
      */
     public function __construct(\Modules\Logger $logger, $autoLoad = false, $config = null)
     {
@@ -93,7 +85,7 @@ class Pool
         ];
 
         if($this->test($config)) {
-            // #TODO: add cross platform
+            // # TODO: add cross platform
             preg_match_all('/^processor/m', file_get_contents('/proc/cpuinfo'), $cpuCount);
 
             $cpuCount = count($cpuCount[0]);
@@ -131,7 +123,7 @@ class Pool
     /**
      * Function test() : make a test connection to db.
      * 
-     * @param  mixed $config
+     * @param mixed $config
      * 
      * @return mixed
      */
@@ -193,19 +185,6 @@ class Pool
     }
 
     /**
-     * Function try_onConnect() : 
-     * 
-     * @return void
-     */
-    private function try_onConnect()
-    {
-        $this->logger->debug("the operation finished within timeout");
-
-        $testConnection->getLoop()->stop();
-    }
-
-
-    /**
      * Function getOne() : Get Instance of Database Module
      * 
      * @todo this just lame example, find smart logic.
@@ -238,5 +217,5 @@ class Pool
         
         return $return;
     }
-} // EOF database.php
+} // EOF services/database.php
     

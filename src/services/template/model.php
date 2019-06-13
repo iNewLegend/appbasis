@@ -6,32 +6,22 @@
 
 namespace Models;
 
-class __NAME extends \Modules\Model
+class __NAME
 {
     /**
-     * Model name
+     * Instance Of Database Module
      *
-     * @var string
+     * @var \Modules\Database
      */
-    protected $name;
+    private $database;
 
     /**
      * Function __construct() : Construct _NAME 
-     */
-    public function __construct(string $name = '__NAME')
-    {
-        $this->initialize();
-
-        parent::__construct();
-    }
-
-    /**
-     * Function initialize() : Initialize _NAME 
      *
-     * @return void
+     * @param \Modules\Database $database
      */
-    private function initialize()
+    public function __construct(\Modules\Database $database)
     {
-
+        $this->database = $database;
     }
 } // EOF models/_NAME.php

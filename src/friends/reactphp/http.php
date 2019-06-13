@@ -39,11 +39,10 @@ class Http
     /**
      * Function __construct() : Initialize Friend Handler
      *
-     * @param \Core\Handler                          $handler
-     * @param string                                 $port
-     * @param \React\EventLoop\StreamSelectLoop|null $loop
-     *
-     * @param bool|boolean                           $autoLoad
+     * @param \Core\Handler                     $handler
+     * @param string                            $port
+     * @param \React\EventLoop\StreamSelectLoop $loop
+     * @param bool                              $autoLoad
      */
     public function __construct(\Core\Handler $handler, string $port, \React\EventLoop\StreamSelectLoop $loop = null, bool $autoLoad = true)
     {
@@ -70,7 +69,7 @@ class Http
     /**
      * Function initialize() : Initialize Friend Handler
      *
-     * @param  \React\EventLoop\StreamSelectLoop|null $loop
+     * @param \React\EventLoop\StreamSelectLoop $loop
      *
      * @return void
      */
@@ -111,7 +110,8 @@ class Http
     /**
      * Function _onConnect() : Called on client connection
      *
-     * @param ConnectionInterface $client
+     * @param \React\Socket\ConnectionInterface $client
+     * 
      * @return void
      */
     private function _onConnect(\React\Socket\ConnectionInterface $client)
@@ -137,7 +137,7 @@ class Http
      * Function: _onData() : Called when data received
      *
      * @param \React\Socket\ConnectionInterface $client
-     * @param mixed $data
+     * @param mixed                             $data
      *
      * @return void
      */
@@ -217,6 +217,7 @@ class Http
             }
         }
 
+        // # TODO:
         // Hash (dynamic later)
         // Also hash can be module like ip
         $hash = '';
@@ -251,7 +252,7 @@ class Http
 
         if (is_string($output)) {
             $contentType = 'text/plain';
-        } else if (is_array($output)) {
+        } else if (is_array($output) || is_object($output)) {
             $output      = json_encode($output);
             $contentType = 'application/json';
         } else if (is_bool($output)) {
@@ -276,4 +277,4 @@ class Http
         );
     }
 
-} // EOF core/handler.php
+} // EOF friends/reactphp/http.php

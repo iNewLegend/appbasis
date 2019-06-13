@@ -2,8 +2,6 @@
 /**
  * @file: services/template.php
  * @author: Leonid Vinikov <czf.leo123@gmail.com>
- *
- * @todo: fully rewrite and optimize, think of global function which parse templates
  */
 
 namespace Services;
@@ -20,7 +18,7 @@ class Template
     /**
      * Lock
      *
-     * @var boolean
+     * @var bool
      */
     private $lock = false;
 
@@ -51,8 +49,8 @@ class Template
     /**
      * Function __construct() : Construct Template Service
      *
-     * @param \Modules\Logger       $logger
-     * @param \Modules\Command|null $command
+     * @param \Modules\Logger   $logger
+     * @param \Modules\Command  $command
      */
     public function __construct(\Modules\Logger $logger, \Modules\Command $command = null)
     {
@@ -62,10 +60,11 @@ class Template
     }
 
     /**
-     * Function initialize() :
+     * Function initialize() : Initialize Template Service
      *
-     * @param  \Modules\Command|null $cmd
-     * @return [type]
+     * @param \Modules\Command $cmd
+     * 
+     * @return void
      */
     private function initialize(\Modules\Command $cmd = null)
     {
@@ -78,15 +77,16 @@ class Template
     }
 
     /**
-     * Function copy() :
+     * Function copy() : copy template to new type.
      *
-     * @param  [type] $type
-     * @param  [type] $name
-     * @return [type]
+     * @param string $type
+     * @param string $name
+     * 
+     * @return bool
      */
     private function copy($type, $name)
     {
-        $this->logger->debug("attempting to copy type: `{$type}` name: {$name}");
+        $this->logger->notice("attempting to copy type: `{$type}` name: {$name}");
 
         $src = __DIR__ . '/template/' . $type . '.php';
 
@@ -97,27 +97,25 @@ class Template
 
         $dst = \Library\Helper::basePath();
 
-        switch ($type):
+        switch ($type): case 'module':
+                $dst .= '/modules/';
+                break;
 
-        case 'module':
-            $dst .= '/modules/';
-            break;
+            case 'model':
+                $dst .= '/models/';
+                break;
 
-        case 'model':
-            $dst .= '/models/';
-            break;
+            case 'config':
+                $dst .= '/config/';
+                break;
 
-        case 'config':
-            $dst .= '/config/';
-            break;
+            case 'controller':
+                $dst .= '/controllers/';
+                break;
 
-        case 'controller':
-            $dst .= '/controllers/';
-            break;
-
-        case 'service':
-            $dst .= '/services/';
-            break;
+            case 'service':
+                $dst .= '/services/';
+                break;
 
         endswitch;
 
@@ -126,11 +124,11 @@ class Template
         $this->logger->notice("destination: `{$dst}`");
 
         if (file_exists($dst)) {
-                $this->logger->critical("destination: `{$dst}` is already exist");
-                return false;
+            $this->logger->critical("destination: `{$dst}` is already exist");
+            return false;
         }
 
-        $this->logger->debug("attempting to load source: '{$src}'");
+        $this->logger->notice("attempting to load source: '{$src}'");
 
         if (!$content = file_get_contents($src)) {
             $this->logger->critical("failed to read source: `{$src}`");
@@ -150,11 +148,48 @@ class Template
     }
 
     /**
-     * Function index() :
-     * @param  string $switch
-     * @return [type]
+     * function template() : Create new Template
+     *
+     * @param string $type
+     * @param string $name
+     * 
+     * @return bool
      */
-    public function index($switch = '')
+    private function template(string $type, string $name)
+    {
+        $return = false;
+
+        if ($this->lock) {
+            $this->index($type);
+            return false;
+        }
+
+        if (empty($name)) {
+            $this->logger->critical("`{$name}` is empty");
+        }
+
+        $this->logger->notice("attempting create new `{$type}` template: `{$name}`");
+
+        if ($this->copy($type, $name)) {
+            $this->logger->info("{$type}: `{$name}` was successfuly created");
+
+            $return = true;
+        } else {
+            $this->logger->warning("create new {$type}: `{$name}` failure");
+        }
+
+        return $return;
+    }
+
+
+    /**
+     * Function index() : Show help info
+     * 
+     * @param string $switch
+     * 
+     * @return void
+     */
+    public function index(string $switch = '')
     {
         static $commands = [
             'module'     => ['create new module' => ['syntax' => 'template module <name>']],
@@ -177,152 +212,62 @@ class Template
     }
 
     /**
-     * Function module() :
-     * @param  string $name
-     * @return [type]
+     * Function module() : Create new Module
+     *     *
+     * @param string $name
+     * 
+     * @return bool
      */
     public function module(string $name = '')
     {
-        if ($this->lock) {
-            $this->index('module');
-            return false;
-        }
-
-        if (empty($name)) {
-            $this->logger->critical("`{$name}` is empty");
-        }
-
-        $this->logger->info("attempting create new module template: `{$name}`");
-
-        if ($this->copy('module', $name)) {
-            $this->logger->info("module: `$name` was success fully created");
-
-            return;
-        }
-
-        $this->logger->warning("attempting to create new module: `{$name}` failure");
+        return $this->template('module', $name);
     }
 
     /**
-     * Function model() :
-     * @param  string $name
-     * @return [type]
+     * Function model() : Create new Model
+     *     *
+     * @param string $name
+     * 
+     * @return bool
      */
     public function model(string $name = '')
     {
-        if ($this->lock) {
-            $this->index('model');
-            return false;
-        }
-
-        if (empty($name)) {
-            $this->logger->critical("`{$name}` is empty");
-        }
-
-        $this->logger->info("attempting create new model template: `{$name}`");
-
-        if ($this->copy('model', $name)) {
-            $this->logger->info("model: `$name` was success fully created");
-
-            return;
-        }
-
-        $this->logger->warning("attempting to create new model: `{$name}` failure");
+        return $this->template('model', $name);
     }
 
     /**
-     * Function config() :
-     * @param  string $name
-     * @return [type]
+     * Function config() : Create new Config
+     *     *
+     * @param string $name
+     * 
+     * @return bool
      */
     public function config(string $name = '')
     {
-        $return = false;
-
-        if ($this->lock) {
-            $this->index('config');
-            return false;
-        }
-
-        if (empty($name)) {
-            $this->logger->critical("`{$name}` is empty");
-        }
-
-        $this->logger->info("attempting create new config template: `{$name}`");
-
-        if ($this->copy('config', $name)) {
-            $this->logger->info("config: `{$name}` was successfuly created");
-
-            $return = true;
-        } else {
-            $this->logger->warning("attempting to create new config: `{$name}` failure");
-        }
-
-        return $return;
+        return $this->template('config', $name);
     }
 
     /**
-     * Function controller() :
-     * @param  string $name
-     * @return [type]
-     */
-    public function controller(string $name = '')
-    {
-        $return = false;
-
-        if ($this->lock) {
-            $this->index('controller');
-            return false;
-        }
-
-        if (empty($name)) {
-            $this->logger->critical("`{$name}` is empty");
-        }
-
-        $this->logger->info("attempting create new controller template: `{$name}`");
-
-        if ($this->copy('controller', $name)) {
-            $this->logger->info("controllers: `{$name}` was successfuly created");
-
-            $return = true;
-        } else {
-            $this->logger->warning("attempting to create new controller: `{$name}` failure");
-        }
-
-        return $return;
-    }
-
-    /**
-     * Function service() :
-     *
-     * @todo all other function like this should be like this one.
-     *
-     * @param  string $name
-     * @return [type]
+     * Function service() : Create new Service
+     *     *
+     * @param string $name
+     * 
+     * @return bool
      */
     public function service(string $name = '')
     {
-        $return = false;
-
-        if ($this->lock) {
-            $this->index('service');
-            return false;
-        }
-
-        if (empty($name)) {
-            $this->logger->critical("`{$name}` is empty");
-        }
-
-        $this->logger->info("attempting create new service template: `{$name}`");
-
-        if ($this->copy('service', $name)) {
-            $this->logger->info("services: `{$name}` was successfuly created");
-
-            $return = true;
-        } else {
-            $this->logger->warning("attempting to create new service: `{$name}` failure");
-        }
-
-        return $return;
+        return $this->template('service', $name);
     }
-} // EOF template.php
+
+    /**
+     * Function controller() : Create new Controller
+     *     *
+     * @param string $name
+     * 
+     * @return bool
+     */
+    public function controller(string $name = '')
+    {
+        return $this->template('controller', $name);
+    }
+} // EOF services/template.php

@@ -37,64 +37,116 @@ class Auxiliary
     private static $handler;
 
     /**
-     * Array of extra services that can be passed from startup.
+     * Array of services
+     * 
      * @var array
      */
-    public static $extServices = array();
+    private static $services;
 
     /**
-     * Array of extra controllers that can be passed from startup.
+     * Array of extra services (plugin)
+     * 
      * @var array
      */
-    public static $extControllers = array();
+    private static $extServices = array();
+
+    /**
+     * Array of controllers
+     * 
+     * @var array
+     */
+    private static $controllers = array();
+
+    /**
+     * Array of extra controllers (plugin)
+     * 
+     * @var array
+     */
+    private static $extControllers = array();
 
     /**
      * Bool, heartbeat used as (pointer from AppBasis.php) will run main loop till it false.
      *
-     * @var boolean
+     * @var bool
      */
     private static $heartbeat;
 
     /**
-     * Function boot : AppBasis initial function.
-     * 
-     * @param \Modules\Logger $logger
+     * Function declareControllers(): Declare & Print All Available Controllers
      *
      * @return void
      */
-    public static function boot(\Modules\Logger $logger = null, & $heartbeat_address)
+    private static function declareControllers()
+    {
+        $contollersPath = __DIR__ . '/../' . Controller::PATH;
+
+        self::$globalLogger->debug("scanning `{$contollersPath}` to set the available controllers`");
+
+        foreach (scandir($contollersPath) as $fileName) {
+            if ($fileName[0] == '.') continue;
+
+            if (substr(strrchr($fileName, "."), 1) == 'php') {
+                $controlerName = Controller::SPACE . ucfirst(basename($fileName, ".php"));
+
+                self::$globalLogger->notice("attempting to set controller `{$controlerName}`");
+
+                if (!class_exists($controlerName)) {
+                    self::$globalLogger->warning("controller: `{$controlerName}` is found but class does not exist in memory.");
+                    self::$globalLogger->okFailed(false, $controlerName, false);
+                    continue;
+                }
+
+                self::$globalLogger->okFailed(true, $controlerName, true);
+
+                self::$controllers[] = $controlerName;
+            }
+        }
+
+        // # DEBUG 
+        foreach (self::getExtControllers() as $controlerName) {
+            self::$globalLogger->notice("attempting check plugin controller: `{$controlerName}`");
+
+            if (!class_exists($controlerName)) {
+                self::$globalLogger->warning("controller: `{$controlerName}` is found but class does not exist in memory.");
+                self::$globalLogger->okFailed(false, $controlerName, false);
+                continue;
+            }
+
+            self::$globalLogger->okFailed(true, $controlerName, true);
+        }
+    }
+
+    /**
+     * Function boot() : AppBasis initial function.
+     * 
+     * @param \Modules\Logger   $logger
+     * @param bool              $refHeartbeat - refrence to hearbeat
+     *
+     * @return void
+     */
+    public static function boot(\Modules\Logger $logger = null, &$refHeartbeat)
     {
         if (empty($logger)) {
             $logger = new \Modules\Logger(self::class);
         }
 
         self::$globalLogger = $logger;
-        self::$heartbeat = & $heartbeat_address;
-    }
-
-    public static function extServices(array $services)
-    {
-        self::$extServices = $services;
-    }
-
-    public static function extControllers(array $controllers)
-    {
-        self::$extControllers = $controllers;
+        self::$heartbeat = &$refHeartbeat;
     }
 
     /**
      * Function auto() : Auto AppBasis Setup
-     *
-     * @todo this function should not work if boot not run before
+     * this function should not work if boot() does not run before
      *
      * @param bool $createCore
      * @param bool $createLoop
+     * @param bool $defaultServices
      *
      * @return \stdClass
      */
-    public static function auto(bool $createCore = false, bool $createLoop = false)
+    public static function auto(bool $createCore = false, bool $createLoop = false, bool $defaultServices = true)
     {
-        if (! self::$globalLogger) {
+        if (!self::$globalLogger) {
             self::shutdown(0, "auto() function cannot run without boot() first. ", __CLASS__, __FUNCTION__);
         }
 
@@ -111,10 +163,22 @@ class Auxiliary
         }
 
         if ($createCore) {
-            self::$globalCore = new \Core\Core(self::$globalLogger, new \Modules\Ip('0.0.0.0'), self::class, array_merge([
-                \Services\Database\Pool::class => [],
-                \Services\Auth::class          => [],
-            ], self::$extServices));
+            self::declareControllers();
+
+            // # TODO: create something smarter and more dynamic.
+            if ($defaultServices) {
+                self::$services[\Services\Database\Pool::class] = [];
+            };
+
+            self::$globalCore = new \Core\Core(
+                self::$globalLogger,
+                new \Modules\Ip('0.0.0.0'),
+                self::class,
+                array_merge(
+                    self::$services,
+                    self::$extServices
+                )
+            );
 
             if (self::$globalCore) {
                 $return->core = true;
@@ -127,14 +191,39 @@ class Auxiliary
     }
 
     /**
+     * function extServices() : Add extra services.
+     *
+     * @param array $services
+     * 
+     * @return void
+     */
+    public static function extServices(array $services)
+    {
+        self::$extServices = array_merge(self::$extServices, $services);
+    }
+
+    /**
+     * function extControllers() : Add extra controllers.
+     *
+     * @param array $controllers
+     * 
+     * @return void
+     */
+    public static function extControllers(array $controllers)
+    {
+        self::$extControllers = array_merge(self::$extControllers, $controllers);
+    }
+
+
+    /**
      * Function attachFriend() : Attaching new friend engine with new handler.
      *
      * @param string $friend
-     * @param string $port
+     * @param mixed $port
      *
      * @return bool
      */
-    public static function attachFriend(string $friend = '', string $port = '51190')
+    public static function attachFriend(string $friend = '', $port = '51190')
     {
         self::$globalLogger->debugJson(func_get_args(), 'params');
 
@@ -161,13 +250,63 @@ class Auxiliary
     }
 
     /**
-     * Function createLoop() : Get loop
+     * Function getLoop() : Get loop
      *
      * @return \React\EventLoop\StreamSelectLoop
      */
     public static function getLoop()
     {
         return self::$globalLoop;
+    }
+
+    /**
+     * Function getGlobalLogger() : Get global Logger
+     *
+     * @return \Modules\Logger
+     */
+    public static function getGlobalLogger()
+    {
+        return self::$globalLogger;
+    }
+
+    /**
+     * Function getExtServices() : Return extra services
+     *
+     * @return array
+     */
+    public static function getExtServices()
+    {
+        return self::$extServices;
+    }
+
+    /**
+     * Function getControllers() : Return controllers
+     *
+     * @return array
+     */
+    public static function getControllers()
+    {
+        return self::$controllers;
+    }
+
+    /**
+     * Function getExtControllers() : Return extra controllers
+     *
+     * @return array
+     */
+    public static function getExtControllers()
+    {
+        return self::$extControllers;
+    }
+
+    /**
+     * Function heartbeat() : Return heartbeat
+     *
+     * @return bool
+     */
+    public static function heartbeat()
+    {
+        return self::$heartbeat;
     }
 
     /**
@@ -182,22 +321,7 @@ class Auxiliary
     }
 
     /**
-     * Function getGlobalLogger() : Get global Logger
-     *
-     * @return \Modules\Logger
-     */
-    public static function getGlobalLogger()
-    {
-        return self::$globalLogger;
-    }
-
-    public static function heartbeat()
-    {
-        return self::$heartbeat;
-    }
-
-    /**
-     * TODO: Undocumented function
+     * Function shutdown() : Shutdown AppBasis
      *
      * @param mixed $code
      * @param mixed $dump

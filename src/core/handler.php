@@ -55,8 +55,8 @@ class Handler
     /**
      * Function onConnect() : Called when new client connected.
      *
-     * @param  \Core\OObject $object
-     * @param  \Modules\Ip   $ip
+     * @param \Core\OObject $object
+     * @param \Modules\Ip   $ip
      *
      * @return void
      */
@@ -66,23 +66,22 @@ class Handler
             $this->logger->info("new connection from: `{$ip->address}`");
         }
 
-        // # Notice: this is temporal code, todo find a good way todo it
-        // # we simple point to our core of our extra services that were loaded before
-        // # so the core will load it.
-        $services = array_merge([\Services\Auth::class => []], \Core\Auxiliary::$extServices);
+        // # NOTICE: this is temporal code, todo find a good way todo it
+        // we simple point to our core of our extra services that were loaded before
+        // so the core will load it.
+        //$services = array_merge([\Services\Auth::class => []], \Core\Auxiliary::$extServices);
 
-        $core = new \Core\Core(null, $ip, 'Core', $services, [$object]);
+        $core = new \Core\Core(null, $ip, 'Core', \Core\Auxiliary::getExtServices(), [$object]);
 
         $this->storage[$ip] = $core;
-
     }
 
     /**
      * Function onCommand() : Called when new client send new command.
      *
-     * @param  \Modules\Ip          $ip
-     * @param  \Modules\Command     $command
-     * @param  string               $hash
+     * @param \Modules\Ip          $ip
+     * @param \Modules\Command     $command
+     * @param string               $hash
      *
      * @return string               The actual output of the command
      */
@@ -92,47 +91,40 @@ class Handler
             $this->logger->debug("`{$ip->address}` command:`{$command}` hash:`{$hash}`");
         }
 
-        /**
-         * # Warning: `contains` is reduce performance
-         */
+        // # WARNING : `contains` is reduce performance
         if ($this->storage->contains($ip)) {
             try {
                 /** @var \Core\Core $core */
                 $core = $this->storage[$ip];
-                
+
                 // part of AppBasis Protocol ?
-                switch($command->getMethod())
-                {
-                    case 'auth':
-                    {
-                        $debugParams = var_export($command->getParameters(), true);
-                        $this->logger->debug("auth cmd: params: `{$debugParams}`");
+                switch ($command->getMethod()) {
+                    case 'auth': {
+                            $debugParams = var_export($command->getParameters(), true);
+                            $this->logger->debug("auth cmd: params: `{$debugParams}`");
 
-                        if (strlen($hash) == 40) {
-                            $core->getObject()->set("hash", $hash);
-                            
-                            $output = ['code' => 'success'];
-                        } else {
-                            $output = ['code' => 'failed'];
+                            if (strlen($hash) == 40) {
+                                $core->getObject()->set("hash", $hash);
+
+                                $output = ['code' => 'success'];
+                            } else {
+                                $output = ['code' => 'failed'];
+                            }
                         }
-                        
-                    }
-                    break;
+                        break;
 
-                    case 'hook':
-                    {
-                        $cmd = $command->getName() . '/hook';
-                        $debugParams = var_export($command->getParameters(), true);
+                    case 'hook': {
+                            $cmd = $command->getName() . '/hook';
+                            $debugParams = var_export($command->getParameters(), true);
 
-                        $this->logger->debug("hooking cmd: `{$cmd}` params: `{$debugParams}`");
+                            $this->logger->debug("hooking cmd: `{$cmd}` params: `{$debugParams}`");
 
-                        $command = new \Modules\Command($cmd, $command->getParameters());
-                    }
+                            $command = new \Modules\Command($cmd, $command->getParameters());
+                        }
 
                     default:
                         $output = $core->executeCommand($command);
                 }
-                
             } catch (\Exception $e) {
                 $output = $e->getMessage();
             }
@@ -141,7 +133,6 @@ class Handler
             if ($this->logger) {
                 $this->logger->critical($output);
             }
-
         }
 
         return $output;
@@ -150,7 +141,7 @@ class Handler
     /**
      * Function onDisconnect() : Called when client disonnected.
      *
-     * @param  \Modules\Ip $ip
+     * @param \Modules\Ip $ip
      *
      * @return void
      */
@@ -166,7 +157,7 @@ class Handler
     /**
      * Function onError() : Called when error.
      *
-     * @param  \Exception $error
+     * @param \Exception $error
      *
      * @return void
      */
@@ -175,6 +166,5 @@ class Handler
         if ($this->logger) {
             $this->logger->error($error);
         }
-
     }
 } // EOF core/handler.php

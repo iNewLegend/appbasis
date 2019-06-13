@@ -67,7 +67,7 @@ class Chat
      */
     public function __construct(\Modules\Ip $ip, \Core\OObject $object, \Modules\Logger $logger, \Services\Auth $auth)
     {
-        $this->userGuard = new \Guards\UserGuard($ip, $object, $auth);
+        $this->userGuard = new \Guards\User($ip, $object, $auth);
 
         if ($this->userGuard) {
             $this->userGuard->run();
@@ -81,7 +81,6 @@ class Chat
         $this->logger = $logger;
 
         $this->user = new \Models\User(\Services\Database\Pool::get());
-
     }
 
     /**
@@ -132,7 +131,7 @@ class Chat
      *
      * @param string message
      *
-     * @return mixed
+     * @return array
      */
     public function message($message)
     {

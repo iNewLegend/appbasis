@@ -9,9 +9,6 @@
 
 namespace Modules;
 
-use Config\Logger;
-
-
 class Process
 {
     private $executeFile = '';
@@ -78,7 +75,7 @@ class Process
         $startupFile = sys_get_temp_dir() . '/' . uniqid() . '.' . time() . '.at';
 
         if ($this->logger) {
-            $this->logger->debug("attempting to create temporary startup file: `{$startupFile}`");
+            $this->logger->notice("attempting to create temporary startup file: `{$startupFile}`");
         }
 
         file_put_contents($startupFile, $this->getCommandLine());
@@ -103,7 +100,7 @@ class Process
     /**
      * Find out if the process is running
      *
-     * @return boolean
+     * @return bool
      */
     public function isRunning()
     {

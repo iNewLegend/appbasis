@@ -1,26 +1,23 @@
 <?php
 /**
  * @file: library/helper.php
- * @todo: fix doc.
- * @author: Name <email@email.com>
+ * @author: Leonid Vinikov <czf.leo123@gmail.com>
  */
 
 namespace Library;
-
-use Core\Auxiliary;
 
 class Helper
 {
     /**
      * Function humanReadableSize() : return size in human readable foromat (EG 1.5GB)
      * 
-     * @param  [type]  $size
-     * @param  [type]  $format
-     * @param  integer $round
+     * @param int       $size
+     * @param string    $format
+     * @param int       $round
      *
      * @return string
      */
-    public static function humanReadableSize($size, $format = null, $round = 3)
+    public static function humanReadableSize(int $size, string $format = null, $round = 3)
     {
         $mod = 1024;
         if (is_null($format)) {
@@ -40,32 +37,16 @@ class Helper
         return sprintf($format, round($size, $round), $units[$i]);
     }
 
-    // test this function
-    public static function getArraySizeInBytes(array $array)
-    {
-        $serializedFoo = serialize($array);
-
-        if (function_exists('mb_strlen')) {
-            $size = mb_strlen($serializedFoo, '8bit');
-        } else {
-            $size = strlen($serializedFoo);
-        }
-        
-        return $size;
-    }
-
     /**
      * Function humanReadableTimeLeft() : Return timeleft from $start in human readable format.
      *
-     * @param  [type] $start
-     * @param  [type] $format
-     * @param  [type] $lng
+     * @param mixed $starttime
      *
      * @return string
      */
-    public static function humanReadableTimeLeft($start, $format = null, $lng = null)
+    public static function humanReadableTimeLeft($starttime)
     {
-        $duration = microtime(true) - $start;
+        $duration = microtime(true) - $starttime;
         $hours    = (int) ($duration / 60 / 60);
         $minutes  = (int) ($duration / 60) - $hours * 60;
         $seconds  = $duration - $hours * 60 * 60 - $minutes * 60;
@@ -76,11 +57,11 @@ class Helper
     /**
      * Function basePath() : Return project base path
      *
-     * @return String
+     * @return string
      */
     public static function basePath()
     {
-        # todo: think what is better readable or optimized in this situation or achieve it both;
+        // # TODO: think what is better readable or optimized in this situation or achieve it both;
         $return = explode('/', __DIR__);
 
         // remove `library`
@@ -92,7 +73,7 @@ class Helper
     /**
      * Function globalPath() : Return project global path
      *
-     * @return String
+     * @return string
      */
     public static function globalPath()
     {
@@ -102,10 +83,10 @@ class Helper
     /**
      * Function exec() : Exec System command
      * 
-     * @param  string               $cmd
-     * @param  \Modules\Logger|null $logger
+     * @param string            $cmd
+     * @param \Modules\Logger   $logger
      * 
-     * @return string ???
+     * @return string|null
      */
     public static function exec(string $cmd, \Modules\Logger $logger = null)
     {
@@ -117,12 +98,9 @@ class Helper
             $logger->info($cmd);
         }
 
-        $output = [];
-        $return = null;
-
         $output = \shell_exec($cmd);
 
-        // #todo: rethink.
+        // # TODO: rethink.
         echo $output;
 
         return $output;

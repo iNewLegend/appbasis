@@ -32,7 +32,7 @@ class User
      * @param string       $hashPassword
      * @param string       $firstName
      * @param string       $lastName
-     * @param bool|boolean $isActive
+     * @param bool         $isActive
      *
      * @return mixed
      */
@@ -53,7 +53,7 @@ class User
     /**
      * Function getId() : Return id by email
      *
-     * @param  string $email
+     * @param string $email
      *
      * @return mixed
      */
@@ -83,7 +83,7 @@ class User
     /**
      * Function getBase() : Get basic user data by id
      *
-     * @param  string $id
+     * @param string $id
      *
      * @return mixed()
      */
@@ -101,7 +101,7 @@ class User
     /**
      * Function getForEndpoint() : get user data for frontend by id
      *
-     * @param  string $id
+     * @param string $id
      *
      * @return mixed
      */
@@ -119,9 +119,9 @@ class User
     /**
      * Function isEmailTaken() : Checks if email is already taken
      *
-     * @param  string  $email
+     * @param string  $email
      *
-     * @return boolean
+     * @return bool
      */
     public function isEmailTaken(string $email)
     {
@@ -137,7 +137,7 @@ class User
     /**
      * Function getFullName() : Get full name (firstname '<space>' lastname) by id
      * 
-     * @param  string $id
+     * @param string $id
      *
      * @return mixed
      */

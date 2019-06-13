@@ -100,9 +100,9 @@ class Config
      */
     private function handle($config)
     {
-        # check if the requested config cached
+        // check if the requested config cached
         if (in_array($config, $this->cacheIndex)) {
-            # if so, return it
+            // if so, return it
 
             if (!empty($this->cacheData[$config])) {
                 return $this->cacheData[$config];
@@ -111,11 +111,11 @@ class Config
             $this->logger->warn("Config: `$config` exist in cacheIndex but not in cacheData.");
         }
 
-        # save the config in memory
+        // save the config in memory
         $this->cacheIndex[$config] = $config;
         $this->cacheData[$config]  = "\\Config\\$config";
 
-        # return and load new config into cache
+        // return and load new config into cache
         return $this->cacheData[$config] = new $this->cacheData[$config]();
     }
 
@@ -128,7 +128,7 @@ class Config
      */
     public function _get($config)
     {
-        # Check if the config exist
+        // Check if the config exist
         $config = ucfirst($config);
 
         if (class_exists("\\Config\\{$config}")) {
@@ -139,4 +139,4 @@ class Config
 
         return null;
     }
-} // EOF Config.php
+} // EOF services/config.php

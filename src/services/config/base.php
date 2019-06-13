@@ -1,12 +1,12 @@
 <?php
 /**
-@file:services/config/base.php
+ * @file: services/config/base.php
  * @author: Leonid Vinikov <czf.leo123@gmail.com>
  */
 
 namespace Services\Config;
 
-abstract class Base implements BaseInterface
+abstract class Base
 {
     /**
      * The Logger instance
@@ -16,35 +16,35 @@ abstract class Base implements BaseInterface
     protected $_logger;
 
     /**
-     * Undocumented variable
+     * Owner
      *
-     * @var [type]
+     * @var string
      */
     protected $_owner = null;
 
     /**
-     * Undocumented variable
+     * Self
      *
-     * @var ReflectionClass
+     * @var \ReflectionClass
      */
     private $_self;
 
     /**
-     * Undocumented variable
+     * Keys
      *
-     * @var [type]
+     * @var array
      */
     private $_keys = [];
 
     /**
-     * Undocumented variable
+     * Access Token
      *
-     * @var [type]
+     * @var string
      */
     private $_accessToken;
 
     /**
-     * Undocumented function
+     * Function __construct() : Construct Config Base
      */
     public function __construct()
     {
@@ -55,7 +55,7 @@ abstract class Base implements BaseInterface
     }
     
     /**
-     * Undocumented function
+     * Function loadKeys() : Load keys
      *
      * @return void
      */
@@ -80,7 +80,7 @@ abstract class Base implements BaseInterface
     }
 
     /**
-     * Config Initialize
+     * Function initialize() : Config Initialize
      *
      * @return void
      */
@@ -90,10 +90,11 @@ abstract class Base implements BaseInterface
     }
 
     /**
-     * Undocumented function
+     * Function protect() : Protect
      *
-     * @param [type] $key
-     * @return void
+     * @param string $key
+     *
+     *  @return void
      */
     public function protect($key)
     {
@@ -102,14 +103,17 @@ abstract class Base implements BaseInterface
     }
 
     /**
-     * Undocumented function
+     * Function getAll() : Get all 
      *
-     * @param [type] $accessToken
+     * @param string $accessToken
+     * 
      * @return void
      */
     public function getAll($accessToken = null)
     {
         $return = [];
+
+        $this->_logger->debug("accessToken: `{$accessToken}`");
 
         $this->loadKeys();
 
@@ -125,15 +129,18 @@ abstract class Base implements BaseInterface
                     $this->_logger->warn("`{get_called_class()}` trying access protected data but access token is empty");
                     continue;
                 } elseif($accessToken !== $this->_accessToken) {  
+                    $this->_logger->warn("`{get_called_class()}` trying access protected data but access token is invalid");
                     continue;
                 } 
+                $this->_logger->warn("{$this->key}");
             }
             
             foreach($this->_keys[$visibility] as $key) {
+                $this->_logger->crit("{$this->key}");
                 // skip self props
                 if($key[0] == '_') continue;
 
-                // critical
+                // # CRITICAL:
                 $return[$key] = $this->$key;
             }
         }
@@ -142,7 +149,7 @@ abstract class Base implements BaseInterface
     }
 
     /**
-     * Undocumented function
+     * Function __toString() : Return all config in json format
      *
      * @return string
      */
@@ -158,9 +165,10 @@ abstract class Base implements BaseInterface
     }
 
     /**
-     * Called when requesting non exist member
+     * Function __get() : Called when requesting non exist member
      *
      * @param string $param
+     * 
      * @return void
      */
     public function __get($param)
@@ -169,4 +177,4 @@ abstract class Base implements BaseInterface
 
         return null;
     }
-} // EOF base.php
+} // EOF services/config/base.php

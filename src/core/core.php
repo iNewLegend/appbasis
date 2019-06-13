@@ -41,10 +41,11 @@ class Core
     /**
      * Function __construct() : Create new core, increase core count
      *
-     * @param \Modules\Logger $logger
-     * @param \Modules\Ip $ip
-     * @param string $name
-     * @param array $services
+     * @param \Modules\Logger   $logger
+     * @param \Modules\Ip       $ip
+     * @param string            $name
+     * @param array             $services
+     * @param array             $modules
      */
     public function __construct(\Modules\Logger $logger = null, \Modules\Ip $ip, string $name = '', array $services = [], array $modules = [])
     {
@@ -60,10 +61,13 @@ class Core
             $logger = new \Modules\Logger($name . '_' . self::$count);
         }
 
-        $this->logger = $logger;
+        // attach logger to modules
+        $modules[] = $logger;
 
-        // Attach ip module to modules
+        // attach ip module to modules
         $modules[] = $ip;
+
+        $this->logger = $logger;
 
         // init core
         $this->initialize($services, $modules);
@@ -81,9 +85,9 @@ class Core
         $this->logger->debug("destroying `" . self::class . '`');
 
         // ack controllers about disconnection
-        foreach ($this->getControllers() as $controller) {
+        foreach ($this->container->getNamespacePrefix('Controllers') as $controller) {
             if ($controller instanceof \Interfaces\Controller\Disconnect) {
-                $controller->_disconnect();
+                $controller->disconnect();
             }
         }
 
@@ -104,18 +108,13 @@ class Core
         // create container with debug status
         $this->container = new \Core\Container();
 
-        $this->logger->debug("attempting register modules");
-
-        // # register core modules
-        $modules[] = $this->logger;
+        $this->logger->notice("attempting register core modules");
 
         // attach modules into container
         $this->registerModules($modules);
 
-        $this->logger->debug("attempting register services");
-
-        // # register services
-        $this->services = $this->registerServices($services);
+        // register services
+        $this->registerServices($services);
 
         // register the container and core definitions.
         $this->register();
@@ -130,6 +129,8 @@ class Core
      */
     public function registerModules(array $modules = [])
     {
+        $this->logger->notice("attempting register core modules");
+
         $definitions = [];
 
         foreach ($modules as $key => $module) {
@@ -160,11 +161,13 @@ class Core
      */
     public function registerServices(array $services)
     {
+        $this->logger->notice("attempting register core services");
+
         $definitions = [];
 
         foreach ($services as $key => $service) {
 
-            if (!is_array($service) /*&& ! is_object($service)*/ ) {
+            if (!is_array($service)) {
                 if (is_object($service)) {
                     $key = get_class($service);
                 }
@@ -173,7 +176,7 @@ class Core
                 continue;
             }
 
-            $this->logger->debug("attempting to register service: `{$key}`");
+            $this->logger->notice("attempting to register service: `{$key}`");
 
             // check if service have get function
             if (!is_callable([$key, 'get'])) {
@@ -206,12 +209,9 @@ class Core
      */
     public function register()
     {
-        # notice: we dont attach core it self into container, currently bcoz it will cause a stuck in the release of core it self from server.
-        /*$this->definitions = array_merge($this->definitions, ['Core\Core' => new class{
-        // limited core access
-        }]);*/
+        $this->logger->notice("attempting register core definitions");
 
-        // debug
+        // # DEBUG
         foreach ($this->definitions as $definition) {
             $class = get_class($definition);
             $this->logger->debug("definition: `{$class}`");
@@ -219,51 +219,158 @@ class Core
 
         $this->container->merge($this->definitions);
 
-        $this->logger->debug("container registered!");
+        $this->logger->info("container registered!");
     }
 
     /**
-     * Function runGuard() : Loads new guard
-     *
-     * @throws \Exception
+     * Function executeGuard() : Execute New guard
      *
      * @param string $name
      *
      * @return bool
      */
-    private function runGuard(string $name)
+    private function executeGuard(string $name)
     {
-        $this->logger->debug("attempting to load: `{$name}` guard");
+        $return = false;
 
-        // create guard
-        $guard = new \Core\Guard($name, $this->container);
+        $this->logger->notice("attempting to execute guard: `{$name}`");
 
-        // attempt to load & run guard
-        if ($guard->isAvailable()) {
-            if ($guard->load() && $guard->create() && $guard->run()) {
-                $this->logger->debug("guard: `{$name}` run successfully");
+        /** @var \Interfaces\Guard\Run $guard */
+        $guard = $this->container->create("Guards\\{$name}");
 
-                $guard = $guard->get();
-            } else {
-                $this->logger->error("guard: `{$name}` is available but cannot not loaded or run.");
+        if ($guard instanceof \Interfaces\Guard\Run) {
+            if ($guard->run()) {
+                $return = true;
 
-                $guard = false;
+                $this->logger->info("guard: `{$name}` run successfully");
             }
-
         } else {
             $this->logger->error("guard: `{$name}` is not available.");
-
-            $guard = false;
         }
 
-        return $guard;
+        return $return;
+    }
+
+    /**
+     * function getServiceExecute() : Get Execute able Service callback method
+     *
+     * @param \Modules\Command $cmd
+     * 
+     * @return callable|false
+     */
+    private function getServiceExecute(\Modules\Command $cmd)
+    {
+        $name = $cmd->getName();
+        $method = $cmd->getMethod();
+
+        $fullName = "Services" . '\\' . $name;
+
+        $this->logger->notice("attempting to execute service: `{$name}`");
+
+        if ($this->isServiceRegistered($fullName)) {
+            $this->logger->warning("unable to execute service: `{$name}`, does not available");
+            
+            return false;
+        }
+        
+        $service = $this->container->get($fullName);
+
+        $this->logger->debug("searching for: `{$method}` method in service: `{$name}`");
+
+        // this method exist in this service?
+        if (\method_exists($service, $method)) {
+            $this->logger->debug("calling service method: `{$name}::$method`");
+
+            return function () use ($service, $method, $cmd) {
+                call_user_func_array([$service, $method], $cmd->getParameters());
+            };
+        }
+
+        $this->logger->debug("method: `{$method}` not found in service: `{$name}`");
+
+        return false;
+    }
+
+    /**
+     * function getControllerExecute() : Get Execute able Controller callback method
+     *
+     * @param \Modules\Command $cmd
+     * 
+     * @return callable|false
+     */
+    private function getControllerExecute(\Modules\Command $cmd)
+    {
+        $name = $cmd->getName();
+
+        $this->logger->notice("attempting to execute controller: `{$name}`");
+
+        $controller = new \Core\Controller($name, $this->container);
+
+        if (!$controller->isAvailable()) {
+            $this->logger->warning("unable to execute controller: `{$name}`, does not available");
+
+            return false;
+        }
+
+        // get guards        
+        $guards = $controller->getGuards();
+
+        if (count($guards) > 0) {
+            foreach ($guards as $guard) {
+                $guardName = explode('\\', $guard)[1];
+                $guardName = str_replace('Guard', '', $guardName);;
+                if (!$this->executeGuard($guardName)) {
+                    $error = "unable to execute guard: `{$guard}`";
+                    $this->logger->error($error);
+
+                    return false;
+                }
+            }
+        }
+
+        $method = $cmd->getMethod();
+        $controllerLoaded = false;
+
+        // attempt to load controller
+        try {
+            if ($controllerLoaded = $controller->create()) {
+                if (!$controller->methodExists($method)) {
+                    $error = "method: `{$method}` not found in controller: `{$name}` in: " . __FILE__ . '(' . __LINE__ . ')';
+
+                    $this->logger->warning($error);
+                    return false;
+                }
+
+                if ($cmd->isEmpty()) {
+                    $this->logger->info("call to controller `{$name}::{$method}`");
+                } else {
+                    $params_plain = var_export($cmd->getParams(), true);
+
+                    $this->logger->info("call to controller `{$name}::{$method}` with params:\n {$params_plain};");
+                }
+
+                // return callback
+                return
+                    function () use ($controller, $method, $cmd) {
+                        return $controller->callMethod($method, $cmd->getParameters()) ?: '{}';
+                    }; // empty json
+            }
+        } catch (\Exception $e) {
+            if (false === $controllerLoaded) {
+                $this->logger->error("fail to load controller: `{$method}`");
+            }
+
+            $this->logger->error($e);
+        }
+
+        return false;
     }
 
     /**
      * Function executeCommand() : Execute command
-     *
-     * @todo rewrite this function and reduce it size
-     * @param mixed $cmd
+  
+     * @param string|\Modules\Command $cmd
+     * 
      * @return mixed
      */
     public function executeCommand($cmd)
@@ -279,120 +386,33 @@ class Core
             $this->cmd = new \Modules\Command($cmd);
         }
 
-        // #advise: each time you call a service or controller you should provide response call back.
-
-        // get command name
         $name = $this->cmd->getName();
-        $method = $this->cmd->getMethod();
 
-        $this->logger->debug("checking if serivce: {$name}` exist in container");
+        $this->logger->notice("attempting to execute command: `{$name}`");
 
         // do we have service with the same name as command?
-        if ($this->checkService($name)) {
-            $this->logger->debug("service: `{$name}` exist, trying to get service");
-
-            $service = $this->getService($name);
-
-            $this->logger->debug("searching for: `{$method}` method in service: `{$name}`");
-
-            // this method exist in this service?
-            if (\method_exists($service, $method)) {
-                $this->logger->debug("calling service method: `{$name}::$method`");
-
-                try {
-                    return call_user_func_array([$service, $method], $this->cmd->getParameters());
-                } catch (\Exception $e) {
-                    $this->logger->error($e);
-                }
-            }
-
-            $this->logger->debug("method: `{$method}` not found in service: `{$name}`");
+        if ($result = $this->getServiceExecute($this->cmd)) {
+            return $result();
         }
 
         // here we think that maybe it is controller
         $this->logger->debug("assuming command: `{$name}` is controller");
-    
-        // create controller
-        $controller = new \Core\Controller($this->cmd->getName(), $this->container, false);
 
-        // check if the controller is available
-        if (!$controller->isAvailable()) {
-            $e = "controller: `{$this->cmd->getName()}` not found";
-
-            $this->logger->warning($e);
-
-            throw new \Exception($e);
+        if ($result = $this->getControllerExecute($this->cmd)) {
+            return $result();
         }
 
-        $this->logger->debug("controller: `{$this->cmd->getName()}` found");
-
-        if (!$controller->load()) {
-            $e = "controller: `{$this->cmd->getName()}` cannot be loaded";
-
-            $this->logger->error($e);
-
-            throw new \Exception($e);
-        }
-
-        $guards = $controller->getGuards();
-
-        if (count($guards) > 0) {
-            foreach ($guards as $guard) {
-                //$this->logger->notice("attempt to run guard: `{$guard}`");
-                $guardShortName = explode('\\', $guard)[1];
-                $guardShortName = strtolower(str_replace('Guard', '', $guardShortName));
-
-                $handler = $this->runGuard($guardShortName);
-
-                if (!$handler) {
-                    throw new \Exception("unable to run guard: `{$guard}`");
-                }
-
-                $this->container->set($guard, $handler);
-            }
-        }
-
-        $controllerLoaded = false;
-
-        // attempt to load controller
-        try {
-            if ($controllerLoaded = $controller->create()) {
-
-                if (!$controller->methodExists($this->cmd->getMethod())) {
-                    throw new \Exception("method: `{$this->cmd->getMethod()}` not found in controller: `{$this->cmd->getName()}` in: " . __FILE__ . '(' . __LINE__ . ')');
-                }
-
-                if ($this->cmd->isEmpty()) {
-                    $this->logger->debug("call to controller `{$this->cmd->getName()}::{$this->cmd->getMethod()}`");
-                } else {
-                    $params_plain = var_export($this->cmd->getParams(), true);
-
-                    $this->logger->debug("call to controller `{$this->cmd->getName()}::{$this->cmd->getMethod()}` with params:\n {$params_plain};");
-                }
-
-                // call to controller method
-                return $controller->callMethod($this->cmd->getMethod(), $this->cmd->getParameters()) ? : '{}'; // empty json
-            }
-        } catch (\Exception $e) {
-            if (false === $controllerLoaded) {
-                $this->logger->error("fail to load controller: `{$this->cmd->getName()}`");
-            }
-
-            $this->logger->error($e);
-
-            throw $e;
-        }
-
-        $this->logger->critical("system error on load controller: `{$this->cmd->getName()}`");
+        $this->logger->critical("faield to execute command: `{$cmd}`");
     }
 
     /**
-     * Function checkService() : Check if service exist in core definitions
+     * Function isServiceRegistered() : Check if service exist in core definitions
      *
      * @param string $name
+     * 
      * @return bool
      */
-    private function checkService(string $name)
+    private function isServiceRegistered(string $name)
     {
         $service = 'Services' . '\\' . $name;
 
@@ -406,33 +426,12 @@ class Core
     }
 
     /**
-     * Function getService() : Trying to get service from container.
-     *
-     * @param string $name
-     * @return mixed
-     */
-    private function getService(string $name)
-    {
-        return $this->container->get("Services" . '\\' . $name);
-    }
-
-    /**
-     * Function getObject() : Trying to get Core Object from Container
+     * Function getObject() : Gget Core Object from Container
      *
      * @return \Core\OObject
      */
-    public function getObject() : \Core\OObject
+    public function getObject(): \Core\OObject
     {
         return $this->container->get("Core\OObject");
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return mixed
-     */
-    public function getControllers()
-    {
-        return $this->container->getNamespacePrefix('Controllers');
     }
 } // EOF core\core.php

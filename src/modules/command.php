@@ -44,10 +44,10 @@ class Command
     private $noSubParameters = true;
 
     /**
-     * Function __construct() : Construct AppCommand and parse $cmd
+     * Function __construct() : Construct Command Module and parse $cmd
      *
-     * @param string $cmd    [description]
-     * @param array  $params [description]
+     * @param string    $cmd
+     * @param array     $params
      */
     public function __construct(string $cmd = '', array $params = [])
     {
@@ -72,9 +72,9 @@ class Command
     }
 
     /**
-     * Function __construct() : Parse command from format eg: /name/methods/params
+     * Function parse() : Parse command from format eg: /name/methods/params
      *
-     * @param  string    $cmd
+     * @param string $cmd
      *
      * @return void
      */
@@ -132,7 +132,7 @@ class Command
     /**
      * Function setName() : Set command name
      *
-     * @param  string $name
+     * @param string $name
      *
      * @return void
      */
@@ -154,7 +154,7 @@ class Command
     /**
      * Function setMethod() : Set method name
      *
-     * @param  string $method
+     * @param string $method
      *
      * @return void
      */
@@ -188,7 +188,7 @@ class Command
     /**
      * Function isEmpty() : Check is empty command on $this->cmd
      *
-     * @return boolean
+     * @return bool
      */
     public function isEmpty()
     {
@@ -212,7 +212,7 @@ class Command
     /**
      * Function noParameters() : Return's command in JSON format
      *
-     * @return boolean
+     * @return bool
      */
     public function noParameters()
     {
@@ -222,7 +222,7 @@ class Command
     /**
      * Function noSubParameters() : Return's command in JSON format
      *
-     * @return boolean
+     * @return bool
      */
     public function noSubParameters()
     {

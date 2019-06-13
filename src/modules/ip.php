@@ -24,13 +24,11 @@ class Ip
     private $ip;
 
     /**
-     * Function __construct() : Construct Ip Module and validate
+     * Function __construct() : Construct Ip Module and validate remoteAddr
      *
-     * @param string $ip
-     *
-     * @throws Exception
+     * @param string $remoteAddr
      */
-    public function __construct($remoteAddr)
+    public function __construct(string $remoteAddr)
     {
         $this->id = time() . '.' . uniqid();
 
@@ -51,7 +49,7 @@ class Ip
     }
 
     /**
-     * Function get() : Get IP Address
+     * Function get() : Get Address
      *
      * @return void
      */
@@ -71,7 +69,7 @@ class Ip
     }
 
     /**
-     * Function get() : Get IP Address
+     * Function get() : Get Id
      *
      * @return void
      */
@@ -89,4 +87,4 @@ class Ip
     {
         return $this->ip;
     }
-} // EOF Ip.php
+} // EOF modules/ip.php

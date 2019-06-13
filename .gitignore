@@ -1,4 +1,13 @@
 tmp/
 vendor/
-.phpintel
-.vscode
+backups/
+
+frontend/react
+
+instalikes/
+ext/instapy
+
+*.phpintel
+*.vscode
+*.lock
+*.log

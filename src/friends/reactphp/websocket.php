@@ -2,7 +2,7 @@
 /**
  * @file: friends/reactphp/websocket.php
  * @author: Leonid Vinikov <czf.leo123@gmail.com>
- * @todo: OnCommand, im not sure its the right place
+ * @todo: class OnCommand, im not sure its the right place
  */
 
 namespace Friends\React;
@@ -24,13 +24,6 @@ class WebSocket
     private $handler;
 
     /**
-     * Instance Of Ratchet Server Engine
-     *
-     * @var \Ratchet\App
-     */
-    private $server;
-
-    /**
      * Server Port
      *
      * @var string
@@ -40,10 +33,10 @@ class WebSocket
     /**
      * Function __construct() : Construct Friends\React WebSocket
      *
-     * @param \Core\Handler                          $handler
-     * @param string                                 $port
-     * @param \React\EventLoop\StreamSelectLoop|null $loop
-     * @param bool|boolean                           $autoLoad
+     * @param \Core\Handler                         $handler
+     * @param string                                $port
+     * @param \React\EventLoop\StreamSelectLoop     $loop
+     * @param bool                                  $autoLoad
      */
     public function __construct(\Core\Handler $handler, string $port, \React\EventLoop\StreamSelectLoop $loop = null, bool $autoLoad = true)
     {
@@ -68,7 +61,8 @@ class WebSocket
 
     /**
      * Function initialize() : Initalize WebSocket
-     * @param  \React\EventLoop\StreamSelectLoop|null $loop
+     * 
+     * @param \React\EventLoop\StreamSelectLoop $loop
      *
      * @return void
      */
@@ -91,14 +85,16 @@ class WebSocket
             $socket,
             $loop
         );
+
+        // # NOTICE: $server not used.
     }
 
     /**
      * Function postTo() : Send post (AppBasis Protocol) to specific client.
      *
-     * @param  \Modules\Ip $ip
-     * @param  string      $method
-     * @param  mixed      $data
+     * @param \Modules\Ip  $ip
+     * @param string       $method
+     * @param mixed        $data
      *
      * @return void
      */
@@ -137,8 +133,8 @@ class WebSocket
     /**
      * Function postToAll() : Send post (AppBasis Protocol) to all client(s).
      *
-     * @param  string      $method
-     * @param  mixed      $data
+     * @param string    $method
+     * @param mixed     $data
      *
      * @return void
      */
@@ -190,9 +186,9 @@ class AppBasis_WebSocket_Protocol
     /**
      * Function __construct() : Construct WebSocket Protocol Header?
      * 
-     * @param mixed         $type
-     * @param string|null   $name
-     * @param string|null   $method
+     * @param mixed     $type
+     * @param string    $name
+     * @param string    $method
      */
     public function __construct($type, string $name = null, string $method = null)
     {
@@ -275,7 +271,7 @@ class OnCommand implements \Ratchet\MessageComponentInterface
     /**
      * Function onOpen() : Called on new connection
      *
-     * @param  \Ratchet\ConnectionInterface $conn
+     * @param \Ratchet\ConnectionInterface $conn
      *
      * @return void
      */
@@ -298,8 +294,8 @@ class OnCommand implements \Ratchet\MessageComponentInterface
     /**
      * Function onMessage() : Called on new message
      *
-     * @param  \Ratchet\ConnectionInterface $from
-     * @param  mixed                        $data
+     * @param \Ratchet\ConnectionInterface $from
+     * @param mixed                        $data
      *
      * @return void
      */
@@ -344,6 +340,10 @@ class OnCommand implements \Ratchet\MessageComponentInterface
             } else {
                 $this->logger->warn("unknown json protocol: `{$data}`");
             }
+        } else {
+            $this->logger->warn("unable to parse protocol: `{$data}`");
+            
+            $data = new \Modules\Command($data);
         }
 
         $output = $this->handler->onCommand($ip, $data, $hash);
@@ -381,7 +381,8 @@ class OnCommand implements \Ratchet\MessageComponentInterface
 
     /**
      * Function onClose() : Called on client connection closing
-     * @param  \Ratchet\ConnectionInterface $conn
+     * 
+     * @param \Ratchet\ConnectionInterface $conn
      *
      * @return void
      */
@@ -399,8 +400,8 @@ class OnCommand implements \Ratchet\MessageComponentInterface
     /**
      * Function onError() : Called on client have error
      *
-     * @param  \Ratchet\ConnectionInterface $conn
-     * @param  \Exception                   $e
+     * @param \Ratchet\ConnectionInterface $conn
+     * @param \Exception                   $e
      *
      * @return void
      */

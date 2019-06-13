@@ -1,20 +1,20 @@
 <?php
 /**
- * @file: library/helper.php
- * @todo: fix doc.
- * @author: Name <email@email.com>
+ * @file: interfaces/controller.php
+ * @author: Leonid Vinikov <czf.leo123@gmail.com>
  */
+
 
 namespace Interfaces\Controller;
 
 interface Disconnect
 {
     /**
-     * Function _disconnect() : called on controller disconnection
+     * Function disconnect() : called on controller disconnection
      *
      * @return void
      */
-    function _disconnect();
+    function disconnect();
 } 
 
-// EOF interface/controller.php
+// EOF interfaces/controller.php

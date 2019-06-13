@@ -21,9 +21,11 @@
             "src/config",
             "src/models",
             "src/library",
-            "src/services",
+            "src/services/",
             "src/friends",
-            "src/guards"
+            "src/controllers",
+            "src/guards",
+            "ext/"
     	]
     }
 }

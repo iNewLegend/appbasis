@@ -1,6 +1,6 @@
 <?php
 /**
- * @file: core/loader.php
+ * @file: modules/loader.php
  * @author: Leonid Vinikov <czf.leo123@gmail.com>
  */
 
@@ -9,7 +9,7 @@ namespace Modules;
 class Loader
 {
     /**
-     * The container of DI
+     * Instance of Container
      *
      * @var \Core\Container
      */
@@ -46,14 +46,14 @@ class Loader
     /**
      * Is the object available
      *
-     * @var boolean
+     * @var bool
      */
     private $available = false;
 
     /**
      * Is the object Loaded
      *
-     * @var boolean
+     * @var bool
      */
     private $loaded = false;
 
@@ -65,13 +65,13 @@ class Loader
     private $logger = null;
 
     /**
-     * Function __construct() :
+     * Function __construct() : Construct Loader Module
      *
-     * @param string          $name
-     * @param string          $path
-     * @param string          $fullName
-     * @param \Core\Container $container
-     * @param boolean         $autoLoad
+     * @param string            $name
+     * @param string            $path
+     * @param string            $fullName
+     * @param \Core\Container   $container
+     * @param bool              $autoLoad
      */
     public function __construct(string $name, string $path, string $fullName, \Core\Container $container, $autoLoad = false)
     {
@@ -90,9 +90,9 @@ class Loader
     }
 
     /**
-     * Function initialize() :
+     * Function initialize() : Initialize Loader
      *
-     * @param  bool   $autoLoad
+     * @param bool $autoLoad
      *
      * @return void
      */
@@ -101,7 +101,9 @@ class Loader
         if (\Services\Config::get('logger')->module_loader) {
             $this->logger = new \Modules\Logger(self::class);
 
-            $this->logger->debug('autoLoad: `' . ($autoLoad ? 'true' : 'false') . '`');
+            $this->logger->debug('autoLoad: `' . ($autoLoad ? 'true' : 'false') . '`' . 
+                " name: `{$this->name}` path: `{$this->path}` fullName: `{$this->fullName}`" 
+            );
         }
 
         if (file_exists($this->path)) {
@@ -116,17 +118,16 @@ class Loader
         if ($autoLoad) {
             $this->load();
         }
-
     }
 
     /**
      * Function load() : Load object into container
      *
-     * @return boolean
+     * @return bool
      */
     public function load()
     {
-        if ($this->isAvailable() && require_once ($this->path)) {
+        if ($this->isAvailable() && require_once($this->path)) {
             return true;
         }
 
@@ -134,9 +135,9 @@ class Loader
     }
 
     /**
-     * Function create() :
+     * Function create() : Create the guard, getting it from the container
      *
-     * @return boolean
+     * @return bool
      */
     public function create()
     {
@@ -147,16 +148,18 @@ class Loader
         $this->handler = $this->container->get($this->fullName);
 
         if ($this->logger) {
-            $this->logger->okFailed((bool) $this->handler, get_called_class(), $this->handler);
+            $this->logger->okFailed((bool)$this->handler, get_called_class(), $this->handler);
         }
 
         if ($this->handler) {
-            return $this->loaded = true;
+            $this->loaded = true;
         }
+
+        return $this->isLoaded();
     }
 
     /**
-     * Function getHandler() :
+     * Function getHandler() : Get the handler
      *
      * @return mixed
      */
@@ -168,7 +171,7 @@ class Loader
     /**
      * Function isAvailable() : Checks if the handler available
      *
-     * @return boolean
+     * @return bool
      */
     public function isAvailable()
     {
@@ -178,10 +181,10 @@ class Loader
     /**
      * Function isLoaded() : Checks if the handler is loaded
      *
-     * @return boolean
+     * @return bool
      */
     public function isLoaded()
     {
         return $this->loaded;
     }
-} // EOF Loader.php
+} // EOF modules/loader.php
