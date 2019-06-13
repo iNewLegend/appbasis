@@ -18,7 +18,9 @@
     
 # Status
   Backend: `Development`
+  
   Angular Frontend: `Development`
+  
   Angular React: `Not working yet.`
 
 ## Road Map
