@@ -90,6 +90,7 @@ $ ng serve
   -  add: security `wrk -t4 -c500 -d10s http://localhost:51190/authorization/login/czf.leo123@gmail.com/badpass`
   -  think: friends can have parent.
   -  change: at chat controller function hook is called by Core\Handler it should be an implantation
+  -  add: document appbasis.php commands.
 
 #### Frontend:
 ##### Angular:

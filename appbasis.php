@@ -176,6 +176,13 @@ class AppBasis
             return false;
         }
 
+
+        if (in_array($pluginClass, self::$plugins)) {
+            self::$logger->warning("plugin: `{$pluginClass}` is already loaded");
+            return true;
+        }
+
+
         self::$logger->debug("loading: `{$plugin_startup_file}`");
 
         if (!require($plugin_startup_file)) {
@@ -211,18 +218,11 @@ class AppBasis
                 if (strstr($dependency, '_Plugin')) {
                     self::$logger->notice("plugin: `{$pluginClass}` attempting to load dependency: `{$dependency}`");
 
-                    if (in_array($dependency, self::$plugins)) {
-                        self::$logger->warning("plugin: `{$pluginClass}` dependency:`{$dependency}`, is already loaded");
-                        continue;
-                    }
-
                     if (!self::plugin(str_replace('_plugin', '', $dependencyLowercase), true)) {
                         self::$logger->error("plugin: `{$pluginClass}` unable to load plugin dependency: `{$dependency}`");
 
                         return false;
                     }
-
-                    self::$plugins [] = $dependency;
                 } else {
                     self::$logger->error("unable to load the plugin dependency: `{$dependency}` does not have `_plugin` within the class name");
                 }
@@ -246,6 +246,8 @@ class AppBasis
 
             return false;
         }
+
+        self::$plugins [] = $pluginClass;
 
         if (!$dependencyFlag) {
             self::main(self::class, self::$logger, new \Modules\Command('server-plain'));
@@ -300,7 +302,9 @@ class AppBasis
                 break;
 
             case 'server': {
-                    // #TODO : add base plugins
+                    // base plugins
+                    self::plugin('auth', true);
+                    self::plugin('user', true);
                 }
             case 'serverplain': {
                     $startup = \Core\Auxiliary::auto(true, true);
