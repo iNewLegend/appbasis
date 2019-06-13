@@ -21,7 +21,7 @@
   
   Angular Frontend: `Development`
   
-  Angular React: `Not working yet.`
+  React Frontend: `Not working yet.`
 
 ## Road Map
   - todo
