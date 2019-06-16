@@ -288,7 +288,7 @@ class AppBasis
             'backup' => 'Create self backup',
             'release' => 'Create release',
             'template' => [$cool . 'template index' => 'Create new template'],
-            'plugin' => [$cool . 'plugin <name>' => 'Run Plugin'],
+            'plugin' => [$cool . 'plugin <plugin1> <plugin2> [ etc ... ]' => 'Run Plugin'],
         ];
 
         switch ($command->getName()) {

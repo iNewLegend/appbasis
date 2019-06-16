@@ -25,7 +25,7 @@ class Http
     /**
      * Server Engine
      *
-     * @var \React\Http\Server
+     * @var \React\Socket\Server
      */
     private $server;
 
@@ -83,7 +83,7 @@ class Http
             $loop = \React\EventLoop\Factory::create();
         }
 
-        $this->server = new \React\Socket\Server('0.0.0.0:' . $this->port, $loop);
+        $this->server = new \React\Socket\Server('0.0.0.0:' . $this->port, $loop, ['backlog' => 128]);
 
         $this->server->on('connection', function (\React\Socket\ConnectionInterface $client) {
             $this->_onConnect($client);
@@ -94,15 +94,15 @@ class Http
         });
 
         // http implant
-        $this->http = new \React\Http\Server(function (\React\Http\Io\ServerRequest $request) {
+        $http = new \React\Http\Server(function (\React\Http\Io\ServerRequest $request) {
             return $this->_onHttp($request);
         });
 
-        $this->http->on('error', function (\Exception $e) {
+        $http->on('error', function (\Exception $e) {
             $this->_onError($e);
         });
 
-        $this->http->listen($this->server);
+        $http->listen($this->server);
 
         $this->logger->notice("ready");
     }
