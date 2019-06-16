@@ -16,6 +16,20 @@ class Database
     private static $instances = 0;
 
     /**
+     * Connection Factory
+     *
+     * @var \React\Mysql\Factory
+     */
+    private $factory;
+
+    /**
+     * Connection String
+     *
+     * @var string
+     */
+    private $uri;
+
+    /**
      * Loop Handler
      *
      * @var \React\EventLoop\StreamSelectLoop
@@ -23,34 +37,42 @@ class Database
     private $loop;
 
     /**
+     * Instance of Logger Module
+     *
+     * @var \Modules\Logger
+     */
+    private $logger;
+
+    /**
      * Database Connection
      *
-     * @var \React\MySQL\Io\Connection
+     * @var \React\MySQL\ConnectionInterface
      */
     private $connection;
 
     /**
      * Function __construct() : Construct Database Module
      *
-     * @param array                                 $config
+     * @param string                                $uri
      * @param \Modules\Logger                       $logger
      * @param \React\EventLoop\StreamSelectLoop     $loop
      * @param bool                                  $autoLoad
      */
-    public function __construct(array $config, \Modules\Logger $logger = null, \React\EventLoop\StreamSelectLoop $loop = null, $autoLoad = true)
+    public function __construct(string $uri, \Modules\Logger $logger = null, \React\EventLoop\StreamSelectLoop $loop = null, $autoLoad = true)
     {
         if (!$loop) {
             $loop = \React\EventLoop\Factory::create();
         }
 
+        $this->factory = new \React\MySQL\Factory($loop);
+
         if (!$logger) {
             $logger = new \Modules\Logger(self::class, \Services\Config::get('logger')->module_database);
         }
 
-        $this->loop   = $loop;
-        $this->logger = $logger;
-
-        $this->connection = new \React\MySQL\Io\Connection($this->loop, $config);
+        $this->uri      = $uri;
+        $this->loop     = $loop;
+        $this->logger   = $logger;
 
         if ($autoLoad) {
             $this->initialize();
@@ -65,7 +87,6 @@ class Database
         --self::$instances;
 
         $this->logger->debug('destroying this instance, now count: `' . self::$instances . '`');
-
     }
 
     /**
@@ -99,24 +120,38 @@ class Database
         $ping  = $this->connection->ping();
 
         $ping->then(function () use ($token) {
-            $this->logger->callBackFire($token, $this->getConnectionState());
+            $this->logger->callBackFire($token, 'connected');
         }, function (\Exception $e) use ($token) {
             $this->logger->callBackFire($token, $e->getMessage());
+
+            $this->connection = null;
         });
 
         $this->logger->callBackDeclare($token);
     }
 
     /**
-     * Function Connect() : (doc-later)
+     * Function Connect() : Creates a new connection
      *
      * @param callable $callback
      *
      * @return void
      */
-    public function connect(callable $callback = null)
+    public function connect(callable $callback)
     {
-        $this->connection->doConnect($callback);
+        $this->logger->debug("uri: `{$this->uri}`");
+
+        $promise = $this->factory->createConnection($this->uri);
+
+        $promise->then(function (\React\MySQL\ConnectionInterface $connection) use ($callback) {
+            $this->connection = $connection;
+
+            $callback(null);
+        }, function (\Exception $error) use ($callback) {
+            $this->connection = null;
+
+            $callback($error);
+        });
     }
 
     /**
@@ -147,7 +182,7 @@ class Database
         if (\Services\Config::get('logger')->module_database == \Config\Module_Database_Logs::DEEP) {
             $token = $this->logger->callBackSet("query", $query, uniqid());
         }
-        
+
         $this->connection->query($query)->then(
             function (\React\MySQL\QueryResult $command) use ($deferred, $token) {
                 if ($token) {
@@ -192,41 +227,9 @@ class Database
      *
      * @return mixed
      */
-    public function fakeLongQuery()
+    public function fakeLongQuery(int $timeout = 20)
     {
-        return $this->queryAwait("SELECT SLEEP(20);");
-    }
-
-    /**
-     * Function getConnectionState() : Get Connection State
-     *
-     * @param bool $named
-     *
-     * @return mixed
-     */
-    public function getConnectionState($named = true)
-    {
-        if (!$named) {
-            return $this->connection->getState();
-        }
-
-        $class     = new \ReflectionClass(\React\MySQL\ConnectionInterface::class);
-        $constants = array_flip($class->getConstants());
-
-        return $constants[$this->connection->getState()];
-    }
-
-    /**
-     * Function isConnected() : Check whatever the module connect to database
-     *
-     * @return bool
-     */
-    public function isConnected()
-    {
-        $state = $this->connection->getState();
-
-        return $state === \React\MySQL\ConnectionInterface::STATE_CONNECTED || $state === \React\MySQL\ConnectionInterface::STATE_AUTHENTICATED
-        ? true : false;
+        return $this->queryAwait("SELECT SLEEP({$timeout});");
     }
 
     /**
@@ -240,12 +243,14 @@ class Database
     }
 
     /**
-     * Function getConnection() : Get the connection to database
+     * Undocumented function
      *
-     * @return \React\MySQL\Io\Connection
+     * @return boolean
      */
-    public function getConnection()
+    public function isConnected()
     {
-        return $this->connection;
+        if ($this->connection) return true;
+
+        return false;
     }
 } // EOF modules/database.php

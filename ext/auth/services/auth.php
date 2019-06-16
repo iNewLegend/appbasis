@@ -60,28 +60,28 @@ class Auth
     {
         if (empty(self::$instance)) {
             $logger = new \Modules\Logger(self::class);
-
             $config = \Services\Config::get("database")->getAll('some_secret_key');
 
-            $config = [
-                'dbname' => $config['name'],
-                'user'   => $config['username'],
-                'passwd' => $config['password'],
-                'host'   => $config['host'],
-            ];
+            $uri = vsprintf('%s:%s@%s:3306/%s', [
+                $config['username'],
+                $config['password'],
+                $config['host'],
+                $config['name']
 
-            $database = new \Modules\Database($config, null, \Core\Auxiliary::getLoop(), true);
+            ]);
+
+            $database = new \Modules\Database($uri, $logger, \Core\Auxiliary::getLoop(), true);
 
             $token = $logger->callBackSet("AuthDB", "connect", uniqid());
 
-            $database->connect(function ($error) use ($database, $logger, $token) {
+            $database->connect(function ($error) use ($logger, $token) {
                 if ($error) {
                     $logger->critical($error);
+
+                    return;
                 }
 
-                if ($database->isConnected()) {
-                    $logger->callBackFire($token, $database->getConnectionState());
-                }
+                $logger->callBackFire($token, 'connected');
             });
 
             $logger->callBackDeclare($token);
@@ -205,27 +205,24 @@ class Auth
 
         switch ($blockStatus) {
 
-            case 'verify':
-                {
+            case 'verify': {
                     if ($this->checkCaptcha($ip, $captcha)) {
                         $this->logger->debug("ip: `{$ip}` captcha verified");
                         $return = true;
                     }
-
                 }
                 break;
 
-            case 'allow':
-                {
+            case 'allow': {
                     $return = true;
                 }
                 break;
 
-            case 'block':break;
+            case 'block':
+                break;
 
             default:
                 $this->logger->error("ip: `{$ip}` unknown block status: `{$blockStatus}`");
-
         }
 
         return $return;
@@ -428,7 +425,7 @@ class Auth
 
         if ($isEmailTaken) {
             $this->attempt->add($ip);
-            
+
             $refError = $isEmailTaken;
 
 
@@ -469,5 +466,4 @@ class Auth
 
         return false;
     }
-
 } // EOF ext/auth/services/auth.php

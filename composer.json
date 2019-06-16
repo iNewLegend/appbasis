@@ -8,10 +8,10 @@
         "react/http": "@stable",
         "react/socket": "@stable",
         "react/http-client": "@stable",
-        "react/promise-timer": "@dev",
-        "react/mysql": "dev-master#28b0055",
-        "clue/block-react": "^1.3",
-        "cboden/ratchet": "^0.4.1"
+        "react/promise-timer": "@stable",
+        "react/mysql": "@stable",
+        "clue/block-react": "@stable",
+        "cboden/ratchet": "@stable"
     },
     "autoload": {
     	"classmap": [

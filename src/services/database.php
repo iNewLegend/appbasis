@@ -18,20 +18,20 @@ class Pool
     /**
      * Self Instance
      *
-     * @var \Services\Database
+     * @var \Services\Database|null
      */
     private static $instance = null;
-    
+
     /**
      * Function get() : Get self Service or Database Module 
      *
-     * @return \Modules\Database
+     * @return \Modules\Database|null
      */
     public static function get()
     {
         // # CRITICAL;
-        
-        if(empty(self::$instance)) {
+
+        if (empty(self::$instance)) {
             self::$instance = new Pool(new \Modules\Logger(self::class), true);
 
             return self::$instance;
@@ -49,11 +49,11 @@ class Pool
      */
     public function __construct(\Modules\Logger $logger, $autoLoad = false, $config = null)
     {
-        if(empty($config)) {
+        if (empty($config)) {
             $config = \Services\Config::get('database');
         }
-        
- 
+
+
         $this->logger = $logger;
         $this->config = $config;
 
@@ -76,45 +76,43 @@ class Pool
         $this->config->protect('some_secret_key');
 
         $this->config = $this->config->getAll('some_secret_key');
-        
-        $config = [
-            'dbname' => $this->config['name'],
-            'user' => $this->config['username'],
-            'passwd' => $this->config['password'],
-            'host' => $this->config['host']
-        ];
 
-        if($this->test($config)) {
+        $uri = vsprintf('%s:%s@%s:3306/%s', [
+            $this->config['username'],
+            $this->config['password'],
+            $this->config['host'],
+            $this->config['name']
+
+        ]);
+
+        if ($this->test($uri)) {
             // # TODO: add cross platform
             preg_match_all('/^processor/m', file_get_contents('/proc/cpuinfo'), $cpuCount);
 
             $cpuCount = count($cpuCount[0]);
             $connectionsCount = $cpuCount * 2;
 
-            $this->logger->info("cores: {$cpuCount} db-connections: {$connectionsCount}");
-            $this->logger->info('memory: ' . \Library\Helper::humanReadableSize(\memory_get_usage(true)));
-
             // database threads as much as cpu(s) * 2
-            for($i = 0 ; $i < $connectionsCount ; ++$i) {
-                $this->databases[$i] = new \Modules\Database($config, new \Modules\Logger(self::class . "_{$i}", \Services\Config::get('logger')->module_database), \Core\Auxiliary::getLoop());
-                
+            for ($i = 0; $i < $connectionsCount; ++$i) {
+                $this->databases[$i] = new \Modules\Database($uri, new \Modules\Logger(self::class . "_{$i}", \Services\Config::get('logger')->module_database), \Core\Auxiliary::getLoop());
+
                 $token = $this->logger->callBackSet("DBConnection_{$i}", "connect", uniqid());
 
-                $this->databases[$i]->connect(function($error) use ($i, $token) {
-                    if($error) {
+                $this->databases[$i]->connect(function ($error) use ($i, $token) {
+                    if ($error) {
                         $this->logger->callBackFire($token, $error->getMessage());
-                    } elseif ($this->databases[$i]->isConnected()) {
-                        $this->logger->callBackFire($token, $this->databases[$i]->getConnectionState());
-                    } else {
-                        $this->logger->callBackFire($token, "Unknown error in line: `" . __LINE__ . "`");
+
+                        return;
                     }
+
+                    $this->logger->callBackFire($token, 'connected');
                 });
 
                 $this->logger->callBackDeclare($token);
             }
 
-            $this->logger->info('memory: ' . \Library\Helper::humanReadableSize(\memory_get_usage(true)));
-
+            $this->logger->info("cpu cores: {$cpuCount} db-connections: {$connectionsCount}");
+            $this->logger->info('appbasis memory: ' . \Library\Helper::humanReadableSize(\memory_get_usage(true)));
         } else {
             $this->logger->critical("test database connection failed");
         }
@@ -123,60 +121,59 @@ class Pool
     /**
      * Function test() : make a test connection to db.
      * 
-     * @param mixed $config
+     * @param string $uri
      * 
-     * @return mixed
+     * @return bool
      */
-    public function test($config)
+    public function test(string $uri)
     {
         $return = false;
 
-        $this->logger->debugJson($config, 'config');
+        $this->logger->info("uri: `{$uri}`");
 
         $startTime = microtime(true);
 
-        $testConnection = new \Modules\Database($config, new \Modules\Logger(__METHOD__));
+        $testConnection = new \Modules\Database($uri, new \Modules\Logger(__METHOD__));
         $loop = $testConnection->getLoop();
 
         $timeout = 3.00;
 
-        $timer = $loop->addTimer($timeout, function() use($loop) {
-            $loop->stop();    
+        $loop->addTimer($timeout, function () use ($loop) {
+            $loop->stop();
         });
-        
+
         // prepare callback logger
         $token = $this->logger->callBackSet("testConnection", "connect", uniqid());
 
-        $testConnection->connect(function($error = null) use ($loop, $token, $testConnection) {
-            if($error) {
+        $testConnection->connect(function ($error = null) use ($loop, $token, &$return) {
+            if ($error) {
                 $this->logger->callBackFire($token, $error->getMessage());
-            } else {
-                $this->logger->callBackFire($token, $testConnection->getConnectionState());
+
+                return;
             }
 
-            $loop->stop();    
+            $return = true;
+
+            $this->logger->callBackFire($token, 'connected');
+
+
+            $loop->stop();
         });
 
         $this->logger->callBackDeclare($token);
 
         // start the connection
         $testConnection->getLoop()->run();
-        
-        $return = $testConnection->isConnected();
+
         $debug = $return ? "true" : "false";
-        
+
         $timeSpent = \Library\Helper::humanReadableTimeLeft($startTime);
-        
-        if( floatval($timeSpent) >= $timeout) {
+
+        if (floatval($timeSpent) >= $timeout) {
             $this->logger->info("test connection reached timeout");
         }
 
         $this->logger->debug("is-connected: `{$debug}` time: `{$timeSpent}ms`");
-
-        // if connected
-        if($return) {
-            $this->logger->info($testConnection->getConnectionState());
-        }
 
         // review later
         unset($testConnection);
@@ -189,23 +186,23 @@ class Pool
      * 
      * @todo this just lame example, find smart logic.
      * 
-     * @return mixed
+     * @return \Modules\Database|null
      */
     public function getOne()
     {
         $return = null;
-        
+
         $databases = [];
 
-        foreach($this->databases as $database) {
-            if($database->isConnected()) {
-                $databases [] = $database;
+        foreach ($this->databases as $database) {
+            if ($database->isConnected()) {
+                $databases[] = $database;
             }
         }
 
         $activeDBCount = count($databases) - 1;
 
-        if($activeDBCount <= 0) {
+        if ($activeDBCount <= 0) {
             $this->logger->warning("no active database connection(s)");
 
             $return = null;
@@ -214,8 +211,7 @@ class Pool
 
             $return = $databases[$choose];
         }
-        
+
         return $return;
     }
 } // EOF services/database.php
-    

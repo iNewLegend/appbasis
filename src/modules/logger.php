@@ -161,7 +161,7 @@ class Logger extends \Monolog\Logger
         if (!isset($backTrace[1])) {
             $backTrace[1] = [
                 'file'     => $backTrace[0]['file'],
-                'function' => 'enteryPoint',
+                'function' => 'entryPoint',
                 'type'     => '::',
                 'class'    => basename($backTrace[0]['file']),
             ];
@@ -387,11 +387,11 @@ class Logger extends \Monolog\Logger
      *
      * @todo rewrite this function, and optimize
      *
-     * @param int       $level
-     * @param string    $message
+     * @param mixed     $level
+     * @param mixed     $message
      * @param array     $context
      */
-    public function addRecord(int $level, string $message, array $context = [])
+    public function addRecord($level, $message, array $context = [])
     {
         if (!$this->initialized) {
             return;
