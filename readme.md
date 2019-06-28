@@ -36,7 +36,7 @@
   
 ## Demo
 
-http://leonid.viewdns.net:8888/appbasis-angular
+http://138.201.155.5/leo123/dist
 
 #### Video:
 
