@@ -338,10 +338,10 @@ class OnCommand implements \Ratchet\MessageComponentInterface
                 }
                 $data = new \Modules\Command("{$data->name}/{$data->method}", (array) $params);
             } else {
-                $this->logger->warn("unknown json protocol: `{$data}`");
+                $this->logger->warning("unknown json protocol: `{$data}`");
             }
         } else {
-            $this->logger->warn("unable to parse protocol: `{$data}`");
+            $this->logger->warning("unable to parse protocol: `{$data}`");
             
             $data = new \Modules\Command($data);
         }

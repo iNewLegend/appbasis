@@ -66,7 +66,7 @@ class Container
         $constructor = $refClass->getConstructor();
 
         if (!$constructor) {
-            $this->logger->warn("class: `{$refClass->getName()}` have no constructor");
+            $this->logger->warning("class: `{$refClass->getName()}` have no constructor");
             return $dependency;
         }
 

@@ -2,7 +2,7 @@
 /**
  * @file: services/config.php
  * @author: Leonid Vinikov <czf.leo123@gmail.com>
- * @todo: add global config that will warn if not found
+ * @todo: add global config that will warning if not found
  * also check the constructor.
  * rewrite this service
  */
@@ -108,7 +108,7 @@ class Config
                 return $this->cacheData[$config];
             }
 
-            $this->logger->warn("Config: `$config` exist in cacheIndex but not in cacheData.");
+            $this->logger->warning("Config: `$config` exist in cacheIndex but not in cacheData.");
         }
 
         // save the config in memory
@@ -135,7 +135,7 @@ class Config
             return $this->handle($config);
         }
 
-        $this->logger->warn("Config: `$config` not exist.");
+        $this->logger->warning("Config: `$config` not exist.");
 
         return null;
     }

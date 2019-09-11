@@ -126,17 +126,17 @@ abstract class Base
 
             if($visibility == \ReflectionProperty::IS_PROTECTED) {
                 if(empty($this->_accessToken)) {
-                    $this->_logger->warn("`{get_called_class()}` trying access protected data but access token is empty");
+                    $this->_logger->warning("`{get_called_class()}` trying access protected data but access token is empty");
                     continue;
                 } elseif($accessToken !== $this->_accessToken) {  
-                    $this->_logger->warn("`{get_called_class()}` trying access protected data but access token is invalid");
+                    $this->_logger->warning("`{get_called_class()}` trying access protected data but access token is invalid");
                     continue;
                 } 
-                $this->_logger->warn("{$this->key}");
+                $this->_logger->warning("{$this->key}");
             }
             
             foreach($this->_keys[$visibility] as $key) {
-                $this->_logger->crit("{$this->key}");
+                $this->_logger->critical("{$this->key}");
                 // skip self props
                 if($key[0] == '_') continue;
 

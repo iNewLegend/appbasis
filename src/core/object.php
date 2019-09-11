@@ -93,7 +93,7 @@ class OObject
     {
         if (!isset($this->data[$name])) {
             if ($this->logger) {
-                $this->logger->warn("requested object: `$name` is not exist");
+                $this->logger->warning("requested object: `$name` is not exist");
             }
 
             return null;

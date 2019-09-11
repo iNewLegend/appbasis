@@ -181,7 +181,7 @@ class Logger extends \Monolog\Logger
 
         // force use name
         if (empty($name)) {
-            $this->warn("name cannot be empty, forcing to use owner class name: `{$this->getOwnerClass()}`");
+            $this->warning("name cannot be empty, forcing to use owner class name: `{$this->getOwnerClass()}`");
 
             $name = $this->owner['class'];
         }
@@ -387,14 +387,14 @@ class Logger extends \Monolog\Logger
      *
      * @todo rewrite this function, and optimize
      *
-     * @param mixed     $level
-     * @param mixed     $message
-     * @param array     $context
+     * @param int	$level
+     * @param string	$message
+     * @param array	$context
      */
-    public function addRecord($level, $message, array $context = [])
+    public function addRecord(int $level, string $message, array $context = []) : Bool
     {
         if (!$this->initialized) {
-            return;
+            return false;
         }
 
         // so let use context to get depth in this way till it has to be extended
