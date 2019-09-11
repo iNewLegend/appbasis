@@ -60,12 +60,11 @@ $ > quit
 $ mysql < appbasis.sql
 $ cd appbasis
 $ composer update
-$ mysql 
 $ php appbasis.php server
 ```
 ### Frontend
 ```sh
-$ cd frontend
+$ cd frontend/angular
 $ ng serve
 ```
 
