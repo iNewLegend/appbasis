@@ -54,7 +54,13 @@ $ git clone https://github.com/iNewLegend/AppBasis.git
 ```
 ### Backend
 ```sh
+$ mysql
+$ > create database appbasis
+$ > quit
+$ mysql < appbasis.sql
+$ cd appbasis
 $ composer update
+$ mysql 
 $ php appbasis.php server
 ```
 ### Frontend
