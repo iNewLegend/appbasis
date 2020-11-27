@@ -11,3 +11,4 @@ ext/instapy
 *.vscode
 *.lock
 *.log
+.idea/

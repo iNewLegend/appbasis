@@ -1,5 +1,5 @@
 {
-    "name": "iNewLegend/AppBasis",
+    "name": "inewlegend/appbasis",
     "description": "",
     "require": {
         "monolog/monolog": "@stable",
