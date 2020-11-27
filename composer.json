@@ -1,7 +1,8 @@
 {
     "name": "inewlegend/appbasis",
     "description": "",
-    "require": {
+	"license": "MIT",
+	"require": {
         "monolog/monolog": "@stable",
         "bjeavons/zxcvbn-php": "@stable",
         "react/event-loop": "@stable",
