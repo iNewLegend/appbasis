@@ -6,6 +6,10 @@
  */
 require 'vendor/autoload.php';
 
+if ( ! defined( 'EXT_PATH') ) {
+	define( 'EXT_PATH', './ext/' );
+}
+
 class AppBasis
 {
     /**
@@ -164,7 +168,7 @@ class AppBasis
 
         self::$logger->notice("attempting to load plugin: `{$pluginClass}` dependencyFlag: `{$dependencyFlagDebug}`");
 
-        $plugin_startup_file = "ext/{$plugin}/{$lowercasePlugin}.php";
+        $plugin_startup_file = EXT_PATH . "{$plugin}/{$lowercasePlugin}.php";
 
         self::$logger->debug("checking if file exist: `{$plugin_startup_file}`");
 
