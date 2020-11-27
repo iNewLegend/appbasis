@@ -6,12 +6,16 @@
  */
 require 'vendor/autoload.php';
 
-if ( ! defined( 'EXT_PATH') ) {
-	define( 'EXT_PATH', './ext/' );
-}
+define( 'APP_BASIS_EXT_PATH', './ext/' );
 
 class AppBasis
 {
+	/**
+	 * Startup params.
+	 * @var array
+	 */
+	static $startupParams = [];
+
     /**
      * Instance Of Logger Module
      * 
@@ -168,7 +172,7 @@ class AppBasis
 
         self::$logger->notice("attempting to load plugin: `{$pluginClass}` dependencyFlag: `{$dependencyFlagDebug}`");
 
-        $plugin_startup_file = EXT_PATH . "{$plugin}/{$lowercasePlugin}.php";
+        $plugin_startup_file = APP_BASIS_EXT_PATH . "{$plugin}/{$lowercasePlugin}.php";
 
         self::$logger->debug("checking if file exist: `{$plugin_startup_file}`");
 
@@ -387,7 +391,6 @@ class AppBasis
         }
     }
 }
-
 // main;
 
 $self = array_shift($argv);
@@ -396,11 +399,19 @@ $command = '';
 $params = [];
 
 if (!empty($argv)) {
-    $command = array_shift($argv);
+	$command = array_shift($argv);
 }
 
-exit(AppBasis::main(
-    $self,
-    new \Modules\Logger(AppBasis::class),
-    new \Modules\Command($command, $argv)
-));
+AppBasis::$startupParams = [
+	'self' => $self,
+	'command' => $command,
+	'params' => $params,
+];
+
+if ( ! defined( 'APP_BASIS_MANUAL' ) ) {
+	exit(AppBasis::main(
+		$self,
+		new \Modules\Logger(AppBasis::class),
+		new \Modules\Command($command, $argv)
+	));
+}
