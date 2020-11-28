@@ -94,7 +94,7 @@ class Http
         });
 
         // http implant
-        $http = new \React\Http\Server(function (\React\Http\Io\ServerRequest $request) {
+        $http = new \React\Http\Server( $loop, function (\React\Http\Io\ServerRequest $request) {
             return $this->_onHttp($request);
         });
 
