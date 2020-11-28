@@ -5,16 +5,8 @@
  */
 require 'vendor/autoload.php';
 
-define( 'APP_BASIS_EXT_PATH', './ext/' );
 
 class AppBasis {
-
-	/**
-	 * Startup params.
-	 *
-	 * @var array
-	 */
-	static $startupParams = [];
 
 	/**
 	 * Instance Of Logger Module
@@ -152,23 +144,29 @@ class AppBasis {
 	/**
 	 * Function plugin() : Load a plugin
 	 *
+	 * @TODO function is to big and ugly.
+	 *
 	 * @param string $plugin
-	 * @param bool   $dependencyFlag
+	 * @param array  $args
 	 *
 	 * @return bool
-	 * @todo function is to big and ugly.
 	 *
 	 */
-	public static function plugin( string $plugin, bool $dependencyFlag = false ) {
+	public static function plugin( string $plugin, $args = [] ) {
 		$pluginClass = ucfirst( $plugin ) . '_Plugin';
 
 		$lowercasePlugin = strtolower( $plugin );
 
-		$dependencyFlagDebug = json_encode( $dependencyFlag );
+		self::$logger->notice( "attempting to load plugin: `{$pluginClass}`" );
+		self::$logger->debugJson( $args, 'args' );
 
-		self::$logger->notice( "attempting to load plugin: `{$pluginClass}` dependencyFlag: `{$dependencyFlagDebug}`" );
+		if ( isset( $args['ext_path'] ) ) {
+			$ext_path = $args['ext_path'];
+		} else {
+			$ext_path = __DIR__ . '/ext/';
+		}
 
-		$plugin_startup_file = APP_BASIS_EXT_PATH . "{$plugin}/{$lowercasePlugin}.php";
+		$plugin_startup_file = "{$ext_path}{$plugin}/{$lowercasePlugin}.php";
 
 		self::$logger->debug( "checking if file exist: `{$plugin_startup_file}`" );
 
@@ -225,7 +223,7 @@ class AppBasis {
 				if ( strstr( $dependency, '_Plugin' ) ) {
 					self::$logger->notice( "plugin: `{$pluginClass}` attempting to load dependency: `{$dependency}`" );
 
-					if ( ! self::plugin( str_replace( '_plugin', '', $dependencyLowercase ), true ) ) {
+					if ( ! self::plugin( str_replace( '_plugin', '', $dependencyLowercase ), $args ) ) {
 						self::$logger->error( "plugin: `{$pluginClass}` unable to load plugin dependency: `{$dependency}`" );
 
 						return false;
@@ -256,11 +254,33 @@ class AppBasis {
 
 		self::$plugins [] = $pluginClass;
 
-		if ( ! $dependencyFlag ) {
-			self::main( self::class, self::$logger, new \Modules\Command( 'server-plain' ) );
-		}
-
 		return true;
+	}
+
+	/**
+	 * Function server() : Run
+	 *
+	 * @param \Modules\Command $command
+	 */
+	public static function server( \Modules\Command $command ) {
+		$args = $command->getArguments();
+
+		if ( isset( $args['plugins'] ) ) {
+			foreach ( $args['plugins'] as $plugin_name => $plugin_args ) {
+				self::plugin( $plugin_name, $plugin_args );
+			}
+	    }
+
+		$startup = \Core\Auxiliary::auto( true, true );
+
+		\Core\Auxiliary::attachFriend( \Friends\React\Http::class, 51194 );
+		\Core\Auxiliary::attachFriend( \Friends\React\WebSocket::class, 51196 );
+
+		self::$logger->debugJson( $startup, "auto" );
+
+		while ( \Core\Auxiliary::heartbeat() ) {
+			\Core\Auxiliary::runLoop();
+		}
 	}
 
 	/**
@@ -317,16 +337,7 @@ class AppBasis {
 			}
 			case 'serverplain':
 				{
-					$startup = \Core\Auxiliary::auto( true, true );
-
-					\Core\Auxiliary::attachFriend( \Friends\React\Http::class, 51194 );
-					\Core\Auxiliary::attachFriend( \Friends\React\WebSocket::class, 51196 );
-
-					self::$logger->debugJson( $startup, "auto" );
-
-					while ( \Core\Auxiliary::heartbeat() ) {
-						\Core\Auxiliary::runLoop();
-					}
+					self::server( $command );
 				}
 				break;
 
@@ -363,12 +374,12 @@ class AppBasis {
 
 					foreach ( $parameters as $key => $parameter ) {
 						if ( ! next( $parameters ) ) {
-							self::plugin( $parameter, false );
+							self::plugin( $parameter );
 
 							continue;
 						}
 
-						self::plugin( $parameter, true );
+						self::plugin( $parameter );
 					}
 				}
 				break;
@@ -400,22 +411,17 @@ class AppBasis {
 }
 
 // main;
-
-$self = array_shift( $argv );
-
-$command = '';
-$params = [];
-
-if ( ! empty( $argv ) ) {
-	$command = array_shift( $argv );
-}
-
-AppBasis::$startupParams = [
-	'self' => $self,
-	'command' => $command,
-	'params' => $params,
-];
-
 if ( ! defined( 'APP_BASIS_MANUAL' ) ) {
-	exit( AppBasis::main( $self, new \Modules\Logger( AppBasis::class ), new \Modules\Command( $command, $argv ) ) );
+	$self = array_shift( $argv );
+
+	$command = '';
+	$params = [];
+
+	if ( ! empty( $argv ) ) {
+		$command = array_shift( $argv );
+	}
+
+	AppBasis::main( $self, new \Modules\Logger( AppBasis::class ), new \Modules\Command( $command, $argv ) );
+
+	exit( 0 );
 }

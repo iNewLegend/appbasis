@@ -12,3 +12,5 @@ ext/instapy
 *.lock
 *.log
 .idea/
+
+.DS_Store
