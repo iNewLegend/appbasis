@@ -27,7 +27,7 @@
             "src/controllers",
             "src/guards",
             "ext/",
-			"appbasis.php"
+			"src/appbasis.php"
     	]
     }
 }

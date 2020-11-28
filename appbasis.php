@@ -12,6 +12,7 @@ class AppBasis
 {
 	/**
 	 * Startup params.
+	 *
 	 * @var array
 	 */
 	static $startupParams = [];
