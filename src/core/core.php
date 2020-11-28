@@ -282,7 +282,7 @@ class Core
             $this->logger->debug("calling service method: `{$name}::$method`");
 
             return function () use ($service, $method, $cmd) {
-                call_user_func_array([$service, $method], $cmd->getParameters());
+                call_user_func_array([$service, $method], $cmd->getArguments());
             };
         }
 
@@ -352,7 +352,7 @@ class Core
                 // return callback
                 return
                     function () use ($controller, $method, $cmd) {
-                        return $controller->callMethod($method, $cmd->getParameters()) ?: '{}';
+                        return $controller->callMethod($method, $cmd->getArguments()) ?: '{}';
                     }; // empty json
             }
         } catch (\Exception $e) {

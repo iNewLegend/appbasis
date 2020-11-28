@@ -70,7 +70,7 @@ class Template
     {
         $this->logger->debug("loaded");
 
-        if ($cmd && $cmd->noSubParameters()) {
+        if ($cmd && count( $cmd->getArguments() ) <= 1 ) {
             // disable another functions
             $this->lock = true;
         }

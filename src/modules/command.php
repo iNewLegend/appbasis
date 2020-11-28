@@ -1,231 +1,182 @@
 <?php
 /**
- * @file: modules/command.php
+ * @file   : modules/command.php
  * @author Leonid Vinikov <czf.leo123@gmail.com>
  */
 
 namespace Modules;
 
-class Command
-{
-    /**
-     * Command name (aka controller)
-     *
-     * @var string
-     */
-    private $name = 'welcome';
+class Command {
 
-    /**
-     * Command method (function)
-     *
-     * @var string
-     */
-    private $method = 'index';
+	/**
+	 * Command name (aka controller).
+	 *
+	 * @var string
+	 */
+	private $name = 'welcome';
 
-    /**
-     * Command parameters
-     *
-     * @var array
-     */
-    private $params = [];
+	/**
+	 * Command method (function).
+	 *
+	 * @var string
+	 */
+	private $method = 'index';
 
-    /**
-     * Does we have no parameters
-     *
-     * @var bool
-     */
-    private $noParameters = true;
+	/**
+	 * Command arguments.
+	 *
+	 * @var array
+	 */
+	private $arguments = [];
 
-    /**
-     * Does we have no sub parameters
-     *
-     * @var bool
-     */
-    private $noSubParameters = true;
+	/**
+	 * Function __construct() : Construct Command Module and parse `$cmd`.
+	 *
+	 * @param string $cmd
+	 * @param array  $args
+	 */
+	public function __construct( string $cmd = '', array $args = [] ) {
+		$this->setArguments( $args );
 
-    /**
-     * Function __construct() : Construct Command Module and parse $cmd
-     *
-     * @param string    $cmd
-     * @param array     $params
-     */
-    public function __construct(string $cmd = '', array $params = [])
-    {
-        $this->setParameters($params);
+		if ( ! empty( $cmd ) ) {
+			$this->parse( $cmd );
+		}
+	}
 
-        if (!empty($cmd)) {
-            $this->parse($cmd);
-        }
+	/**
+	 * Function parse() : Parse command from format eg: '/name/methods/params'.
+	 *
+	 * @param string $cmd
+	 *
+	 * @return void
+	 */
+	public function parse( string $cmd ) {
+		if ( ! empty( $cmd ) && is_string( $cmd ) ) {
+			// Remove forward slash from the start & end.
+			$cmd = trim( $cmd, '/' );
+			$cmd = rtrim( $cmd, '/' );
 
-        $countParameters = count($this->getParameters());
+			// Removes all illegal URL characters from a string.
+			$cmd = explode( '/', $cmd );
 
-        $this->noParameters = true;
-        $this->noSubParameters = true;
+			// Set name aka controller.
+			if ( isset( $cmd[0] ) && ! empty( $cmd[0] ) ) {
+				// only abc for controller name
+				$cmd[0] = preg_replace( "/[^a-zA-Z]+/", "", $cmd[0] );
 
-        if ($countParameters) {
-            $this->noParameters = false;
-        }
-        
-        if ($countParameters > 1) {
-            $this->noSubParameters = false;
-        }
-    }
+				$this->name = $cmd[0];
+				unset( $cmd[0] );
+			}
 
-    /**
-     * Function parse() : Parse command from format eg: /name/methods/params
-     *
-     * @param string $cmd
-     *
-     * @return void
-     */
-    public function parse(string $cmd)
-    {
-        if (!empty($cmd) && is_string($cmd)) {
-            // remove forward slash from the start & end
+			// Set method.
+			if ( isset( $cmd[1] ) ) {
+				// Only abc and digits for method name.
+				$cmd[1] = preg_replace( "/[^a-zA-Z0-9]+/", "", $cmd[1] );
 
-            $cmd = trim($cmd, '/');
-            $cmd = rtrim($cmd, '/');
+				$this->method = $cmd[1];
+				unset( $cmd[1] );
+			}
 
-            // removes all illegal URL characters from a string
-            $cmd = explode('/', $cmd);
+			// Set args.
+			if ( ! empty( $cmd ) ) {
 
-            // set controller
-            if (isset($cmd[0]) && !empty($cmd[0])) {
-                // only abc for controller name
-                $cmd[0] = preg_replace("/[^a-zA-Z]+/", "", $cmd[0]);
+				foreach ( $cmd as $key => $param ) {
+					$cmd[ $key ] = filter_var( $param, FILTER_SANITIZE_STRING );
+				}
 
-                $this->name = $cmd[0];
-                unset($cmd[0]);
-            }
+				$this->arguments = array_values( $cmd );
+			}
+		}
+	}
 
-            // set method
-            if (isset($cmd[1])) {
-                // only abc and digits for method name
-                $cmd[1] = preg_replace("/[^a-zA-Z0-9]+/", "", $cmd[1]);
+	/**
+	 * Function getName() : Get command name.
+	 *
+	 * @return string
+	 */
+	public function getName() {
+		return $this->name;
+	}
 
-                $this->method = $cmd[1];
-                unset($cmd[1]);
-            }
+	/**
+	 * Function setName() : Set command name.
+	 *
+	 * @param string $name
+	 *
+	 * @return void
+	 */
+	public function setName( string $name ) {
+		$this->name = $name;
+	}
 
-            // set params
-            if (!empty($cmd)) {
+	/**
+	 * Function getMethod() : Get command method name.
+	 *
+	 * @return string
+	 */
+	public function getMethod() {
+		return $this->method;
+	}
 
-                foreach ($cmd as $key => $param) {
-                    $cmd[$key] = filter_var($param, FILTER_SANITIZE_STRING);
-                }
+	/**
+	 * Function setMethod() : Set method name.
+	 *
+	 * @param string $method
+	 *
+	 * @return void
+	 */
+	public function setMethod( string $method ) {
+		$this->method = $method;
+	}
 
-                $this->params = array_values($cmd);
-            }
-        }
-    }
+	/**
+	 * Function getArguments() : Get command parameters
+	 *
+	 * @return array
+	 */
+	public function getArguments() {
+		return $this->arguments;
+	}
 
-    /**
-     * Function getName() : Get command name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
+	/**
+	 * Function setArguments() : Set command arguments.
+	 *
+	 * @param array $args
+	 *
+	 * @return void
+	 */
+	public function setArguments( array $args ) {
+		$this->arguments = $args;
+	}
 
-    /**
-     * Function setName() : Set command name
-     *
-     * @param string $name
-     *
-     * @return void
-     */
-    public function setName(string $name)
-    {
-        $this->name = $name;
-    }
+	/**
+	 * Function isEmpty() : Check is empty command on `$this->cmd`.
+	 *
+	 * @return bool
+	 */
+	public function isEmpty() {
+		return empty( $this->cmd );
+	}
 
-    /**
-     * Function getMethod() : Get command method name
-     *
-     * @return string
-     */
-    public function getMethod()
-    {
-        return $this->method;
-    }
+	/**
+	 * Function hasArguments().
+	 *
+	 * @return bool
+	 */
+	public function hasArguments() {
+		return boolval( count( $this->arguments ) );
+	}
 
-    /**
-     * Function setMethod() : Set method name
-     *
-     * @param string $method
-     *
-     * @return void
-     */
-    public function setMethod(string $method)
-    {
-        $this->method = $method;
-    }
-
-    /**
-     * Function getParameters() : Get command parameters
-     *
-     * @return array
-     */
-    public function getParameters()
-    {
-        return $this->params;
-    }
-
-    /**
-     * Function setParameters() : Set command parameters
-     *
-     * @param array $params
-     *
-     * @return void
-     */
-    public function setParameters($params)
-    {
-        $this->params = $params;
-    }
-
-    /**
-     * Function isEmpty() : Check is empty command on $this->cmd
-     *
-     * @return bool
-     */
-    public function isEmpty()
-    {
-        return empty($this->cmd);
-    }
-
-    /**
-     * Function __toString() : Return's command in JSON format
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return json_encode([
-            $this->name,
-            $this->method,
-            $this->params,
-        ]);
-    }
-
-    /**
-     * Function noParameters() : Return's command in JSON format
-     *
-     * @return bool
-     */
-    public function noParameters()
-    {
-        return $this->noParameters;
-    }
-
-    /**
-     * Function noSubParameters() : Return's command in JSON format
-     *
-     * @return bool
-     */
-    public function noSubParameters()
-    {
-        return $this->noSubParameters;
-    }
+	/**
+	 * Function __toString() : Return's command in JSON format.
+	 *
+	 * @return string
+	 */
+	public function __toString() {
+		return json_encode( [
+			$this->name,
+			$this->method,
+			$this->arguments,
+		] );
+	}
 } // EOF modules/command.php

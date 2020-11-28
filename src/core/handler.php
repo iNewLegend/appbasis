@@ -100,7 +100,7 @@ class Handler
                 // part of AppBasis Protocol ?
                 switch ($command->getMethod()) {
                     case 'auth': {
-                            $debugParams = var_export($command->getParameters(), true);
+                            $debugParams = var_export($command->getArguments(), true);
                             $this->logger->debug("auth cmd: params: `{$debugParams}`");
 
                             if (strlen($hash) == 40) {
@@ -115,11 +115,11 @@ class Handler
 
                     case 'hook': {
                             $cmd = $command->getName() . '/hook';
-                            $debugParams = var_export($command->getParameters(), true);
+                            $debugParams = var_export($command->getArguments(), true);
 
                             $this->logger->debug("hooking cmd: `{$cmd}` params: `{$debugParams}`");
 
-                            $command = new \Modules\Command($cmd, $command->getParameters());
+                            $command = new \Modules\Command($cmd, $command->getArguments());
                         }
 
                     default:

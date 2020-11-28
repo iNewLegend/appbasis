@@ -136,14 +136,14 @@ class AppBasis
     public static function template(\Modules\Command $command)
     {
         $method = '';
-        $params = $command->getParameters();
+        $params = $command->getArguments();
 
         if (!empty($params)) {
             $method = array_shift($params);
         }
 
         $appCommand = new Modules\Command("Template/{$method}/");
-        $appCommand->setParameters($params);
+        $appCommand->setArguments($params);
 
         // Create new app, pass needed service in it , will be called later by runCommand.
         $app = new \Core\Core(self::$logger, new \Modules\Ip('127.0.0.1'), self::class, [
@@ -349,12 +349,12 @@ class AppBasis
 
                 // should be a service for plugin case
             case 'plugin': {
-                    if ($command->noParameters()) {
+                    if (! $command->hasArguments()) {
                         self::$logger->info("syntax: {$cool} plugin <name>");
                         break;
                     }
 
-                    $parameters = $command->getParameters();
+                    $parameters = $command->getArguments();
 
                     foreach ($parameters as $key => $parameter) {
                         if (!next($parameters)) {
